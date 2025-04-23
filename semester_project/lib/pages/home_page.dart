@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'create_lobby.dart';
 
 class HomePage extends StatefulWidget{
   const HomePage({super.key});
@@ -24,8 +23,7 @@ class LandingPage extends State<HomePage>  {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton.icon(
-                onPressed: () => {
-                },
+                onPressed: () => {},
                 icon: const Icon(Icons.login),
                 label: const Text('Join Lobby'),
                 style: ElevatedButton.styleFrom(
@@ -35,10 +33,7 @@ class LandingPage extends State<HomePage>  {
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
-                onPressed: () => {
-                  
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateLobbyPage()))
-                },
+                onPressed: () => {},
                 icon: const Icon(Icons.add_box),
                 label: const Text('Create Lobby'),
                 style: ElevatedButton.styleFrom(
