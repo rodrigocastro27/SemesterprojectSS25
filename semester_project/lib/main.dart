@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:semester_project/pages/map_page.dart';
 import 'package:semester_project/pages/home_page.dart';
 
 void main() async{
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget
 
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage()
+      home: MapPage(),
     );
 
   }
