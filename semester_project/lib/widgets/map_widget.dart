@@ -15,6 +15,9 @@ class MapWidget extends StatefulWidget {
 }
 
 class _MapWidgetState extends State<MapWidget> {
+
+  bool isHider = false;
+
   static const int pingDuration = 5; // time that ping is displayed in the map
   static const int cooldownDuration =
       10; // time after the ping finishes to wait to ping again
@@ -64,6 +67,7 @@ class _MapWidgetState extends State<MapWidget> {
     _pingTimer?.cancel();
     _cooldownTimer?.cancel();
 
+    // the setState function is used to notify the framework that the state of the object has changed
     setState(() {
       pingState = PingState.pinging;
     });
@@ -105,7 +109,7 @@ class _MapWidgetState extends State<MapWidget> {
       children: [
         FlutterMap(
           options: MapOptions(
-            initialCenter: userLocation!,
+            initialCenter: userLocation!, // the "!" forces dart to use the userLocation value as not null
             initialZoom: 16,
             interactionOptions: const InteractionOptions(
               flags: ~InteractiveFlag.doubleTapZoom,
@@ -118,9 +122,9 @@ class _MapWidgetState extends State<MapWidget> {
             ),
             MarkerLayer(
               markers: [
-                if (pingState ==
+                if (isHider || (!isHider && pingState ==
                     PingState
-                        .pinging) // show only when the pinging state is "pinging"
+                        .pinging)) // show only when the pinging state is "pinging"
                   Marker(
                     point: userLocation!,
                     width: 28,
@@ -132,13 +136,54 @@ class _MapWidgetState extends State<MapWidget> {
             ),
           ],
         ),
-        Positioned(
+        if (!isHider) Positioned(
           bottom: 20,
           left: 20,
           child: PingButton(
             onPing: startPing, // call to function to start Pinging
             pingState: pingState,
             cooldownSeconds: cooldownSeconds,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            spacing: 10,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 50,
+                width: 150,
+                child: TextButton.icon(
+                      onPressed: () => {setState(() {
+                        isHider = true;
+                        pingState = PingState.pinging;
+                      })},
+                      label: const Text('Hider'),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        minimumSize: const Size.fromHeight(50),
+                        textStyle: const TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+              ),
+              SizedBox(
+                height: 50,
+                width: 150,
+                child: TextButton.icon(
+                      onPressed: () => {setState(() {
+                        isHider = false;
+                        pingState = PingState.idle;
+                      })},
+                      label: const Text('Seeker'),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.greenAccent,
+                        minimumSize: const Size.fromHeight(50),
+                        textStyle: const TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+              ),
+            ],
           ),
         ),
       ],
