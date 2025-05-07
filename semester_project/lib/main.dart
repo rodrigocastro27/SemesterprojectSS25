@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:semester_project/pages/map_page.dart';
 import 'package:semester_project/pages/home_page.dart';
 import 'package:semester_project/pages/qrcode_page.dart';
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget
 
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MyQr(),
+      home: HomePage()
     );
 
   }
