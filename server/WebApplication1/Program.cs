@@ -1,43 +1,42 @@
-using System.Net;
 using System.Net.WebSockets;
-using Fleck;
+using System.Text;
+using System.Text.Json;
+using WebApplication1;
 
-namespace WebApplication1;
+var builder = WebApplication.CreateBuilder();
+var app = builder.Build();
+app.UseWebSockets();
 
-public class Program
+var lobbyManager = new LobbyManager();
+
+app.Map("/ws", async context =>
 {
-    public static void Main(string[] args)
+    if (context.WebSockets.IsWebSocketRequest)
     {
-        var wsConnections = new List<IWebSocketConnection>();
-        
-        var server  = new WebSocketServer("ws://0.0.0.0:8181");
-        
-        server.Start(ws =>
+        var socket = await context.WebSockets.AcceptWebSocketAsync();
+        var buffer = new byte[1024 * 4];
+
+        while (socket.State == WebSocketState.Open)
         {
-            ws.OnOpen = () =>
+            var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+            if (result.MessageType == WebSocketMessageType.Text)
             {
-                Console.WriteLine($"Client connected: {ws.ConnectionInfo.ClientIpAddress}");
-                wsConnections.Add(ws);        
-            };
-            
-            ws.OnMessage = message =>
-            {
-                Console.WriteLine($"Received: {message}");
+                var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                var doc = JsonDocument.Parse(msg);
+                var action = doc.RootElement.GetProperty("action").GetString();
 
-                foreach (var webSocketConnection in wsConnections)
+                if (action == "join_lobby")
                 {
-                    webSocketConnection.Send($"Echo: {message}");
-                }
-            };
+                    var name = doc.RootElement.GetProperty("name").GetString();
+                    var lobbyId = doc.RootElement.GetProperty("lobbyId").GetString();
 
-            ws.OnClose = () =>
-            {
-                Console.WriteLine($"Client disconnected: {ws.ConnectionInfo.ClientIpAddress}");
-                wsConnections.Remove(ws);
-            };
-            
-        });
-        
-        WebApplication.CreateBuilder(args).Build().Run();
+                    var player = new Player(name, socket);
+                    var lobby = lobbyManager.GetOrCreateLobby(lobbyId);
+                    await lobby.AddPlayerAsync(player);
+                }
+            }
+        }
     }
-}
+});
+
+app.Run("http://0.0.0.0:5000");
