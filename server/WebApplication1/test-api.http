@@ -1,0 +1,10 @@
+GET http://localhost:5259/api/lobby
+
+POST http://localhost:5259/api/lobby/create
+Content-Type: application/json
+
+{
+  "Name": "Lobby 1",
+  "MaxPlayers": 4,
+  "Status": "waiting"
+}

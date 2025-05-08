@@ -1,32 +1,33 @@
-using System.Net;
+namespace WebApplication1.Properties.Models;
+
 using System.Net.WebSockets;
 using Fleck;
-
-namespace WebApplication1;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+        // Start WebSocket Server using Fleck
         var wsConnections = new List<IWebSocketConnection>();
-        
-        var server  = new WebSocketServer("ws://0.0.0.0:8181");
-        
+        var server = new WebSocketServer("ws://0.0.0.0:8181");
+
         server.Start(ws =>
         {
             ws.OnOpen = () =>
             {
                 Console.WriteLine($"Client connected: {ws.ConnectionInfo.ClientIpAddress}");
-                wsConnections.Add(ws);        
+                wsConnections.Add(ws);
             };
-            
+
             ws.OnMessage = message =>
             {
                 Console.WriteLine($"Received: {message}");
-
-                foreach (var webSocketConnection in wsConnections)
+                foreach (var socket in wsConnections)
                 {
-                    webSocketConnection.Send($"Echo: {message}");
+                    socket.Send($"Echo: {message}");
                 }
             };
 
@@ -35,9 +36,31 @@ public class Program
                 Console.WriteLine($"Client disconnected: {ws.ConnectionInfo.ClientIpAddress}");
                 wsConnections.Remove(ws);
             };
-            
         });
-        
-        WebApplication.CreateBuilder(args).Build().Run();
+
+        // Build and run ASP.NET Core app
+        var builder = WebApplication.CreateBuilder(args);
+
+        // Add services to the container
+        builder.Services.AddSingleton<MongoService>();
+        builder.Services.AddControllers(); // Enables [ApiController]
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        var app = builder.Build();
+
+        // Enable Swagger only in development (or always, for testing)
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(); // This enables the /swagger page
+        }
+
+        app.UseCors("AllowAll");
+        app.UseAuthorization();
+        // Map API controllers
+        app.MapControllers();
+
+        app.Run(); // Start HTTP server
     }
 }
