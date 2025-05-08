@@ -1,43 +1,53 @@
-using System.Net;
 using System.Net.WebSockets;
-using Fleck;
+using System.Text;
+using System.Text.Json;
+using System.Collections.Concurrent;
 
-namespace WebApplication1;
+var app = WebApplication.Create();
+app.UseWebSockets();
 
-public class Program
+var lobbies = new ConcurrentDictionary<string, WebSocket>();
+
+app.Map("/ws", async context =>
 {
-    public static void Main(string[] args)
+    if (context.WebSockets.IsWebSocketRequest)
     {
-        var wsConnections = new List<IWebSocketConnection>();
-        
-        var server  = new WebSocketServer("ws://0.0.0.0:8181");
-        
-        server.Start(ws =>
+        var socket = await context.WebSockets.AcceptWebSocketAsync();
+
+        var buffer = new byte[1024];
+        while (socket.State == WebSocketState.Open)
         {
-            ws.OnOpen = () =>
+            var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+            if (result.MessageType == WebSocketMessageType.Text)
             {
-                Console.WriteLine($"Client connected: {ws.ConnectionInfo.ClientIpAddress}");
-                wsConnections.Add(ws);        
-            };
-            
-            ws.OnMessage = message =>
-            {
-                Console.WriteLine($"Received: {message}");
+                var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                var doc = JsonDocument.Parse(msg);
+                var action = doc.RootElement.GetProperty("action").GetString();
 
-                foreach (var webSocketConnection in wsConnections)
+                if (action == "join_lobby")
                 {
-                    webSocketConnection.Send($"Echo: {message}");
-                }
-            };
+                    var playerName = doc.RootElement.GetProperty("name").GetString();
+                    lobbies[playerName] = socket;
 
-            ws.OnClose = () =>
-            {
-                Console.WriteLine($"Client disconnected: {ws.ConnectionInfo.ClientIpAddress}");
-                wsConnections.Remove(ws);
-            };
-            
-        });
-        
-        WebApplication.CreateBuilder(args).Build().Run();
+                    // Send timer start event
+                    for (int i = 10; i >= 0; i--)
+                    {
+                        var timerMsg = JsonSerializer.Serialize(new {
+                            action = "timer_update",
+                            seconds = i
+                        });
+                        await socket.SendAsync(
+                            Encoding.UTF8.GetBytes(timerMsg),
+                            WebSocketMessageType.Text,
+                            true,
+                            CancellationToken.None
+                        );
+                        await Task.Delay(1000);
+                    }
+                }
+            }
+        }
     }
-}
+});
+
+await app.RunAsync("http://0.0.0.0:5000");
