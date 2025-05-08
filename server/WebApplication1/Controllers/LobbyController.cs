@@ -1,5 +1,5 @@
-namespace WebApplication1.Properties.Models;
-
+using WebApplication1.Services;
+using WebApplication1.Models;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
@@ -13,9 +13,9 @@ public class LobbyController : ControllerBase
 
     public LobbyController(IMongoClient mongoClient)
     {
-        var database = mongoClient.GetDatabase("GameDB");
-        _lobbyCollection = database.GetCollection<Lobby>("lobbies");
-        _playerCollection = database.GetCollection<Player>("players");
+        var database = mongoClient.GetDatabase("semprojDB");
+        _lobbyCollection = database.GetCollection<Lobby>("Lobbies");
+        _playerCollection = database.GetCollection<Player>("Players");
     }
 
     // Create a new player
@@ -67,10 +67,10 @@ public class LobbyController : ControllerBase
     }
 
 
-    [HttpGet("test")]
-    public IActionResult Test()
+    [HttpGet("ping")]
+    public IActionResult Ping()
     {
-        return Ok("Test route is working!");
+        return Ok("pong");
     }
 }
 

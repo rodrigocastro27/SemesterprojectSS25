@@ -1,6 +1,7 @@
-namespace WebApplication1.Properties.Models;
+namespace WebApplication1.Services;
 
 using MongoDB.Driver;
+using WebApplication1.Models;
 using System;
 
 public class MongoService

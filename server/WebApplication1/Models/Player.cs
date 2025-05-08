@@ -1,4 +1,4 @@
-﻿namespace WebApplication1.Properties.Models;
+﻿namespace WebApplication1.Models;
 
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;

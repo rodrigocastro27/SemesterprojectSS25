@@ -1,5 +1,6 @@
-namespace WebApplication1.Properties.Models;
 
+using WebApplication1.Services;
+using MongoDB.Driver;
 using System.Net.WebSockets;
 using Fleck;
 using Microsoft.AspNetCore.Builder;
@@ -41,8 +42,26 @@ public class Program
         // Build and run ASP.NET Core app
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddSingleton<IMongoClient>(sp =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            var connectionString = configuration["MongoDb:ConnectionString"];
+            return new MongoClient(connectionString);
+        });
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", policy =>
+            {
+                policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
         // Add services to the container
         builder.Services.AddSingleton<MongoService>();
+        
         builder.Services.AddControllers(); // Enables [ApiController]
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -55,6 +74,8 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI(); // This enables the /swagger page
         }
+
+        
 
         app.UseCors("AllowAll");
         app.UseAuthorization();
