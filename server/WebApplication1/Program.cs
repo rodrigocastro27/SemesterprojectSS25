@@ -1,43 +1,42 @@
-using System.Net;
 using System.Net.WebSockets;
-using Fleck;
+using System.Text;
+using System.Text.Json;
+using System.Collections.Concurrent;
+using WebApplication1;
+using WebApplication1.Handlers;
+using WebApplication1.Models;
 
-namespace WebApplication1;
+var app = WebApplication.Create();
+app.UseWebSockets();
 
-public class Program
+var dispatcher = new WebSocketActionDispatcher();
+var lobbyManager = new LobbyManager();
+
+LobbyHandlers.Register(dispatcher, lobbyManager);
+PlayerHandlers.Register(dispatcher, lobbyManager);
+
+
+
+app.Map("/ws", async context =>
 {
-    public static void Main(string[] args)
+    if (context.WebSockets.IsWebSocketRequest)
     {
-        var wsConnections = new List<IWebSocketConnection>();
-        
-        var server  = new WebSocketServer("ws://0.0.0.0:8181");
-        
-        server.Start(ws =>
+        var socket = await context.WebSockets.AcceptWebSocketAsync();
+
+        var buffer = new byte[1024];
+       
+        while (socket.State == WebSocketState.Open)
         {
-            ws.OnOpen = () =>
+            var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+            if (result.MessageType == WebSocketMessageType.Text)
             {
-                Console.WriteLine($"Client connected: {ws.ConnectionInfo.ClientIpAddress}");
-                wsConnections.Add(ws);        
-            };
-            
-            ws.OnMessage = message =>
-            {
-                Console.WriteLine($"Received: {message}");
+                var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                await dispatcher.HandleMessage(msg, socket);
+            }
+        }
 
-                foreach (var webSocketConnection in wsConnections)
-                {
-                    webSocketConnection.Send($"Echo: {message}");
-                }
-            };
-
-            ws.OnClose = () =>
-            {
-                Console.WriteLine($"Client disconnected: {ws.ConnectionInfo.ClientIpAddress}");
-                wsConnections.Remove(ws);
-            };
-            
-        });
-        
-        WebApplication.CreateBuilder(args).Build().Run();
     }
-}
+    
+});
+
+await app.RunAsync("http://0.0.0.0:5000");
