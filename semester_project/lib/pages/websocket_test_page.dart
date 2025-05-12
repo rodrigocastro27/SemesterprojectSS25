@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/websocket_client.dart';
+import 'dart:convert';
 
 class WebSocketTestPage extends StatefulWidget {
   const WebSocketTestPage({super.key});
@@ -16,17 +17,26 @@ class _WebSocketTestPageState extends State<WebSocketTestPage> {
   @override
   void initState() {
     super.initState();
-    socket = WebSocketService.connect('ws://10.0.2.2:8181');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initSocket();
+    });
+  }
+
+  void _initSocket() {
+    socket = WebSocketService.connect('ws://192.168.137.1:5000/ws');
     print('WebSocket: trying to connect...');
 
-    socket.stream.listen((data) {
-      print('WebSocket: received $data');
-      setState(() {
-        messages.add('Server: $data');
-      });
-    }, onError: (error) {
-      print('WebSocket error: $error');
-    });
+    socket.stream.listen(
+      (data) {
+        print('WebSocket: received $data');
+        setState(() {
+          messages.add('Server: $data');
+        });
+      },
+      onError: (error) {
+        print('WebSocket error: $error');
+      },
+    );
   }
 
   @override
@@ -37,14 +47,12 @@ class _WebSocketTestPageState extends State<WebSocketTestPage> {
   }
 
   void _sendMessage() {
-    final text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      socket.send(text);
-      setState(() {
-        messages.add('You: $text');
-      });
-      _controller.clear();
-    }
+    final payload = {"action": "join_lobby", "name": "Aurora", "lobbyId": "11"};
+    final jsonString = jsonEncode(payload);
+    socket.send(jsonString);
+    setState(() {
+      messages.add('Client: $jsonString');
+    });
   }
 
   @override
