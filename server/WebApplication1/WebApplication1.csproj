@@ -8,17 +8,15 @@
 
     <ItemGroup>
         <PackageReference Include="Fleck" Version="1.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
+        <PackageReference Include="NgrokApi" Version="0.13.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
     <ItemGroup>
       <Compile Remove="WeatherForecast.cs" />
       <Compile Remove="GameSession.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\" />
+      <Compile Remove="Handlers\IHandler.cs" />
     </ItemGroup>
 
 </Project>

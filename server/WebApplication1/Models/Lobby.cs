@@ -9,23 +9,11 @@ public class Lobby
     public string Id { get; }
     public List<Player> Players { get; } = new();
     private bool _timerRunning = false;
-
+    
     public Lobby(string id)
     {
         Id = id;
     }
-
-    public async Task AddPlayerAsync(Player player)
-    {
-        Players.Add(player);
-
-        if (!_timerRunning)
-        {
-            _timerRunning = true;
-            await StartTimerAsync();
-        }
-    }
-
     private async Task StartTimerAsync()
     {
         for (int i = 10; i >= 0; i--)
@@ -51,5 +39,15 @@ public class Lobby
 
             await Task.Delay(1000);
         }
+    }
+
+    public void AddPlayer(Player player)
+    {
+        Players.Add(player);
+    }
+
+    public void RemovePlayer(Player player)
+    {
+        Players.Remove(player);
     }
 }

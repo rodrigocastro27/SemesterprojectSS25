@@ -1,7 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
 
-namespace WebApplication1;
+namespace WebApplication1.Utils;
 
 public class WebSocketActionDispatcher
 {
@@ -13,15 +13,25 @@ public class WebSocketActionDispatcher
     {
         var doc = JsonDocument.Parse(jsonMessage);
         var root = doc.RootElement;
-        var action = root.GetProperty("action").GetString();
+
+        if (!root.TryGetProperty("action", out var actionElem) ||
+            !root.TryGetProperty("data", out var dataElem))
+        {
+            Console.WriteLine($"Malformed message: {jsonMessage}");
+            return;
+        }
+
+        var action = actionElem.GetString();
+        Console.WriteLine($"Action: {action}");
 
         if (action != null && _handlers.TryGetValue(action, out var handler))
         {
-            await handler(root, socket);
+            await handler(dataElem, socket); // Only pass the 'data' part
         }
         else
         {
             Console.WriteLine($"Unknown action: {action}");
         }
     }
+
 }
