@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/models/player.dart';
@@ -21,7 +23,7 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
 
     final player = Player(name: username, role: _selectedRole);
 
-    MessageSender.joinLobby(lobbyName, username);
+    MessageSender.joinLobby(lobbyName, username, Random().nextInt(100000));
 
     showDialog(
       context: context,

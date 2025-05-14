@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:semester_project/logic/message_sender.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +20,7 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
 
     final username = await _getUsername();
 
-    MessageSender.createLobby(lobbyName, username);
+    MessageSender.createLobby(lobbyName, username, Random().nextInt(100000));
 
     showDialog(
       context: context,

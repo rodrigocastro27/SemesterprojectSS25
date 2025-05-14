@@ -42,7 +42,7 @@ public static class LobbyHandlers
             await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new     //broadcasts when a player joins a lobby to update in all flutter clients
             {
                 players = lobby.Players.Select(p => new {
-                    name = p.Name,
+                    name = p.Id,
                     role = p.Role 
                 }).ToList()
             });
@@ -69,7 +69,7 @@ public static class LobbyHandlers
                 await MessageSender.SendToPlayerAsync(player, "lobby_created", new {
                     lobbyId = lobbyId,
                     players = lobby.Players.Select(p => new {
-                        name = p.Name,
+                        name = p.Id,
                         role = p.Role 
                     }).ToList()
                 });
