@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:semester_project/services/lobby_state.dart';
+import 'package:semester_project/widgets/player_list_tile.dart';
 
 class LobbyPage extends StatelessWidget {
-  final String lobbyId;
-
-  const LobbyPage({super.key, required this.lobbyId});
+  const LobbyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final state = LobbyState.instance;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Lobby')),
-      body: Center(
-        child: Text(
-          'Lobby: $lobbyId',  // Display the lobby ID as the name
-          style: const TextStyle(fontSize: 24),
-        ),
+      appBar: AppBar(
+        title: Text('Lobby: ${state.lobbyId}'),
+        actions: [
+          if (state.isHost)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.star, color: Colors.amber),
+            )
+        ],
+      ),
+      body: ListView.builder(
+        itemCount: state.players.length,
+        itemBuilder: (context, index) =>
+            PlayerListTile(player: state.players[index]),
       ),
     );
   }

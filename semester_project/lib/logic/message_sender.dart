@@ -13,6 +13,15 @@ class MessageSender {
     webSocketService.send("join_lobby", {
       "lobbyId": lobbyId,
       "name": name,
+      "id": 10,
+    });
+  }
+
+  static void leaveLobby(String lobbyId, String name) {
+    webSocketService.send("leave_lobby", {
+      "lobbyId": lobbyId,
+      "name": name,
+      "id": 10,
     });
   }
 

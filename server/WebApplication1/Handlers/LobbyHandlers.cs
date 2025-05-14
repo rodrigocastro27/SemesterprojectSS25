@@ -1,6 +1,5 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
-using WebApplication1.Models;
 using WebApplication1.Services;
 using WebApplication1.Utils;
 
@@ -35,10 +34,18 @@ public static class LobbyHandlers
             player.SetHost(false);
             
             //confirmation message 
-            await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
-                action = "lobby_joined",
-                lobbyId
-            }), WebSocketMessageType.Text, true, CancellationToken.None);
+            await MessageSender.SendToPlayerAsync(player, "lobby_joined", new
+            {
+                lobbyId = lobbyId,
+                host = false,
+            });
+            await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new     //broadcasts when a player joins a lobby to update in all flutter clients
+            {
+                players = lobby.Players.Select(p => new {
+                    name = p.Name,
+                    role = p.Role 
+                }).ToList()
+            });
         });
         
         
@@ -61,7 +68,10 @@ public static class LobbyHandlers
 
                 await MessageSender.SendToPlayerAsync(player, "lobby_created", new {
                     lobbyId = lobbyId,
-                    host = true
+                    players = lobby.Players.Select(p => new {
+                        name = p.Name,
+                        role = p.Role 
+                    }).ToList()
                 });
             }
         });

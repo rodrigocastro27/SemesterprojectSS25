@@ -10,6 +10,8 @@ public class Player(string name, int id, WebSocket socket)
 
     private bool _isHost;
     public GeoPosition Position { get; private set; }
+    public string Role = "hider";
+
     public void UpdateLocation(GeoPosition pos) => Position = pos;
     
     public void SetHost(bool state)=> _isHost = state;
