@@ -14,7 +14,12 @@ class LobbyState {
     this.isHost = isHost;
   }
 
-  void updatePlayers(List<Player> updated) {
-    players = updated;
+  void addPlayer(Player player) {
+
+  if (!players.any((p) => p.name == player.name)) {
+     players.add(player);
   }
+
+}
+
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
-import 'package:semester_project/logic/actions/lobby_actions.dart';
+import 'package:semester_project/logic/handlers/lobby_handler.dart';
 import 'package:semester_project/pages/home_page.dart';
 import 'package:semester_project/services/websocket_service.dart';
 

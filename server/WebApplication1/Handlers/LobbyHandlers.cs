@@ -38,13 +38,17 @@ public static class LobbyHandlers
             {
                 lobbyId = lobbyId,
                 host = false,
+                player = new {
+                    name = player.Name,
+                    role = player.Role
+                }
             });
-            await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new     //broadcasts when a player joins a lobby to update in all flutter clients
+            await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new
             {
-                players = lobby.Players.Select(p => new {
-                    name = p.Id,
-                    role = p.Role 
-                }).ToList()
+                player = new {
+                    name = player.Name,
+                    role = player.Role
+                }
             });
         });
         
@@ -66,12 +70,13 @@ public static class LobbyHandlers
                 lobby.AddPlayer(player);
                 player.SetHost(true);
 
-                await MessageSender.SendToPlayerAsync(player, "lobby_created", new {
+                await MessageSender.SendToPlayerAsync(player, "lobby_created", new
+                {
                     lobbyId = lobbyId,
-                    players = lobby.Players.Select(p => new {
-                        name = p.Id,
-                        role = p.Role 
-                    }).ToList()
+                    player = new {
+                        name = player.Name,
+                        role = player.Role
+                    }
                 });
             }
         });

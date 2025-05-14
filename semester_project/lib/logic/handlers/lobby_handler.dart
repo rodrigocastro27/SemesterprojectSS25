@@ -13,46 +13,45 @@ class LobbyActions {
 
     dispatcher.register('new_player_joined', _handleNewPlayerJoined);
     dispatcher.register('removed_player', _handlePlayerRemoved);
-    
+
     dispatcher.register('game_started', _handleGameStarted);
-    
+
     dispatcher.register('failed_lobby', _handleJoinLobbyFailed);
   }
 
   static void _handleLobbyJoined(Map<String, dynamic> data) {
     final lobbyId = data['lobbyId'];
-    final playersData = data['players'] ?? [];
-    final players = (playersData as List)
-        .map((p) => Player(name: p['name'], role: p['role']))
-        .toList();
+    final playerData = data['player'];
+    final player = Player(name: playerData['name'], role: playerData['role']);
 
-    LobbyState.instance.setLobby(lobbyId, players, isHost: false);
+    LobbyState.instance.setLobby(lobbyId, [player], isHost: false);
 
     navigatorKey.currentState?.pop();
-    navigatorKey.currentState?.push(MaterialPageRoute(builder: (_) => const LobbyPage()));
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(builder: (_) => const LobbyPage()),
+    );
   }
 
   static void _handleLobbyCreated(Map<String, dynamic> data) {
     final lobbyId = data['lobbyId'];
-    final playersData = data['players'] ?? [];
-    final players = (playersData as List)
-        .map((p) => Player(name: p['name'], role: p['role']))
-        .toList();
+    final playerData = data['player'];
+    final player = Player(name: playerData['name'], role: playerData['role']);
 
-    LobbyState.instance.setLobby(lobbyId, players, isHost: true);
+    LobbyState.instance.setLobby(lobbyId, [player], isHost: true);
 
     navigatorKey.currentState?.pop();
-    navigatorKey.currentState?.push(MaterialPageRoute(builder: (_) => const LobbyPage()));
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(builder: (_) => const LobbyPage()),
+    );
   }
 
   static void _handleNewPlayerJoined(Map<String, dynamic> data) {
-    final playersData = data['players'] as List;
-    final players = playersData
-        .map((p) => Player(name: p['name'], role: p['role']))
-        .toList();
+  final playerData = data['player'];
+  final player = Player(name: playerData['name'], role: playerData['role']);
 
-    LobbyState.instance.updatePlayers(players);
-  }
+  LobbyState.instance.addPlayer(player);
+}
+
 
   static void _handlePlayerRemoved(Map<String, dynamic> data) {
     final lobbyId = data['lobbyId'];
@@ -65,13 +64,17 @@ class LobbyActions {
     navigatorKey.currentState?.pop(); // remove loading if any
     showDialog(
       context: navigatorKey.currentContext!,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Join Failed"),
-        content: Text("Could not join lobby $lobbyId"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK"))
-        ],
-      ),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("Join Failed"),
+            content: Text("Could not join lobby $lobbyId"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
     );
   }
 
