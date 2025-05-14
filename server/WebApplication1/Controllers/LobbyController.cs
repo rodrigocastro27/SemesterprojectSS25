@@ -1,4 +1,6 @@
-using WebApplication1.Services;
+namespace WebApplication1.Controllers;
+
+using WebApplication1.Data;
 using WebApplication1.Models;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -8,75 +10,60 @@ using MongoDB.Driver;
 
 public class LobbyController : ControllerBase
 {
-    private readonly IMongoCollection<Lobby> _lobbyCollection;
-    private readonly IMongoCollection<Player> _playerCollection;
+    private readonly IMongoCollection<Lobby>? _lobbies;
 
-    public LobbyController(IMongoClient mongoClient)
+    public LobbyController(MongoDBService mongoDBservice)
     {
-        var database = mongoClient.GetDatabase("semprojDB");
-        _lobbyCollection = database.GetCollection<Lobby>("Lobbies");
-        _playerCollection = database.GetCollection<Player>("Players");
+        _lobbies = mongoDBservice.Database?.GetCollection<Lobby>("lobby");
     }
 
-    // Create a new player
-    [HttpPost("player/register")]
-    public async Task<ActionResult<Player>> RegisterPlayer([FromBody] Player player)
+    // Fetch all lobbies
+    [HttpGet("get_lobbies")]
+    public async Task<IEnumerable<Lobby>> GetLobby()
     {
-        await _playerCollection.InsertOneAsync(player);
-        return Ok(player);
+        return await _lobbies.Find(FilterDefinition<Lobby>.Empty).ToListAsync();
     }
 
-    // Create a new lobby
-    [HttpPost("lobby/create")]
-    public async Task<ActionResult<Lobby>> CreateLobby([FromBody] Lobby lobby)
+    // Fetch lobby by id
+    [HttpGet("get_lobby_{id}")]
+    public async Task<ActionResult<Lobby?>> GetLobbyById(string id)
     {
-        lobby.Status = "waiting";
-        lobby.CreatedAt = DateTime.UtcNow;
-        await _lobbyCollection.InsertOneAsync(lobby);
-        return Ok(lobby);
+        var filter = Builders<Lobby>.Filter.Eq(x => x.Id, id);
+        var lobby = await _lobbies.Find(filter).FirstOrDefaultAsync();
+
+        return lobby is not null ? Ok(lobby) : NotFound();
     }
 
-    // Get list of all lobbies
-    [HttpGet("lobbies")]
-    public async Task<ActionResult<List<Lobby>>> GetLobbies()
+    // To create a new lobby
+    [HttpPost("create_lobby")]
+    public async Task<ActionResult> CreateLobby(Lobby lobby)
     {
-        var lobbies = await _lobbyCollection.Find(_ => true).ToListAsync();
-        return Ok(lobbies);
+        await _lobbies!.InsertOneAsync(lobby);                  // SUPRESSED WARNING
+        return CreatedAtAction(nameof(GetLobbyById), new {id = lobby.Id}, lobby);
     }
 
-    // Join a lobby
-    [HttpPost("lobby/join")]
-    public async Task<ActionResult> JoinLobby([FromBody] JoinLobbyRequest request)
+    // Update existing lobby data
+    [HttpPut("update_lobby")]
+    public async Task<ActionResult> UpdateLobby(Lobby lobby)
     {
-        var player = await _playerCollection.Find(p => p.Id == request.PlayerId).FirstOrDefaultAsync();
-        if (player == null) return NotFound("Player not found");
+        var filter = Builders<Lobby>.Filter.Eq(x => x.Id, lobby.Id);
+        // To update one by one
+        // var update = Builders<Lobby>.Update
+        //     .Set(x => x.Name, lobby.Name)
+        //     .Set(x => x.MaxPlayers, lobby.MaxPlayers);
+        // await _lobbies.UpdateOneAsync(filter, update);
 
-        var lobby = await _lobbyCollection.Find(l => l.Id == request.LobbyId).FirstOrDefaultAsync();
-        if (lobby == null) return NotFound("Lobby not found");
-
-        if (lobby.PlayerIds.Count >= lobby.MaxPlayers) return BadRequest("Lobby is full");
-
-        lobby.PlayerIds.Add(request.PlayerId);
-        await _lobbyCollection.ReplaceOneAsync(l => l.Id == lobby.Id, lobby);
-
-        player.Status = "in_lobby";
-        player.CurrentLobbyId = lobby.Id;
-        await _playerCollection.ReplaceOneAsync(p => p.Id == player.Id, player);
-
-        return Ok(lobby);
+        // To update all the fields
+        await _lobbies!.ReplaceOneAsync(filter, lobby);     // SUPRESSED WARNING
+        return Ok();
     }
 
-
-    [HttpGet("ping")]
-    public IActionResult Ping()
+    // Delete a Lobby
+    [HttpDelete("delete_lobby_{id}")]
+    public async Task<ActionResult> DeleteLobby(string id)
     {
-        return Ok("pong");
+        var filter = Builders<Lobby>.Filter.Eq(x => x.Id, id);
+        await _lobbies!.DeleteOneAsync(filter);             // SUPRESSED WARNING
+        return Ok();
     }
 }
-
-public class JoinLobbyRequest
-{
-    public required string PlayerId { get; set; }
-    public required string LobbyId { get; set; }
-}
-

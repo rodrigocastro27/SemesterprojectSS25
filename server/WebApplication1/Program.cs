@@ -1,5 +1,4 @@
-
-using WebApplication1.Services;
+using WebApplication1.Data;
 using MongoDB.Driver;
 using System.Net.WebSockets;
 using Fleck;
@@ -60,7 +59,7 @@ public class Program
         });
 
         // Add services to the container
-        builder.Services.AddSingleton<MongoService>();
+        builder.Services.AddSingleton<MongoDBService>();
         
         builder.Services.AddControllers(); // Enables [ApiController]
         builder.Services.AddEndpointsApiExplorer();
