@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:semester_project/main.dart';
 import 'package:semester_project/pages/lobby%20pages/lobby_page.dart';
 import 'package:semester_project/models/player.dart';
+import 'package:semester_project/pages/map_page.dart';
 import 'package:semester_project/services/lobby_state.dart';
 
 import '../action_dispatcher.dart';
@@ -41,17 +42,25 @@ class LobbyActions {
 
     navigatorKey.currentState?.pop();
     navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) => const LobbyPage()),
+      MaterialPageRoute(builder: (_) =>const LobbyPage()),
     );
   }
 
   static void _handleNewPlayerJoined(Map<String, dynamic> data) {
-  final playerData = data['player'];
-  final player = Player(name: playerData['name'], role: playerData['role']);
+    final playerData = data['player'];
+    final player = Player(name: playerData['name'], role: playerData['role']);
 
-  LobbyState.instance.addPlayer(player);
-}
+    LobbyState.instance.addPlayer(player);
+    print('Current players in lobby:');
+    for (var p in LobbyState.instance.players) {
+      print('- ${p.name} (${p.role})');
+    }
 
+     navigatorKey.currentState?.push(
+      MaterialPageRoute(builder: (_) =>const LobbyPage()),
+    );
+
+  }
 
   static void _handlePlayerRemoved(Map<String, dynamic> data) {
     final lobbyId = data['lobbyId'];
@@ -80,6 +89,8 @@ class LobbyActions {
 
   static void _handleGameStarted(Map<String, dynamic> data) {
     // Navigate to game screen or change UI state
-    print("Game has started!");
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(builder: (_) =>const MapPage()),
+    );
   }
 }

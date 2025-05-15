@@ -21,6 +21,8 @@ public static class LobbyHandlers
          
             var lobby = LobbyManager.Instance.GetLobby(lobbyId);
 
+            
+            
             if (lobby == null)
             {
                 await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
@@ -32,6 +34,16 @@ public static class LobbyHandlers
             
             lobby.AddPlayer(player);
             player.SetHost(false);
+
+
+
+                Console.WriteLine(lobby.Id + ": ");
+            
+            foreach (var lobbyPlayer in lobby.Players)
+            {
+                Console.WriteLine(lobbyPlayer.Name);
+            }
+            
             
             //confirmation message 
             await MessageSender.SendToPlayerAsync(player, "lobby_joined", new

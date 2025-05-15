@@ -36,8 +36,10 @@ class MessageSender {
     });
   } 
 
-  static void startGame()
+  static void startGame(String lobbyId)
   {
-    //start the game
+    webSocketService.send("start_game", {
+      "lobbyId": lobbyId,
+    });
   }
 }
