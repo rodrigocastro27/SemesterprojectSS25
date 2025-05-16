@@ -1,8 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/models/player.dart';
+import 'package:semester_project/pages/lobby_page.dart';
+import 'package:semester_project/services/firestore_services.dart';
 
 class JoinLobbyPage extends StatefulWidget {
   const JoinLobbyPage({super.key});
@@ -23,13 +22,17 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
 
     final player = Player(name: username, role: _selectedRole);
 
-    MessageSender.joinLobby(lobbyName, username, Random().nextInt(100000));
+    final firestoreService = FirestoreService();
+    final lobbyDoc = await firestoreService.joinLobby(lobbyName, player);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+    if (lobbyDoc != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => LobbyPage(lobbyRef: lobbyDoc)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lobby not found')));
+    }
   }
 
   @override
@@ -57,13 +60,9 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
                   _selectedRole = value!;
                 });
               },
-              items:
-                  ['Hider', 'Seeker']
-                      .map(
-                        (role) =>
-                            DropdownMenuItem(value: role, child: Text(role)),
-                      )
-                      .toList(),
+              items: ['Hider', 'Seeker']
+                  .map((role) => DropdownMenuItem(value: role, child: Text(role)))
+                  .toList(),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

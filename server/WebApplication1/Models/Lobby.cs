@@ -9,16 +9,11 @@ public class Lobby
     public string Id { get; }
     public List<Player> Players { get; } = new();
     private bool _timerRunning = false;
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> FlutterWebSocket
     public Lobby(string id)
     {
         Id = id;
     }
-<<<<<<< HEAD
 
     public async Task AddPlayerAsync(Player player)
     {
@@ -31,8 +26,6 @@ public class Lobby
         }
     }
 
-=======
->>>>>>> FlutterWebSocket
     private async Task StartTimerAsync()
     {
         for (int i = 10; i >= 0; i--)
@@ -59,17 +52,4 @@ public class Lobby
             await Task.Delay(1000);
         }
     }
-<<<<<<< HEAD
-=======
-
-    public void AddPlayer(Player player)
-    {
-        Players.Add(player);
-    }
-
-    public void RemovePlayer(Player player)
-    {
-        Players.Remove(player);
-    }
->>>>>>> FlutterWebSocket
 }

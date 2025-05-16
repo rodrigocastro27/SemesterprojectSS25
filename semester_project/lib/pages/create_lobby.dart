@@ -1,8 +1,7 @@
-import 'dart:math';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:semester_project/logic/message_sender.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'lobby_page.dart';
 
 class CreateLobbyPage extends StatefulWidget {
   const CreateLobbyPage({super.key});
@@ -19,14 +18,30 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
     if (lobbyName.isEmpty) return;
 
     final username = await _getUsername();
+    final role = "hider";
 
-    MessageSender.createLobby(lobbyName, username, Random().nextInt(100000));
+    try {
+     final lobbyDoc =  await FirebaseFirestore.instance.collection('lobbies').add({
+        'lobbyName': lobbyName,
+        'members': [
+          {
+            'name': username,
+           'role': role
+          },
+        ],
+      });
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+      print('Lobby created successfully!');
+      Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => LobbyPage(lobbyRef: lobbyDoc)),
+);
+    } catch (e) {
+      print('Error creating lobby: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to create lobby: $e')));
+    }
   }
 
   Future<String> _getUsername() async {
