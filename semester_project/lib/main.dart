@@ -1,27 +1,46 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:semester_project/pages/map_page.dart';
+import 'package:semester_project/logic/action_dispatcher.dart';
+import 'package:semester_project/logic/handlers/lobby_handler.dart';
 import 'package:semester_project/pages/home_page.dart';
-import 'package:semester_project/pages/qrcode_page.dart';
+import 'package:semester_project/services/websocket_service.dart';
 
-void main() async{
-   
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+
+final dispatcher = ServerActionDispatcher();
+late WebSocketService webSocketService;
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();   //basic global navigation... look into it!
+
+
+
+void main() {
+
+  setupActionHandlers();
+
+  webSocketService = WebSocketService(dispatcher);
+  webSocketService.connect('wss://f959-193-170-132-8.ngrok-free.app/ws');  //ngrok link
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget
-{
+
+void setupActionHandlers() {
+
+    LobbyActions.register(dispatcher);
+  // Add more handlers here as needed
+}
+
+
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return const MaterialApp(
+   return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: HomePage()
+      home: HomePage(),
     );
-
   }
 }
+
+
