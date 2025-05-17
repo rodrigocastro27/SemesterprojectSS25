@@ -5,7 +5,6 @@ using WebApplication1.Utils;
 using WebApplication1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSingleton<SQLiteConnector>();
 
 var app = builder.Build();
 app.UseWebSockets();
