@@ -30,8 +30,8 @@ app.Map("/ws", async context =>
                     var name = doc.RootElement.GetProperty("name").GetString();
                     var lobbyId = doc.RootElement.GetProperty("lobbyId").GetString();
 
-                    var player = new Player(name, socket);
-                    var lobby = lobbyManager.GetOrCreateLobby(lobbyId);
+                    var player = new Player(name!, socket);
+                    var lobby = lobbyManager.GetOrCreateLobby(lobbyId!);
                     await lobby.AddPlayerAsync(player);
                 }
             }
