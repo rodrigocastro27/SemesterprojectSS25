@@ -17,7 +17,7 @@ void main() {
   setupActionHandlers();
 
   webSocketService = WebSocketService(dispatcher);
-  webSocketService.connect('wss://f959-193-170-132-8.ngrok-free.app/ws');  //ngrok link
+  webSocketService.connect('wss://91a4-193-170-134-240.ngrok-free.app/ws');  //ngrok link
 
   runApp(const MyApp());
 }
