@@ -2,8 +2,12 @@ using System.Net.WebSockets;
 using System.Text;
 using WebApplication1.Handlers;
 using WebApplication1.Utils;
+using WebApplication1.Data;
 
-var app = WebApplication.Create();
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<SQLiteConnector>();
+
+var app = builder.Build();
 app.UseWebSockets();
 
 var dispatcher = new WebSocketActionDispatcher();
