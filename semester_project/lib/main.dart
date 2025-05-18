@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
 import 'package:semester_project/logic/handlers/lobby_handler.dart';
+import 'package:semester_project/logic/handlers/player_handler.dart';
+import 'package:semester_project/pages/authentication_page.dart';
 import 'package:semester_project/pages/home_page.dart';
 import 'package:semester_project/services/websocket_service.dart';
 
@@ -17,7 +19,7 @@ void main() {
   setupActionHandlers();
 
   webSocketService = WebSocketService(dispatcher);
-  webSocketService.connect('wss://91a4-193-170-134-240.ngrok-free.app/ws');  //ngrok link
+  webSocketService.connect('wss://8744-193-170-132-8.ngrok-free.app/ws');  //ngrok link
 
   runApp(const MyApp());
 }
@@ -26,6 +28,7 @@ void main() {
 void setupActionHandlers() {
 
     LobbyActions.register(dispatcher);
+    PlayerActions.register(dispatcher);
   // Add more handlers here as needed
 }
 
@@ -38,7 +41,7 @@ class MyApp extends StatelessWidget {
    return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: AuthPage(),
     );
   }
 }

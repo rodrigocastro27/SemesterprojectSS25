@@ -8,6 +8,8 @@ import 'package:semester_project/services/lobby_state.dart';
 import '../action_dispatcher.dart';
 
 class LobbyActions {
+
+  // Messages recieved from the server and how to handle them
   static void register(ServerActionDispatcher dispatcher) {
     dispatcher.register('lobby_joined', _handleLobbyJoined);
     dispatcher.register('lobby_created', _handleLobbyCreated);
@@ -75,8 +77,8 @@ class LobbyActions {
       context: navigatorKey.currentContext!,
       builder:
           (ctx) => AlertDialog(
-            title: const Text("Join Failed"),
-            content: Text("Could not join lobby $lobbyId"),
+            title: const Text("Failed to join lobby"),
+            content: Text("Could not join lobby $lobbyId because it already exists."),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),

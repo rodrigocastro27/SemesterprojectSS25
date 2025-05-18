@@ -1,6 +1,8 @@
 ﻿
 using System.Collections.Concurrent;
 using WebApplication1.Models;
+using System.Data.SQLite;
+using WebApplication1.Data;
 
 namespace WebApplication1.Services;
 
@@ -10,7 +12,7 @@ public class LobbyManager
 
     public static LobbyManager Instance { get; } = new LobbyManager();
 
-    private LobbyManager() {}
+    private LobbyManager() { }
 
     public Lobby? GetLobby(string lobbyId)
     {
@@ -20,9 +22,26 @@ public class LobbyManager
 
     public Lobby CreateLobby(string lobbyId)
     {
+        using var conn = SQLiteConnector.GetConnection();
+
+        // See if lobby exists
+        if (GetLobby(lobbyId) != null) return null!;
+
+        // If it doesn't insert it into the database
+        var cmd1 = new SQLiteCommand("INSERT INTO Lobbies (`name`) VALUES (@name);", conn);
+        cmd1.Parameters.AddWithValue("@name", lobbyId);
+        cmd1.ExecuteNonQuery();
+
+        // Update the manager's data
         var lobby = new Lobby(lobbyId);
         _lobbies[lobbyId] = lobby;
+
         return lobby;
+    }
+
+    public void AddLobby(string name, Lobby lobby)
+    {
+        _lobbies[name] = lobby;
     }
 
 }

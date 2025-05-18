@@ -5,7 +5,8 @@ import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/models/player.dart';
 
 class JoinLobbyPage extends StatefulWidget {
-  const JoinLobbyPage({super.key});
+  final String username;
+  const JoinLobbyPage({super.key, required this.username});
 
   @override
   State<JoinLobbyPage> createState() => _JoinLobbyPageState();
@@ -21,9 +22,9 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
     final username = _usernameController.text.trim();
     if (lobbyName.isEmpty || username.isEmpty) return;
 
-    final player = Player(name: username, role: _selectedRole);
+    final player = Player(name: widget.username, role: _selectedRole);
 
-    MessageSender.joinLobby(lobbyName, username, Random().nextInt(100000));
+    MessageSender.joinLobby(lobbyName, widget.username);
 
     showDialog(
       context: context,

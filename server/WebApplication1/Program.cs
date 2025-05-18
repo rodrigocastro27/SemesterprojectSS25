@@ -8,11 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 app.UseWebSockets();
+SQLiteConnector.Initialize(builder.Environment.ContentRootPath);
 
 var dispatcher = new WebSocketActionDispatcher();
 
 LobbyHandlers.Register(dispatcher);
 PlayerHandlers.Register(dispatcher);
+
+DataLoader.LoadAll();
 
 
 app.Map("/ws", async context =>

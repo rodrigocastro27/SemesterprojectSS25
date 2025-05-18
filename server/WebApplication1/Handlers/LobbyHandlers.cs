@@ -2,27 +2,28 @@
 using System.Text.Json;
 using WebApplication1.Services;
 using WebApplication1.Utils;
+using WebApplication1.Data;
 
 namespace WebApplication1.Handlers;
 
 public static class LobbyHandlers
 {
     public static void Register(WebSocketActionDispatcher dispatcher)
-    {
+    {   
+        // Process message
         dispatcher.Register("join_lobby", async (data, socket) =>
-        {
-            var name = data.GetProperty("name").GetString();
-            var playerId = data.GetProperty("id").GetInt32();
+        {   
+            // Read data in message
+            var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
 
-                
-            var player = PlayerManager.Instance.GetPlayer(playerId) 
-                         ?? PlayerManager.Instance.CreatePlayer(playerId, name, socket);
-         
-            var lobby = LobbyManager.Instance.GetLobby(lobbyId);
+            // Check if player is already in the list of players
+            var player = PlayerManager.Instance.GetPlayer(username!);
 
-            
-            
+            // Get the lobby
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+
+            // Handle if lobby does not exist       
             if (lobby == null)
             {
                 await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
@@ -31,18 +32,12 @@ public static class LobbyHandlers
                 }), WebSocketMessageType.Text, true, CancellationToken.None);    
                 return;
             }
+
+            // TODO: check if the player is already in the list
             
-            lobby.AddPlayer(player);
-            player.SetHost(false);
-
-
-
-                Console.WriteLine(lobby.Id + ": ");
-            
-            foreach (var lobbyPlayer in lobby.Players)
-            {
-                Console.WriteLine(lobbyPlayer.Name);
-            }
+            // If everything correct, add the player ot the lobby
+            lobby.AddPlayer(player!);
+            player!.SetHost(false);  // Don't add the player as host
             
             
             //confirmation message 
@@ -50,7 +45,8 @@ public static class LobbyHandlers
             {
                 lobbyId = lobbyId,
                 host = false,
-                player = new {
+                player = new
+                {
                     name = player.Name,
                     role = player.Role
                 }
@@ -67,29 +63,40 @@ public static class LobbyHandlers
         
         dispatcher.Register("create_lobby", async (data, socket) =>
         {
-            if (data.TryGetProperty("name", out var nameElem) &&
-                data.TryGetProperty("id", out var idElem) &&
+            Console.WriteLine("\nPROCESSING CREATING LOBBY...\n");
+
+            if (data.TryGetProperty("username", out var nameElem) &&
                 data.TryGetProperty("lobbyId", out var lobbyIdElem))
             {
-                var name = nameElem.GetString();
-                var playerId = idElem.GetInt32();
+                var username = nameElem.GetString();
                 var lobbyId = lobbyIdElem.GetString();
 
-                var player = PlayerManager.Instance.GetPlayer(playerId)
-                             ?? PlayerManager.Instance.CreatePlayer(playerId, name, socket);
+                Console.WriteLine("\nLobby: $lobbyId\n");
 
-                var lobby = LobbyManager.Instance.CreateLobby(lobbyId);
-                lobby.AddPlayer(player);
-                player.SetHost(true);
+                var player = PlayerManager.Instance.GetPlayer(username!);
 
-                await MessageSender.SendToPlayerAsync(player, "lobby_created", new
+                var lobby = LobbyManager.Instance.CreateLobby(lobbyId!);
+
+                if (lobby == null)
                 {
-                    lobbyId = lobbyId,
-                    player = new {
-                        name = player.Name,
-                        role = player.Role
-                    }
-                });
+                    Console.WriteLine("\nFAILED TO JOIN LOBBY\n");
+                    await MessageSender.SendToPlayerAsync(player!, "failed_lobby", new { lobbyId = lobbyId });
+                }
+                else
+                {
+                    lobby.AddPlayer(player!);
+                    player!.SetHost(true);
+
+                    await MessageSender.SendToPlayerAsync(player, "lobby_created", new
+                    {
+                        lobbyId = lobbyId,
+                        player = new
+                        {
+                            name = player.Name,
+                            role = player.Role
+                        }
+                    });
+                }
             }
         });
 
@@ -97,12 +104,12 @@ public static class LobbyHandlers
         dispatcher.Register("exit_lobby", async (data, socket) =>
         {
             var name = data.GetProperty("name").GetString();
-            var playerId = data.GetProperty("id").GetInt32();
+            var playerId = data.GetProperty("id").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
             
            
-            var lobby = LobbyManager.Instance.GetLobby(lobbyId);
-            var player = PlayerManager.Instance.GetPlayer(playerId);
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            var player = PlayerManager.Instance.GetPlayer(playerId!);
 
             if (lobby == null||player == null)
             {
@@ -129,9 +136,9 @@ public static class LobbyHandlers
         {
             var lobbyId = data.GetProperty("lobbyId").GetString();
             
-            var lobby = LobbyManager.Instance.GetLobby(lobbyId);
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             
-            await MessageSender.BroadcastLobbyAsync(lobby, "game_started", new
+            await MessageSender.BroadcastLobbyAsync(lobby!, "game_started", new
             {
                 action = "started",
             });

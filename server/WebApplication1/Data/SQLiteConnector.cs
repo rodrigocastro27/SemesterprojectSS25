@@ -4,15 +4,14 @@ namespace WebApplication1.Data;
 
 public static class SQLiteConnector
 {
-    private static readonly string _dbPath;
-    private static readonly string _connectionString;
+    private static string _dbPath = null!;
+    private static string _connectionString = null!;
 
     // Static constructor
-    static SQLiteConnector()
+    public static void Initialize(string contentRootPath)
     {
-        _dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "game.db");
+        _dbPath = Path.Combine(contentRootPath, "Database", "database.db");
         _connectionString = $"Data Source={_dbPath};Version=3;";
-
         EnsureDatabaseExists();
     }
 
