@@ -10,6 +10,7 @@ public static class DataLoader
     {
         LoadLobbies();
         LoadPlayers();
+        LoadLobbyPlayers();
     }
 
     private static void LoadLobbies()
@@ -31,7 +32,7 @@ public static class DataLoader
     private static void LoadPlayers()
     {
         using var conn = SQLiteConnector.GetConnection();
-        var cmd = new SQLiteCommand("SELECT id, username, email, lobbyId FROM Players;", conn);
+        var cmd = new SQLiteCommand("SELECT id, username, email FROM Players;", conn);
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
@@ -39,17 +40,57 @@ public static class DataLoader
             string id = reader.GetString(0);
             string username = reader.GetString(1);
             string? email = reader.IsDBNull(2) ? null : reader.GetString(2);
-            string? lobbyId = reader.IsDBNull(3) ? null : reader.GetString(3);
 
             var player = new Player(username, id, null!);
 
             PlayerManager.Instance.AddPlayer(username, player);
+        }
+    }
 
-            if (lobbyId != null)
+    private static void LoadLobbyPlayers()
+    {
+        using var conn = SQLiteConnector.GetConnection();
+        var cmd = new SQLiteCommand("SELECT Lobby, Player, Nickname, IsHost, Role FROM LobbyPlayers;", conn);
+        using var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            string lobbyId = reader.GetString(0);
+            string username = reader.GetString(1);
+            string nickname = reader.GetString(2); // fallback if nickname is null
+            bool isHost = reader.GetBoolean(3);
+            string role = reader.GetString(4);
+
+            // Get the player from PlayerManager
+            var player = PlayerManager.Instance.GetPlayer(username);
+            if (player == null)
             {
-                var lobby = LobbyManager.Instance.GetLobby(lobbyId);
-                lobby?.AddPlayer(player);
+                Console.WriteLine($"Warning: Player '{username}' not found in PlayerManager.");
+                continue;
             }
+
+            // Get the lobby from LobbyManager
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId);
+            if (lobby == null)
+            {
+                Console.WriteLine($"Warning: Lobby '{lobbyId}' not found in LobbyManager.");
+                continue;
+            }
+
+            // Add player to the lobby if not already present
+            if (!lobby.HasPlayer(player))
+            {
+                lobby.AddPlayer(player);
+            }
+
+            // Set host if applicable
+            if (isHost)
+            {
+                player.SetHost(true); // Assuming you have this method
+            }
+
+            // Set nickname, if supported
+            player.Role = role; // Optional, if you support nicknames
         }
     }
 }

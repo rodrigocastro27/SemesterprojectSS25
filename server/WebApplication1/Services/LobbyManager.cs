@@ -14,6 +14,11 @@ public class LobbyManager
 
     private LobbyManager() { }
 
+    public void AddLobby(string name, Lobby lobby)
+    {
+        _lobbies[name] = lobby;
+    }
+
     public Lobby? GetLobby(string lobbyId)
     {
         _lobbies.TryGetValue(lobbyId, out var lobby);
@@ -34,14 +39,9 @@ public class LobbyManager
 
         // Update the manager's data
         var lobby = new Lobby(lobbyId);
-        _lobbies[lobbyId] = lobby;
+        AddLobby(lobbyId, lobby);
 
         return lobby;
-    }
-
-    public void AddLobby(string name, Lobby lobby)
-    {
-        _lobbies[name] = lobby;
     }
 
 }

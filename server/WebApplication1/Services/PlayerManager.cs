@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using WebApplication1.Models;
 using System.Data.SQLite;
 using WebApplication1.Data;
+using WebApplication1.Utils;
 
 namespace WebApplication1.Services;
 
@@ -14,6 +15,11 @@ public class PlayerManager
     public static PlayerManager Instance { get; } = new PlayerManager();
 
     private PlayerManager() { } // prevent external instantiation
+
+    public void AddPlayer(string username, Player player)
+    {
+        _players[username] = player;
+    }
 
     public Player CreatePlayer(string deviceId, string username, WebSocket socket)
     {
@@ -27,13 +33,20 @@ public class PlayerManager
 
         // Insert into the Manager player list
         var player = new Player(username, deviceId, socket);
-        _players[username] = player;
+        AddPlayer(username, player);
         return player;
     }
 
-    public void Remove(string id)
+    public void RemovePlayer(string username)
     {
-        _players.TryRemove(id, out _);
+        // Delete from database
+        using var conn = SQLiteConnector.GetConnection();
+        var cmd = new SQLiteCommand("DELETE FROM Players WHERE username = @username;", conn);
+        cmd.Parameters.AddWithValue("@username", username);
+        cmd.ExecuteNonQuery();
+
+        // Remove from player list
+        _players.TryRemove(username, out _);
     }
 
     public void UpdatePlayerSocket(string id, WebSocket newSocket)
@@ -59,15 +72,103 @@ public class PlayerManager
 
     public void PrintPlayers()
     {
-        Console.WriteLine("\n\n\n\n");
+        Console.WriteLine("\n\n");
         foreach (var player in _players.Values)
         {
             Console.WriteLine($"Player Name: {player.Name}");
         }
+        Console.WriteLine("\n\n");
     }
 
-    public void AddPlayer(string username, Player player)
+    public string IsPlayerInLobby(Player player) {
+        using var conn = SQLiteConnector.GetConnection();
+
+        string? lobbyId = null;
+
+        var cmd = new SQLiteCommand("SELECT Lobby FROM LobbyPlayers WHERE Player = @username;", conn);
+        cmd.Parameters.AddWithValue("@username", player.Name);
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            lobbyId = reader.IsDBNull(0) ? null : reader.GetString(0);
+        }
+        return lobbyId!;
+    }
+
+    public string AddPlayerToLobby(Player player, Lobby lobby, string nickname, bool isHost)
     {
-        _players[username] = player;
+        using var conn = SQLiteConnector.GetConnection();
+
+        string playerInLobby = IsPlayerInLobby(player);
+
+        Console.WriteLine($"Player {player.Name} is in lobby {playerInLobby}. Trying to join lobby {lobby.Id}.");
+
+        // If the player is already in a lobby
+        if (playerInLobby != null)
+        {
+            // Check if trying to access the same one
+            if (playerInLobby == lobby.Id)
+            {
+                Console.WriteLine("TRYING TO JOIN SAME LOBBY!");
+                // Update the nickname if it has been changed
+                var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Nickname = @nickname WHERE Player = @username;", conn);
+                cmd.Parameters.AddWithValue("@nickname", nickname);
+                cmd.Parameters.AddWithValue("@username", player.Name);
+                cmd.ExecuteNonQuery();
+            }
+            else    // Or another one
+            {
+                Console.WriteLine("TRYING TO JOIN DIFFERENT LOBBY!");
+                playerInLobby = null!;
+            }
+        }
+        else  // Add the player to the given lobby
+        {
+            Console.WriteLine($"ADDING PLAYER IN LOBBY ${lobby.Id}.");
+            // Add player into database
+            var cmd = new SQLiteCommand("INSERT INTO LobbyPlayers (Lobby, Player, Nickname, IsHost, Role) VALUES(@lobbyId, @username, @nickname, @isHost, @role);", conn);
+            cmd.Parameters.AddWithValue("@lobbyId", lobby.Id);
+            cmd.Parameters.AddWithValue("@username", player.Name);
+            cmd.Parameters.AddWithValue("@nickname", nickname);
+            cmd.Parameters.AddWithValue("@isHost", isHost);
+            cmd.Parameters.AddWithValue("@role", player.Role);
+
+            cmd.ExecuteNonQuery();
+
+            lobby.AddPlayer(player);
+            playerInLobby = lobby.Id;
+        }
+
+        return playerInLobby;
+    }
+
+    public void RemovePlayerFromLobby(Player player, Lobby lobby)
+    {
+        using var conn = SQLiteConnector.GetConnection();
+
+        lobby.RemovePlayer(player);
+
+        // See if player is host and act accordingly
+        if (player._isHost == true)
+        {
+            // Set new host if there is someone still left in the lobby
+            Player newHost = lobby.GetRandomPlayer();
+
+            if (newHost != null)
+            {
+                // Change manager
+                newHost.SetHost(true);
+
+                // Change in database
+                var cmd1 = new SQLiteCommand("UPDATE LobbyPlayers SET IsHost = 1 WHERE Player = @username;", conn);
+                cmd1.Parameters.AddWithValue("@username", newHost.Name);  // username is the player's identifier
+                cmd1.ExecuteNonQuery();
+            }
+        }
+
+        // Delete player from lobby in database
+        var cmd2 = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Lobby = @lobbyId AND Player = @username;", conn);
+        cmd2.Parameters.AddWithValue("@lobbyId", lobby.Id);
+        cmd2.Parameters.AddWithValue("@username", player.Name);
     }
 }

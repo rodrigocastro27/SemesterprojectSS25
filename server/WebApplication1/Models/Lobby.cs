@@ -9,7 +9,7 @@ public class Lobby
     public string Id { get; }
     public List<Player> Players { get; } = new();
     private bool _timerRunning = false;
-    
+
     public Lobby(string id)
     {
         Id = id;
@@ -18,7 +18,8 @@ public class Lobby
     {
         for (int i = 10; i >= 0; i--)
         {
-            var message = JsonSerializer.Serialize(new {
+            var message = JsonSerializer.Serialize(new
+            {
                 action = "timer_update",
                 seconds = i
             });
@@ -49,5 +50,32 @@ public class Lobby
     public void RemovePlayer(Player player)
     {
         Players.Remove(player);
+    }
+
+    public bool HasPlayer(Player player)
+    {
+        return Players.Any(p => p.Id == player.Id);
+    }
+
+    public Player GetRandomPlayer()
+    {
+        if (Players.Count == 0) return null!;
+        return Players[0];  // return first player in list, to select someone
+    }
+
+    public void PrintPlayers()
+    {
+        if (Players.Count == 0)
+        {
+            Console.WriteLine("\nNo players in the list.\n");
+            return;
+        }
+
+        Console.WriteLine($"\nPlayers in lobby {Id}:");
+        foreach (var player in Players)
+        {
+            Console.WriteLine($"{player.Name}");
+        }
+        Console.WriteLine();
     }
 }

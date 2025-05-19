@@ -15,11 +15,12 @@ class LobbyActions {
     dispatcher.register('lobby_created', _handleLobbyCreated);
 
     dispatcher.register('new_player_joined', _handleNewPlayerJoined);
-    dispatcher.register('removed_player', _handlePlayerRemoved);
+    dispatcher.register('player_removed', _handlePlayerRemoved);
 
     dispatcher.register('game_started', _handleGameStarted);
 
     dispatcher.register('failed_lobby', _handleJoinLobbyFailed);
+    dispatcher.register('player_already_in_lobby', _handlePlayerAlreadyInLobby);
   }
 
   static void _handleLobbyJoined(Map<String, dynamic> data) {
@@ -61,11 +62,11 @@ class LobbyActions {
      navigatorKey.currentState?.push(
       MaterialPageRoute(builder: (_) =>const LobbyPage()),
     );
-
   }
 
   static void _handlePlayerRemoved(Map<String, dynamic> data) {
     final lobbyId = data['lobbyId'];
+
     // Optional: Show a snackbar or update UI
     print('Player removed from lobby $lobbyId');
   }
@@ -93,6 +94,27 @@ class LobbyActions {
     // Navigate to game screen or change UI state
     navigatorKey.currentState?.push(
       MaterialPageRoute(builder: (_) =>const MapPage()),
+    );
+  }
+
+  static void _handlePlayerAlreadyInLobby(Map<String, dynamic> data) {
+    final lobbyId = data['lobbyId'];
+    final username = data['name'];
+
+    navigatorKey.currentState?.pop(); // remove loading if any
+    showDialog(
+      context: navigatorKey.currentContext!,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("Failed to join lobby"),
+            content: Text("Could not join lobby $lobbyId because the player is already in another lobby."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
     );
   }
 }

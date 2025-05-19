@@ -18,15 +18,16 @@ class MessageSender {
     });
   }
 
-  static void joinLobby(String lobbyId, String username) {
+  static void joinLobby(String lobbyId, String username, String nickname) {
     webSocketService.send("join_lobby", {
       "lobbyId": lobbyId,
       "username": username,
+      "nickname": nickname,
     });
   }
 
   static void leaveLobby(String lobbyId, String username) {
-    webSocketService.send("leave_lobby", {
+    webSocketService.send("exit_lobby", {
       "lobbyId": lobbyId,
       "username": username,
     });

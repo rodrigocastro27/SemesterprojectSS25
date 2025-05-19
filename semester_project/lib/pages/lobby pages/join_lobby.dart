@@ -14,17 +14,17 @@ class JoinLobbyPage extends StatefulWidget {
 
 class _JoinLobbyPageState extends State<JoinLobbyPage> {
   final TextEditingController _lobbyNameController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _nicknameController = TextEditingController();
   String _selectedRole = 'Hider';
 
   void _joinLobby() async {
     final lobbyName = _lobbyNameController.text.trim();
-    final username = _usernameController.text.trim();
-    if (lobbyName.isEmpty || username.isEmpty) return;
+    final nickname = _nicknameController.text.trim();
+    if (lobbyName.isEmpty || nickname.isEmpty) return;
 
     final player = Player(name: widget.username, role: _selectedRole);
 
-    MessageSender.joinLobby(lobbyName, widget.username);
+    MessageSender.joinLobby(lobbyName, widget.username, nickname);
 
     showDialog(
       context: context,
@@ -47,8 +47,8 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: "Username"),
+              controller: _nicknameController,
+              decoration: const InputDecoration(labelText: "Nickname"),
             ),
             const SizedBox(height: 20),
             DropdownButton<String>(
