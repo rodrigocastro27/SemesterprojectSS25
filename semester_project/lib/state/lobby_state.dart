@@ -20,6 +20,14 @@ class LobbyState extends ChangeNotifier {
     }
   }
 
+  void removePlayer(Player player) {
+    // TODO: database part that then makes this happen
+    if (players.any((p) => p.name == player.name)) {
+      players.remove(player);
+      notifyListeners();
+    }
+  }
+
   void clearLobby() {
     lobbyId = null;
     players.clear();

@@ -118,6 +118,7 @@ public static class LobbyHandlers
         
         dispatcher.Register("exit_lobby", async (data, socket) =>
         {
+            // TODO: test if this works after clicking the button
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
             

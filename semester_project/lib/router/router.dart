@@ -19,9 +19,9 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState) {
       final hasUsername = playerState.username != null;
       final inLobby = lobbyState.lobbyId != null;
 
-      final isAuth = state.fullPath == '/auth';
+      // final isAuth = state.fullPath == '/auth';
       final isHome = state.fullPath == '/home';
-      final isLobby = state.fullPath == '/lobby';
+      // final isLobby = state.fullPath == '/lobby';
 
       if (!hasUsername) return '/auth';
       if (hasUsername && !inLobby && !isHome) return '/home';

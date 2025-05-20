@@ -35,6 +35,12 @@ class LobbyActions {
       _showError("Could not join lobby because it already exists.");
     });
 
+    dispatcher.register('leave_lobby', (data) {
+      final playerData = data['player'];
+      final player = Player(name: playerData['name'], role: playerData['role']);
+      Provider.of<LobbyState>(context, listen: false).removePlayer(player);
+    });
+
     dispatcher.register('player_already_in_lobby', (data) {
       _showError("Player is already in another lobby.");
     });
