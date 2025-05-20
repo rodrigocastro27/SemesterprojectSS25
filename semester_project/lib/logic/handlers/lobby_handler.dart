@@ -1,120 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:semester_project/main.dart';
-import 'package:semester_project/pages/lobby%20pages/lobby_page.dart';
+import 'package:provider/provider.dart';
 import 'package:semester_project/models/player.dart';
-import 'package:semester_project/pages/map_page.dart';
-import 'package:semester_project/services/lobby_state.dart';
-
+import 'package:semester_project/state/lobby_state.dart';
 import '../action_dispatcher.dart';
+import 'package:semester_project/services/navigation_service.dart';
 
 class LobbyActions {
+  static void register(ServerActionDispatcher dispatcher, BuildContext context) {
+    dispatcher.register('lobby_joined', (data) {
+      final lobbyId = data['lobbyId'];
+      final playerData = data['player'];
+      final player = Player(name: playerData['name'], role: playerData['role']);
+      Provider.of<LobbyState>(context, listen: false).setLobby(lobbyId, [player], isHost: false);
+    });
 
-  // Messages recieved from the server and how to handle them
-  static void register(ServerActionDispatcher dispatcher) {
-    dispatcher.register('lobby_joined', _handleLobbyJoined);
-    dispatcher.register('lobby_created', _handleLobbyCreated);
+    dispatcher.register('lobby_created', (data) {
+      final lobbyId = data['lobbyId'];
+      final playerData = data['player'];
+      final player = Player(name: playerData['name'], role: playerData['role']);
+      Provider.of<LobbyState>(context, listen: false).setLobby(lobbyId, [player], isHost: true);
+    });
 
-    dispatcher.register('new_player_joined', _handleNewPlayerJoined);
-    dispatcher.register('player_removed', _handlePlayerRemoved);
+    dispatcher.register('new_player_joined', (data) {
+      final playerData = data['player'];
+      final player = Player(name: playerData['name'], role: playerData['role']);
+      Provider.of<LobbyState>(context, listen: false).addPlayer(player);
+    });
 
-    dispatcher.register('game_started', _handleGameStarted);
+    dispatcher.register('game_started', (data) {
+      // Handle game start, optionally update state to trigger redirect
+    });
 
-    dispatcher.register('failed_lobby', _handleJoinLobbyFailed);
-    dispatcher.register('player_already_in_lobby', _handlePlayerAlreadyInLobby);
+    dispatcher.register('failed_lobby', (data) {
+      _showError("Could not join lobby because it already exists.");
+    });
+
+    dispatcher.register('player_already_in_lobby', (data) {
+      _showError("Player is already in another lobby.");
+    });
   }
 
-  static void _handleLobbyJoined(Map<String, dynamic> data) {
-    final lobbyId = data['lobbyId'];
-    final playerData = data['player'];
-    final player = Player(name: playerData['name'], role: playerData['role']);
+  static void _showError(String message) {
+    final context = rootNavigatorKey.currentContext;
 
-    LobbyState.instance.setLobby(lobbyId, [player], isHost: false);
-
-    navigatorKey.currentState?.pop();
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) => const LobbyPage()),
-    );
-  }
-
-  static void _handleLobbyCreated(Map<String, dynamic> data) {
-    final lobbyId = data['lobbyId'];
-    final playerData = data['player'];
-    final player = Player(name: playerData['name'], role: playerData['role']);
-
-    LobbyState.instance.setLobby(lobbyId, [player], isHost: true);
-
-    navigatorKey.currentState?.pop();
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) =>const LobbyPage()),
-    );
-  }
-
-  static void _handleNewPlayerJoined(Map<String, dynamic> data) {
-    final playerData = data['player'];
-    final player = Player(name: playerData['name'], role: playerData['role']);
-
-    LobbyState.instance.addPlayer(player);
-    print('Current players in lobby:');
-    for (var p in LobbyState.instance.players) {
-      print('- ${p.name} (${p.role})');
+    if (context == null) {
+      print("Context not available for dialog.");
+      return;
     }
 
-     navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) =>const LobbyPage()),
-    );
-  }
-
-  static void _handlePlayerRemoved(Map<String, dynamic> data) {
-    final lobbyId = data['lobbyId'];
-
-    // Optional: Show a snackbar or update UI
-    print('Player removed from lobby $lobbyId');
-  }
-
-  static void _handleJoinLobbyFailed(Map<String, dynamic> data) {
-    final lobbyId = data['lobbyId'];
-    navigatorKey.currentState?.pop(); // remove loading if any
     showDialog(
-      context: navigatorKey.currentContext!,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text("Failed to join lobby"),
-            content: Text("Could not join lobby $lobbyId because it already exists."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("OK"),
-              ),
-            ],
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Pop twice to remove the loading screen as well
+              Navigator.pop(ctx);
+              Navigator.pop(ctx);
+              },
+            child: const Text("OK"),
           ),
-    );
-  }
-
-  static void _handleGameStarted(Map<String, dynamic> data) {
-    // Navigate to game screen or change UI state
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) =>const MapPage()),
-    );
-  }
-
-  static void _handlePlayerAlreadyInLobby(Map<String, dynamic> data) {
-    final lobbyId = data['lobbyId'];
-    final username = data['name'];
-
-    navigatorKey.currentState?.pop(); // remove loading if any
-    showDialog(
-      context: navigatorKey.currentContext!,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text("Failed to join lobby"),
-            content: Text("Could not join lobby $lobbyId because the player is already in another lobby."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("OK"),
-              ),
-            ],
-          ),
+        ],
+      ),
     );
   }
 }

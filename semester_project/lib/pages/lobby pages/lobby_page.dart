@@ -1,30 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:semester_project/logic/message_sender.dart';
-import 'package:semester_project/services/lobby_state.dart';
+import 'package:semester_project/state/lobby_state.dart';
 import 'package:semester_project/widgets/player_list_tile.dart';
 
-class LobbyPage extends StatefulWidget {
+class LobbyPage extends StatelessWidget {
   const LobbyPage({super.key});
 
-  @override
-  State<LobbyPage> createState() => _LobbyPageState();
-}
-
-class _LobbyPageState extends State<LobbyPage> {
-  final state = LobbyState.instance;
-
-  void _startGame() {
+  void _startGame(BuildContext context, LobbyState state) {
     final lobbyId = state.lobbyId;
     if (lobbyId == null) return;
 
-    // Send "start_game" message to server
     MessageSender.startGame(lobbyId);
-
     print('Start game message sent for lobby $lobbyId');
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<LobbyState>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Lobby: ${state.lobbyId}'),
@@ -33,7 +27,7 @@ class _LobbyPageState extends State<LobbyPage> {
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Icon(Icons.star, color: Colors.amber),
-            )
+            ),
         ],
       ),
       body: ListView.builder(
@@ -43,7 +37,7 @@ class _LobbyPageState extends State<LobbyPage> {
       ),
       floatingActionButton: state.isHost
           ? FloatingActionButton(
-              onPressed: _startGame,
+              onPressed: () => _startGame(context, state),
               child: const Icon(Icons.play_arrow),
               tooltip: 'Start Game',
             )
