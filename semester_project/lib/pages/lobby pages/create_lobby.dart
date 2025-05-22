@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:semester_project/logic/message_sender.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateLobbyPage extends StatefulWidget {
-  const CreateLobbyPage({super.key});
+  final String username;
+  const CreateLobbyPage({super.key, required this.username});
 
   @override
   State<CreateLobbyPage> createState() => _CreateLobbyPageState();
@@ -18,21 +18,13 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
     final lobbyName = _lobbyNameController.text.trim();
     if (lobbyName.isEmpty) return;
 
-    final username = await _getUsername();
-
-    MessageSender.createLobby(lobbyName, username, Random().nextInt(100000));
+    MessageSender.createLobby(lobbyName, widget.username);
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
-  }
-
-  Future<String> _getUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('username') ??
-        'Guest${DateTime.now().millisecondsSinceEpoch}';
   }
 
   @override

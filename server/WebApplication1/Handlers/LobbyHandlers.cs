@@ -1,7 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
 using WebApplication1.Services;
-using WebApplication1.Services.Messaging;
 using WebApplication1.Utils;
 
 namespace WebApplication1.Handlers;
@@ -9,107 +8,191 @@ namespace WebApplication1.Handlers;
 public static class LobbyHandlers
 {
     public static void Register(WebSocketActionDispatcher dispatcher)
-    {
-        dispatcher.Register("join_lobby", async (data, socket) =>
+    {   
+        dispatcher.Register("create_lobby", async (data, socket) =>
         {
-            var name = data.GetProperty("name").GetString();
-            var playerId = data.GetProperty("id").GetInt32();
+            Console.WriteLine("\nPROCESSING CREATING LOBBY...\n");
+
+            if (data.TryGetProperty("username", out var nameElem) &&
+                data.TryGetProperty("lobbyId", out var lobbyIdElem))
+            {
+                var username = nameElem.GetString();
+                var lobbyId = lobbyIdElem.GetString();
+
+                Console.WriteLine("\nLobby: $lobbyId\n");
+
+                var player = PlayerManager.Instance.GetPlayer(username!);
+                var lobby = LobbyManager.Instance.CreateLobby(lobbyId!);
+
+                if (lobby == null)
+                {
+                    Console.WriteLine("\nFAILED TO JOIN LOBBY\n");
+                    await MessageSender.SendToPlayerAsync(player!, "failed_lobby", new { lobbyId = lobbyId });
+                }
+                else
+                {
+                    // Modify the Managers
+                    player!.SetHost(true);
+
+                    // Add player to lobby in the database
+                    string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, username!, true);
+                    if (lobbyAdded == null)
+                    {
+                        await MessageSender.SendToPlayerAsync(player, "player_already_in_lobby", new
+                        {
+                            username = player.Name,
+                            lobbyId = lobby.Id,
+                        });
+                        return;
+                    }
+
+                    await MessageSender.SendToPlayerAsync(player, "lobby_created", new
+                    {
+                        lobbyId = lobbyId,
+                        player = new
+                        {
+                            name = player.Name,
+                            role = player.Role
+                        }
+                    });
+                }
+            }
+        });
+
+
+        dispatcher.Register("join_lobby", async (data, socket) =>
+        {   
+            // Read data in message
+            var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
+            var nickname = data.GetProperty("nickname").GetString();
 
-                
-            var player = PlayerManager.Instance.GetPlayer(playerId) 
-                         ?? PlayerManager.Instance.CreatePlayer(playerId, name, socket);
-         
-            var lobby = LobbyManager.Instance.GetLobby(lobbyId);
+            // Check if player is already in the list of players
+            var player = PlayerManager.Instance.GetPlayer(username!);
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
 
-            
-            
+            // Handle if lobby does not exist       
             if (lobby == null)
             {
-                
-                // need to find standard for error messages
                 await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
                     action = "failed_lobby",
-                    lobbyId
+                    data = new
+                    {
+                        lobby = lobbyId,
+                        player = new
+                        {
+                            name = username
+                        }
+                    }
                 }), WebSocketMessageType.Text, true, CancellationToken.None);    
                 return;
             }
             
-            lobby.AddPlayer(player);
-            player.SetHost(false);
+            player!.SetHost(false);  // Don't add the player as host
 
-
-
-                Console.WriteLine(lobby.Id + ": ");
+            // Add player to lobby in the database as host in case it is empty
+            bool isHost = lobby.GetRandomPlayer() == null ? true : false;
             
-            foreach (var lobbyPlayer in lobby.Players)
+            string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, nickname!, isHost);
+            if (lobbyAdded == null)
             {
-                Console.WriteLine(lobbyPlayer.Name);
+                await MessageSender.SendToPlayerAsync(player, "player_already_in_lobby", new
+                {
+                    username = player.Name,
+                    lobbyId = lobby.Id,
+                });
+                return;
             }
-            
             
             //confirmation message 
-            await LobbyMessageSender.JoinedAsync(lobby, player);
-            
-            //broadcast to other players in the lobby that a new player joined (yes this is an actual human comment, not chatgpt)
-            await LobbyMessageSender.BroadcastPlayerJoinedAsync(lobby, player);
-        });
-        
-        
-        dispatcher.Register("create_lobby", async (data, socket) =>
-        {
-            if (data.TryGetProperty("name", out var nameElem) &&
-                data.TryGetProperty("id", out var idElem) &&
-                data.TryGetProperty("lobbyId", out var lobbyIdElem))
+            await MessageSender.SendToPlayerAsync(player, "lobby_joined", new
             {
-                var name = nameElem.GetString();
-                var playerId = idElem.GetInt32();
-                var lobbyId = lobbyIdElem.GetString();
-
-                var player = PlayerManager.Instance.GetPlayer(playerId)
-                             ?? PlayerManager.Instance.CreatePlayer(playerId, name, socket);
-
-                var lobby = LobbyManager.Instance.CreateLobby(lobbyId);
-                lobby.AddPlayer(player);
-                player.SetHost(true);
-
-                await LobbyMessageSender.CreateAsync(lobby, player);
-            }
+                lobbyId = lobbyId,
+                host = false,
+                player = new
+                {
+                    name = player.Name,
+                    role = player.Role
+                }
+            });
+            await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new
+            {
+                player = new {
+                    name = player.Name,
+                    role = player.Role
+                }
+            });
         });
 
         
         dispatcher.Register("exit_lobby", async (data, socket) =>
         {
-            var name = data.GetProperty("name").GetString();
-            var playerId = data.GetProperty("id").GetInt32();
+            Console.WriteLine("\nStart procedure to leave lobby...\n");
+            var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
             
-           
-            var lobby = LobbyManager.Instance.GetLobby(lobbyId);
-            var player = PlayerManager.Instance.GetPlayer(playerId);
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            var player = PlayerManager.Instance.GetPlayer(username!);
 
             if (lobby == null||player == null)
             {
-                await LobbyMessageSender.ErrorMessageAsync(lobby, player);        
+                Console.WriteLine("\nERROR: Player or Lobby are null.\n");
+
+                //implement with message sender
+                await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new
+                {
+                    action = "failed",
+                    lobbyId
+                }), WebSocketMessageType.Text, true, CancellationToken.None);    
                 return;
             }
             
+            // Update manager
             lobby.RemovePlayer(player);
+
+            // Eliminate from the lobby
+            PlayerManager.Instance.RemovePlayerFromLobby(player, lobby);
             
-           await LobbyMessageSender.LeaveAsync(lobby, player);
+            //implement with message sender 
+            await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new
+            {
+                action = "leave_lobby",
+                data = new {
+                    lobby = lobbyId,
+                    player = new {
+                        name = player.Name,
+                        role = player.Role
+                    }
+                }
+            }), WebSocketMessageType.Text, true, CancellationToken.None);
             
         });
-        
-        
+
+
+        dispatcher.Register("delete_lobby", async (data, socket) =>
+        {
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+
+            LobbyManager.Instance.DeleteLobby(lobby!);
+
+            await MessageSender.BroadcastLobbyAsync(lobby!, "lobby_deleted", new
+            {
+                action = "deleted"
+            });
+        });
+
+
         dispatcher.Register("start_game", async (data, socket) =>
         {
             var lobbyId = data.GetProperty("lobbyId").GetString();
             
-            var lobby = LobbyManager.Instance.GetLobby(lobbyId);
-
-            await LobbyMessageSender.StartGame(lobby);
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             
-            
+            await MessageSender.BroadcastLobbyAsync(lobby!, "game_started", new
+            {
+                action = "started",
+            });
         });
     }
 }
