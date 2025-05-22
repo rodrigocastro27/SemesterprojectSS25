@@ -42,8 +42,8 @@ class LobbyState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setNewHost(String username, PlayerState playerState) {
-    if (playerState.getUsername() == username) isHost = true;
+  void setNewHost() {
+    isHost = true;
     notifyListeners();
   }
 

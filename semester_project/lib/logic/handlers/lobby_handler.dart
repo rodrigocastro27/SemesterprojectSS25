@@ -47,8 +47,8 @@ class LobbyActions {
     });
 
     dispatcher.register('new_host', (data) {
-      final username = data['player'];
-      Provider.of<LobbyState>(context, listen: false).setNewHost(username, context.read<PlayerState>());
+      // final username = data['player'];
+      Provider.of<LobbyState>(context, listen: false).setNewHost();
     });
 
     dispatcher.register('lobby_deleted', (data) {

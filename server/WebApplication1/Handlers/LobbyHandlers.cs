@@ -124,7 +124,7 @@ public static class LobbyHandlers
             Console.WriteLine($"Notifyin client that the player was succesfully removed from the lobby.");
             await LobbyMessageSender.LeaveAsync(lobby, player!);
             Console.WriteLine($"Notifying all the players in the lobby that player {player!.Name} left the lobby.");
-            await LobbyMessageSender.BroadcastPlayerList(lobby);            
+            await LobbyMessageSender.BroadcastPlayerList(lobby);
         });
 
 

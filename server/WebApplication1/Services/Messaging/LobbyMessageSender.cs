@@ -31,9 +31,9 @@ public static class LobbyMessageSender
         });
     }
 
-    public static async Task BroadcastNewHost(Lobby lobby, Player player)
+    public static async Task SetNewHost(Player player)
     {
-        await MessageSender.BroadcastLobbyAsync(lobby, "new_host", new
+        await MessageSender.SendToPlayerAsync(player, "new_host", new
         {
             player = player.Name,
         }); // Notify the handler to send a message to the UI
@@ -71,13 +71,10 @@ public static class LobbyMessageSender
     {
         await MessageSender.SendToPlayerAsync(player, "leave_lobby", new
         {
-            action = "removed",
-            data = new {
-                lobby = lobby.Id,
-                player = new {
-                    name = player!.Name,
-                    role = player.Role
-                }
+            lobby = lobby.Id,
+            player = new {
+                name = player!.Name,
+                role = player.Role
             }
         });
     }
