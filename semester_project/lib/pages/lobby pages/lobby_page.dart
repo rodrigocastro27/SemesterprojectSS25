@@ -43,39 +43,87 @@ Widget build(BuildContext context) {
         ),
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: ElevatedButton.icon(
-            onPressed: () {
-              showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: const Text("Confirm"),
-                content: Text("Are you sure you want to leave the lobby?"),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx), // Only remove the Dialog
-                    child: const Text("NO"),
+          child: Column(
+            children: [
+              FractionallySizedBox(
+                widthFactor: 0.5,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text("Confirm"),
+                        content: const Text("Are you sure you want to leave the lobby?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text("NO"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              final lobbyId = lobbyState.lobbyId;
+                              if (lobbyId != null) {
+                                MessageSender.leaveLobby(lobbyId, playerState.username!);
+                              }
+                              Navigator.pop(ctx);
+                            },
+                            child: const Text("YES"),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.exit_to_app),
+                  label: const Text("Leave Lobby"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
                   ),
-                  TextButton(
+                ),
+              ),
+              if (lobbyState.isHost) ...[
+                const SizedBox(height: 12), // spacing
+                FractionallySizedBox(
+                  widthFactor: 0.5,
+                  child: ElevatedButton.icon(
                     onPressed: () {
-                      // Pop twice to remove the loading screen as well
-                      final lobbyId = lobbyState.lobbyId;
-                      if (lobbyId != null) {
-                        MessageSender.leaveLobby(lobbyId, playerState.username!);
-                      }
-                      Navigator.pop(ctx);
-                      },
-                    child: const Text("YES"),
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text("Delete Lobby"),
+                          content: const Text("Are you sure you want to delete the lobby?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                final lobbyId = lobbyState.lobbyId;
+                                if (lobbyId != null) {
+                                  MessageSender.deleteLobby(lobbyId);
+                                }
+                                Navigator.pop(ctx);
+                              },
+                              child: const Text(
+                                "Delete",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.delete_forever),
+                    label: const Text("Delete Lobby"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
-        ],
-      ),
-    );
-            },
-            icon: const Icon(Icons.exit_to_app),
-            label: const Text("Leave Lobby"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
+                ),
+              ],
+            ],
           ),
         ),
       ],

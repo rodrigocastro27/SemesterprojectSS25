@@ -33,6 +33,12 @@ class MessageSender {
     });
   }
 
+  static void deleteLobby(String lobbyId) {
+    webSocketService.send("delete_lobby", {
+      "lobbyId": lobbyId,
+    });
+  }
+
   // GAME -------------------------------------------------------------------------------
   static void updatePosition(String name, String lobbyId, double lat, double lon) {
     webSocketService.send("update_position", {

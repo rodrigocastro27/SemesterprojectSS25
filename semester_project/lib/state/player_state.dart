@@ -7,4 +7,8 @@ class PlayerState extends ChangeNotifier {
     username = name;
     notifyListeners();
   }
+
+  String? getUsername() {
+    return username;
+  }
 }

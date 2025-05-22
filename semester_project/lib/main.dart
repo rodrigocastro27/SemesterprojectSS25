@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
     final router = createRouter(playerState, lobbyState);
 
     webSocketService = WebSocketService(dispatcher);
-    webSocketService.connect('wss://1634-193-170-132-8.ngrok-free.app/ws');
+    webSocketService.connect('wss://ee5c-193-170-132-8.ngrok-free.app/ws');
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

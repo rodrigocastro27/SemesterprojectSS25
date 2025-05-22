@@ -86,11 +86,13 @@ public static class DataLoader
             // Set host if applicable
             if (isHost)
             {
-                player.SetHost(true); // Assuming you have this method
+                player.SetHost(true);
             }
 
             // Set nickname, if supported
-            player.Role = role; // Optional, if you support nicknames
+            player.Role = role;
         }
+
+        LobbyManager.Instance.DeleteEmptyLobbies();
     }
 }

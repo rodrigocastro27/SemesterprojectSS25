@@ -76,15 +76,24 @@ public static class LobbyHandlers
             {
                 await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
                     action = "failed_lobby",
-                    lobbyId
+                    data = new
+                    {
+                        lobby = lobbyId,
+                        player = new
+                        {
+                            name = username
+                        }
+                    }
                 }), WebSocketMessageType.Text, true, CancellationToken.None);    
                 return;
             }
             
             player!.SetHost(false);  // Don't add the player as host
 
-            // Add player to lobby in the database
-            string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, nickname!, false);
+            // Add player to lobby in the database as host in case it is empty
+            bool isHost = lobby.GetRandomPlayer() == null ? true : false;
+            
+            string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, nickname!, isHost);
             if (lobbyAdded == null)
             {
                 await MessageSender.SendToPlayerAsync(player, "player_already_in_lobby", new
@@ -118,7 +127,7 @@ public static class LobbyHandlers
         
         dispatcher.Register("exit_lobby", async (data, socket) =>
         {
-            // TODO: test if this works after clicking the button
+            Console.WriteLine("\nStart procedure to leave lobby...\n");
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
             
@@ -127,8 +136,11 @@ public static class LobbyHandlers
 
             if (lobby == null||player == null)
             {
+                Console.WriteLine("\nERROR: Player or Lobby are null.\n");
+
                 //implement with message sender
-                await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
+                await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new
+                {
                     action = "failed",
                     lobbyId
                 }), WebSocketMessageType.Text, true, CancellationToken.None);    
@@ -144,13 +156,33 @@ public static class LobbyHandlers
             //implement with message sender 
             await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new
             {
-                action = "player_removed",
-                lobbyId
+                action = "leave_lobby",
+                data = new {
+                    lobby = lobbyId,
+                    player = new {
+                        name = player.Name,
+                        role = player.Role
+                    }
+                }
             }), WebSocketMessageType.Text, true, CancellationToken.None);
             
         });
-        
-        
+
+
+        dispatcher.Register("delete_lobby", async (data, socket) =>
+        {
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+
+            LobbyManager.Instance.DeleteLobby(lobby!);
+
+            await MessageSender.BroadcastLobbyAsync(lobby!, "lobby_deleted", new
+            {
+                action = "deleted"
+            });
+        });
+
+
         dispatcher.Register("start_game", async (data, socket) =>
         {
             var lobbyId = data.GetProperty("lobbyId").GetString();

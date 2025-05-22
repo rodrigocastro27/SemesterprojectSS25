@@ -4,6 +4,7 @@ import 'package:semester_project/models/player.dart';
 import 'package:semester_project/state/lobby_state.dart';
 import '../action_dispatcher.dart';
 import 'package:semester_project/services/navigation_service.dart';
+import 'package:semester_project/state/player_state.dart';
 
 class LobbyActions {
   static void register(ServerActionDispatcher dispatcher, BuildContext context) {
@@ -27,22 +28,32 @@ class LobbyActions {
       Provider.of<LobbyState>(context, listen: false).addPlayer(player);
     });
 
-    dispatcher.register('game_started', (data) {
-      // Handle game start, optionally update state to trigger redirect
+    dispatcher.register('start_game', (data) {
+      Provider.of<LobbyState>(context, listen: false).startGame();
     });
 
     dispatcher.register('failed_lobby', (data) {
-      _showError("Could not join lobby because it already exists.");
+      _showError("Could not join lobby because it doesn't exist.");
     });
 
     dispatcher.register('leave_lobby', (data) {
       final playerData = data['player'];
       final player = Player(name: playerData['name'], role: playerData['role']);
-      Provider.of<LobbyState>(context, listen: false).removePlayer(player);
+      Provider.of<LobbyState>(context, listen: false).leaveLobby(player);
     });
 
     dispatcher.register('player_already_in_lobby', (data) {
       _showError("Player is already in another lobby.");
+    });
+
+    dispatcher.register('new_host', (data) {
+      final username = data['player'];
+      Provider.of<LobbyState>(context, listen: false).setNewHost(username, context.read<PlayerState>());
+    });
+
+    dispatcher.register('lobby_deleted', (data) {
+      _showError("The lobby you were in was deleted!");
+      Provider.of<LobbyState>(context, listen: false).clearLobby();
     });
   }
 

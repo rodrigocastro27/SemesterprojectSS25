@@ -4,6 +4,8 @@ using WebApplication1.Models;
 using System.Data.SQLite;
 using WebApplication1.Data;
 using WebApplication1.Utils;
+using WebApplication1.Handlers;
+using System.Threading.Tasks;
 
 namespace WebApplication1.Services;
 
@@ -142,8 +144,10 @@ public class PlayerManager
         return playerInLobby;
     }
 
-    public void RemovePlayerFromLobby(Player player, Lobby lobby)
+    public async void RemovePlayerFromLobby(Player player, Lobby lobby)
     {
+        Console.WriteLine("\nProceding to remove player from lobby in database.\n");
+
         using var conn = SQLiteConnector.GetConnection();
 
         lobby.RemovePlayer(player);
@@ -156,13 +160,34 @@ public class PlayerManager
 
             if (newHost != null)
             {
+                Console.WriteLine("\n\t\tSUBCASE: There's someone left in the lobby\n");
+                // TODO: test if it updates properly (with someone else)
+
                 // Change manager
                 newHost.SetHost(true);
+                await MessageSender.BroadcastLobbyAsync(lobby, "new_host", new
+                {
+                    player = player.Name,
+                }); // Notify the handler to send a message to the UI
 
                 // Change in database
                 var cmd1 = new SQLiteCommand("UPDATE LobbyPlayers SET IsHost = 1 WHERE Player = @username;", conn);
                 cmd1.Parameters.AddWithValue("@username", newHost.Name);  // username is the player's identifier
                 cmd1.ExecuteNonQuery();
+            }
+            else
+            {
+                // Delete from database
+                var cmd3 = new SQLiteCommand("DELETE FROM Lobbies WHERE `name` = @lobbyId;", conn);
+                cmd3.Parameters.AddWithValue("@lobbyId", lobby.Id);
+                cmd3.ExecuteNonQuery();
+
+                // Delete from manager
+                Lobby res = LobbyManager.Instance.DeleteLobby(lobby);
+                if (res == null)
+                {
+                    Console.WriteLine("\nLobby did not exist before removing or error removing.\n");
+                }
             }
         }
 
@@ -170,5 +195,6 @@ public class PlayerManager
         var cmd2 = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Lobby = @lobbyId AND Player = @username;", conn);
         cmd2.Parameters.AddWithValue("@lobbyId", lobby.Id);
         cmd2.Parameters.AddWithValue("@username", player.Name);
+        cmd2.ExecuteNonQuery();
     }
 }

@@ -18,6 +18,7 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState) {
     redirect: (context, state) {
       final hasUsername = playerState.username != null;
       final inLobby = lobbyState.lobbyId != null;
+      final playing = lobbyState.playing;
 
       // final isAuth = state.fullPath == '/auth';
       final isHome = state.fullPath == '/home';
@@ -26,6 +27,7 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState) {
       if (!hasUsername) return '/auth';
       if (hasUsername && !inLobby && !isHome) return '/home';
       if (hasUsername && inLobby) return '/lobby';
+      if (hasUsername && inLobby && playing) return '/game';
 
       return null;
     },
@@ -43,7 +45,7 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState) {
         builder: (context, state) => const LobbyPage(),
       ),
       GoRoute(
-        path: '/map',
+        path: '/game',
         builder: (context, state) => const MapPage(),
       ),
     ],
