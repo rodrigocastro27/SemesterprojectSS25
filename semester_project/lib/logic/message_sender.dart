@@ -1,32 +1,45 @@
-import 'dart:math';
-
 import 'package:semester_project/main.dart';
 
 class MessageSender {
-  static void createLobby(String lobbyId, String name, int id) {
+
+  // PLAYER ---------------------------------------------------------------
+  static void loginPlayer(String deviceId, String username) {
+    webSocketService.send("login_player", {
+      "deviceId": deviceId,
+      "username": username,
+      });
+  }
+
+  // LOBBIES --------------------------------------------------------------
+  static void createLobby(String lobbyId, String username) {
     webSocketService.send("create_lobby", {
       "lobbyId": lobbyId,
-      "name": name,
-      "id": id,
+      "username": username,
     });
   }
 
-  static void joinLobby(String lobbyId, String name, int id) {
+  static void joinLobby(String lobbyId, String username, String nickname) {
     webSocketService.send("join_lobby", {
       "lobbyId": lobbyId,
-      "name": name,
-      "id": id,
+      "username": username,
+      "nickname": nickname,
     });
   }
 
-  static void leaveLobby(String lobbyId, String name, int id) {
-    webSocketService.send("leave_lobby", {
+  static void leaveLobby(String lobbyId, String username) {
+    webSocketService.send("exit_lobby", {
       "lobbyId": lobbyId,
-      "name": name,
-      "id": id,
+      "username": username,
     });
   }
 
+  static void deleteLobby(String lobbyId) {
+    webSocketService.send("delete_lobby", {
+      "lobbyId": lobbyId,
+    });
+  }
+
+  // GAME -------------------------------------------------------------------------------
   static void updatePosition(String name, String lobbyId, double lat, double lon) {
     webSocketService.send("update_position", {
       "name": name,
