@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
 using WebApplication1.Services;
+using WebApplication1.Services.Messaging;
 using WebApplication1.Utils;
 
 namespace WebApplication1.Handlers;
@@ -115,13 +116,7 @@ public static class LobbyHandlers
                     role = player.Role
                 }
             });
-            await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new
-            {
-                player = new {
-                    name = player.Name,
-                    role = player.Role
-                }
-            });
+            await LobbyMessageSender.BroadcastPlayerList(lobby);
         });
 
         

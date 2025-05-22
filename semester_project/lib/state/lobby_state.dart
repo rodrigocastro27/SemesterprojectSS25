@@ -51,4 +51,9 @@ class LobbyState extends ChangeNotifier {
     playing = true;
     notifyListeners();
   }
+
+  void updatePlayerList(List<Player> newList){
+      players= newList;
+      notifyListeners();
+  }
 }

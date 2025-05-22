@@ -55,6 +55,19 @@ class LobbyActions {
       _showError("The lobby you were in was deleted!");
       Provider.of<LobbyState>(context, listen: false).clearLobby();
     });
+
+    dispatcher.register("player_list", (data){
+        final playersData = data['players'] as List<dynamic>;
+        final newList = playersData.map((playerData) {
+                return Player(
+            name: playerData['name'],
+            role: playerData['role'],
+          );
+        }).toList();
+
+
+        Provider.of<LobbyState>(context, listen: false).updatePlayerList(newList);
+    });
   }
 
   static void _showError(String message) {
