@@ -1,8 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:semester_project/logic/message_sender.dart';
-import 'package:semester_project/models/player.dart';
+// import 'package:semester_project/models/player.dart';
 
 class JoinLobbyPage extends StatefulWidget {
   final String username;
@@ -22,7 +20,7 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
     final nickname = _nicknameController.text.trim();
     if (lobbyName.isEmpty || nickname.isEmpty) return;
 
-    final player = Player(name: widget.username, role: _selectedRole);
+    // final player = Player(name: widget.username, role: _selectedRole);
 
     MessageSender.joinLobby(lobbyName, widget.username, nickname);
 
