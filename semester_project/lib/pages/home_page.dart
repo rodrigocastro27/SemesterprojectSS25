@@ -3,9 +3,7 @@ import 'lobby pages/create_lobby.dart';
 import 'lobby pages/join_lobby.dart';
 
 class HomePage extends StatefulWidget{
-  final String username;
-
-  const HomePage({super.key, required this.username});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => LandingPage();
@@ -17,7 +15,7 @@ class LandingPage extends State<HomePage>  {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Multiplayer Lobby - ${widget.username}'),
+        title: const Text('Multiplayer Lobby'),
         centerTitle: true,
       ),
       body: Center(
@@ -28,7 +26,7 @@ class LandingPage extends State<HomePage>  {
             children: [
               ElevatedButton.icon(
                 onPressed: () => {
-                  Navigator.push(context, MaterialPageRoute(builder: (_)=> JoinLobbyPage(username: widget.username)))
+                  Navigator.push(context, MaterialPageRoute(builder: (_)=>const JoinLobbyPage()))
                 },
                 icon: const Icon(Icons.login),
                 label: const Text('Join Lobby'),
@@ -41,7 +39,7 @@ class LandingPage extends State<HomePage>  {
               ElevatedButton.icon(
                 onPressed: () => {
                   
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => CreateLobbyPage(username: widget.username)))
+                   Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateLobbyPage()))
                 },
                 icon: const Icon(Icons.add_box),
                 label: const Text('Create Lobby'),

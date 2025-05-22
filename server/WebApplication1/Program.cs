@@ -2,20 +2,14 @@ using System.Net.WebSockets;
 using System.Text;
 using WebApplication1.Handlers;
 using WebApplication1.Utils;
-using WebApplication1.Data;
 
-var builder = WebApplication.CreateBuilder(args);
-
-var app = builder.Build();
+var app = WebApplication.Create();
 app.UseWebSockets();
-SQLiteConnector.Initialize(builder.Environment.ContentRootPath);
 
 var dispatcher = new WebSocketActionDispatcher();
 
 LobbyHandlers.Register(dispatcher);
 PlayerHandlers.Register(dispatcher);
-
-DataLoader.LoadAll();
 
 
 app.Map("/ws", async context =>

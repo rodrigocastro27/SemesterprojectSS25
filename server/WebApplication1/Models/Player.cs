@@ -2,13 +2,13 @@
 
 namespace WebApplication1.Models;
 
-public class Player(string name, string deviceId, WebSocket socket)
+public class Player(string name, int id, WebSocket socket)
 {
     public string Name { get; set; } = name;
-    public string Id { get; set; } = deviceId; //device id
+    public int Id { get; set; } = id; //device id
     public WebSocket Socket { get; set; } = socket;
 
-    public bool _isHost;
+    private bool _isHost;
     public GeoPosition Position { get; private set; }
     public string Role = "hider";
 

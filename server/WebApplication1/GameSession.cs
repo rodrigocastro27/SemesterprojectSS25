@@ -4,13 +4,10 @@ namespace WebApplication1;
 
 public class GameSession
 {
-    private Lobby lobby;
-    
-    
+
     async void Start()
     {
         
-        Update();
     }
 
     async void Update()
@@ -23,10 +20,6 @@ public class GameSession
             
         }
     }
-
-    public void SetLobby(Lobby _lobby)
-    {
-        lobby = _lobby;
-    }
+    
     
 }

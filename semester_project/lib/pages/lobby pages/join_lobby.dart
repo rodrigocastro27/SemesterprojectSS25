@@ -5,8 +5,7 @@ import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/models/player.dart';
 
 class JoinLobbyPage extends StatefulWidget {
-  final String username;
-  const JoinLobbyPage({super.key, required this.username});
+  const JoinLobbyPage({super.key});
 
   @override
   State<JoinLobbyPage> createState() => _JoinLobbyPageState();
@@ -14,17 +13,17 @@ class JoinLobbyPage extends StatefulWidget {
 
 class _JoinLobbyPageState extends State<JoinLobbyPage> {
   final TextEditingController _lobbyNameController = TextEditingController();
-  final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   String _selectedRole = 'Hider';
 
   void _joinLobby() async {
     final lobbyName = _lobbyNameController.text.trim();
-    final nickname = _nicknameController.text.trim();
-    if (lobbyName.isEmpty || nickname.isEmpty) return;
+    final username = _usernameController.text.trim();
+    if (lobbyName.isEmpty || username.isEmpty) return;
 
-    final player = Player(name: widget.username, role: _selectedRole);
+    final player = Player(name: username, role: _selectedRole);
 
-    MessageSender.joinLobby(lobbyName, widget.username, nickname);
+    MessageSender.joinLobby(lobbyName, username, Random().nextInt(100000));
 
     showDialog(
       context: context,
@@ -47,8 +46,8 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _nicknameController,
-              decoration: const InputDecoration(labelText: "Nickname"),
+              controller: _usernameController,
+              decoration: const InputDecoration(labelText: "Username"),
             ),
             const SizedBox(height: 20),
             DropdownButton<String>(
