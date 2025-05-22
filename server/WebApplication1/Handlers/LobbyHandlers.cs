@@ -12,26 +12,28 @@ public static class LobbyHandlers
     {   
         dispatcher.Register("create_lobby", async (data, socket) =>
         {
-            Console.WriteLine("\nPROCESSING CREATING LOBBY...\n");
-
             if (data.TryGetProperty("username", out var nameElem) &&
                 data.TryGetProperty("lobbyId", out var lobbyIdElem))
-            {
+            {               
                 var username = nameElem.GetString();
                 var lobbyId = lobbyIdElem.GetString();
 
-                Console.WriteLine("\nLobby: $lobbyId\n");
+                Console.WriteLine($"\n[create_lobby] Atempting to create lobby {lobbyId}.");
 
                 var player = PlayerManager.Instance.GetPlayer(username!);
                 var lobby = LobbyManager.Instance.CreateLobby(lobbyId!);
 
                 if (lobby == null)
                 {
-                    Console.WriteLine("\nFAILED TO JOIN LOBBY\n");
-                    await MessageSender.SendToPlayerAsync(player!, "failed_lobby", new { lobbyId = lobbyId });
+                    Console.WriteLine($"Failed to create lobby {lobbyId} because it doesn't exist. Notifying client...");
+                    await LobbyMessageSender.ErrorMessageAsync(lobbyId!, player!, 1);
+                    //await MessageSender.SendToPlayerAsync(player!, "failed_lobby", new { lobbyId = lobbyId });
                 }
                 else
                 {
+                    Console.WriteLine($"Successfully created lobby {lobbyId}.");
+
+                    Console.WriteLine($"Setting player {player!.Name} as host.");
                     // Modify the Managers
                     player!.SetHost(true);
 
@@ -39,28 +41,18 @@ public static class LobbyHandlers
                     string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, username!, true);
                     if (lobbyAdded == null)
                     {
-                        await MessageSender.SendToPlayerAsync(player, "player_already_in_lobby", new
-                        {
-                            username = player.Name,
-                            lobbyId = lobby.Id,
-                        });
+                        Console.WriteLine($"Notifying client that player cannot join the lobby.");
+                        await LobbyMessageSender.ErrorMessageAsync(lobby.Id, player, 2);
                         return;
                     }
 
-                    await MessageSender.SendToPlayerAsync(player, "lobby_created", new
-                    {
-                        lobbyId = lobbyId,
-                        player = new
-                        {
-                            name = player.Name,
-                            role = player.Role
-                        }
-                    });
+                    Console.WriteLine($"Notifying client that player {player.Name} successfully joined lobby {lobby.Id}.");
+                    await LobbyMessageSender.CreatedLobbyAsync(lobby, player);
                 }
             }
         });
 
-
+        
         dispatcher.Register("join_lobby", async (data, socket) =>
         {   
             // Read data in message
@@ -72,95 +64,67 @@ public static class LobbyHandlers
             var player = PlayerManager.Instance.GetPlayer(username!);
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
 
+            Console.WriteLine($"\n[join_lobby] Player {player} attempting to join lobby {lobbyId}.");
+
             // Handle if lobby does not exist       
             if (lobby == null)
             {
-                await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
-                    action = "failed_lobby",
-                    data = new
-                    {
-                        lobby = lobbyId,
-                        player = new
-                        {
-                            name = username
-                        }
-                    }
-                }), WebSocketMessageType.Text, true, CancellationToken.None);    
+                Console.WriteLine($"Lobby {lobby!.Id} does not exist. Notifying the client.");
+                await LobbyMessageSender.ErrorMessageAsync(lobbyId!, player!, 1);
                 return;
             }
             
-            player!.SetHost(false);  // Don't add the player as host
-
             // Add player to lobby in the database as host in case it is empty
             bool isHost = lobby.GetRandomPlayer() == null ? true : false;
+            player!.SetHost(isHost);
+            if (isHost) Console.WriteLine($"Lobby {lobby.Id} is empty so adding player {player.Name} as host.");
+            else Console.WriteLine($"Lobby {lobby.Id} is not empty so adding player {player.Id} NOT as host.");
             
             string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, nickname!, isHost);
             if (lobbyAdded == null)
             {
-                await MessageSender.SendToPlayerAsync(player, "player_already_in_lobby", new
-                {
-                    username = player.Name,
-                    lobbyId = lobby.Id,
-                });
+                Console.WriteLine($"Notifying client that player cannot join the lobby.");
+                await LobbyMessageSender.ErrorMessageAsync(lobbyId!, player, 2);
                 return;
             }
-            
-            //confirmation message 
-            await MessageSender.SendToPlayerAsync(player, "lobby_joined", new
-            {
-                lobbyId = lobbyId,
-                host = false,
-                player = new
-                {
-                    name = player.Name,
-                    role = player.Role
-                }
-            });
+
+            //confirmation message
+            Console.WriteLine($"Notifying player {player.Name} that he successfully joined lobby {lobby.Id}.");
+            await LobbyMessageSender.JoinedAsync(lobby, player, isHost);
+            Console.WriteLine($"Notifying all players in lobby {lobby.Id} that player {player.Id} joined the lobby.");
             await LobbyMessageSender.BroadcastPlayerList(lobby);
         });
 
         
         dispatcher.Register("exit_lobby", async (data, socket) =>
         {
-            Console.WriteLine("\nStart procedure to leave lobby...\n");
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
-            
+
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             var player = PlayerManager.Instance.GetPlayer(username!);
 
-            if (lobby == null||player == null)
+            Console.WriteLine($"\n[exit_lobby] Start procedure to leave lobby {lobbyId}.");
+
+            if (lobby == null)
             {
-                Console.WriteLine("\nERROR: Player or Lobby are null.\n");
+                Console.WriteLine($"Lobby {lobbyId} does not exist. Notifying player.");
 
                 //implement with message sender
-                await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new
-                {
-                    action = "failed",
-                    lobbyId
-                }), WebSocketMessageType.Text, true, CancellationToken.None);    
+                await LobbyMessageSender.ErrorMessageAsync(lobbyId!, player!, 1);
                 return;
             }
-            
-            // Update manager
-            lobby.RemovePlayer(player);
 
-            // Eliminate from the lobby
-            PlayerManager.Instance.RemovePlayerFromLobby(player, lobby);
-            
-            //implement with message sender 
-            await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new
-            {
-                action = "leave_lobby",
-                data = new {
-                    lobby = lobbyId,
-                    player = new {
-                        name = player.Name,
-                        role = player.Role
-                    }
-                }
-            }), WebSocketMessageType.Text, true, CancellationToken.None);
-            
+            // Update manager
+            lobby.RemovePlayer(player!);
+
+            // Eliminate from the lobby in the database
+            PlayerManager.Instance.RemovePlayerFromLobby(player!, lobby);
+
+            Console.WriteLine($"Notifyin client that the player was succesfully removed from the lobby.");
+            await LobbyMessageSender.LeaveAsync(lobby, player!);
+            Console.WriteLine($"Notifying all the players in the lobby that player {player!.Name} left the lobby.");
+            await LobbyMessageSender.BroadcastPlayerList(lobby);            
         });
 
 
@@ -169,25 +133,25 @@ public static class LobbyHandlers
             var lobbyId = data.GetProperty("lobbyId").GetString();
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
 
-            LobbyManager.Instance.DeleteLobby(lobby!);
+            Console.WriteLine($"[delete_lobby] Proceeding to delete lobby {lobbyId}.");
 
-            await MessageSender.BroadcastLobbyAsync(lobby!, "lobby_deleted", new
-            {
-                action = "deleted"
-            });
+            Console.WriteLine("Notifying players still in the lobby that it has been deleted.");
+            await LobbyMessageSender.DeletedLobby(lobby!);
+
+            LobbyManager.Instance.DeleteLobby(lobby!);
         });
 
 
         dispatcher.Register("start_game", async (data, socket) =>
         {
             var lobbyId = data.GetProperty("lobbyId").GetString();
+
+            Console.WriteLine($"\n[start_game] Proceeding to start game for lobby {lobbyId}.");
             
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
-            
-            await MessageSender.BroadcastLobbyAsync(lobby!, "game_started", new
-            {
-                action = "started",
-            });
+
+            Console.WriteLine("Notifying all players in the lobby that the game is starting.");
+            await GameMessageSender.SendGameStarted(lobby!, "started");
         });
     }
 }

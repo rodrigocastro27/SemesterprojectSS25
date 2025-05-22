@@ -11,7 +11,7 @@ public class GameHandlers
     {
         dispatcher.Register("command1", async (data, socket) =>
         {
-            GameMessageSender.SendGameMessage("game id", "Game Message");   //placeholder
+            // GameMessageSender.SendGameStarted(, "Game Message");   //placeholder
         });
         
         

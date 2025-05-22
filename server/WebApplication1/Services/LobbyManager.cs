@@ -29,6 +29,7 @@ public class LobbyManager
 
     public Lobby CreateLobby(string lobbyId)
     {
+        Console.WriteLine($"Creating lobby {lobbyId} in database.");
         using var conn = SQLiteConnector.GetConnection();
 
         // See if lobby exists
@@ -49,6 +50,8 @@ public class LobbyManager
     public Lobby DeleteLobby(Lobby lobby)
     {
         if (GetLobby(lobby.Id) == null) return null!;
+
+        Console.WriteLine($"Proceeding to delete lobby {lobby.Id} from database.");
 
         // Delete from database
         using var conn = SQLiteConnector.GetConnection();

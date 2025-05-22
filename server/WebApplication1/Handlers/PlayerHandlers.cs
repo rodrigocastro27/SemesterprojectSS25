@@ -13,21 +13,29 @@ public static class PlayerHandlers
             var deviceId = data.GetProperty("deviceId").GetString();
             var username = data.GetProperty("username").GetString();
 
-            PlayerManager.Instance.PrintPlayers();
+            Console.WriteLine($"\n[login_player] Player {username} attempting to log in.");
 
             // // If player exists, create it and add it to database
             var player = PlayerManager.Instance.GetPlayerByName(username!);
-            if (player == null) {
+            if (player == null)
+            {
+
+                Console.WriteLine($"Player {username} is new. Proceeding to creat it.");
                 player = PlayerManager.Instance.CreatePlayer(deviceId!, username!, socket);
-            } else {
+                
+            }
+            else
+            {
+                Console.WriteLine($"Player is already registered. Proceeding to update its socket.");
                 PlayerManager.Instance.UpdatePlayerSocket(username!, socket);
             }
 
+            // Potentially also create a PlayerMessageSender
             await MessageSender.SendToPlayerAsync(player!, "player_registered", new
-                {
-                    id = deviceId,
-                    user = username
-                });
+            {
+                id = deviceId,
+                user = username
+            });
         });
 
         dispatcher.Register("update_position", async (data, socket) =>
