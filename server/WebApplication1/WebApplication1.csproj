@@ -15,7 +15,6 @@
 
     <ItemGroup>
       <Compile Remove="WeatherForecast.cs" />
-      <Compile Remove="GameSession.cs" />
       <Compile Remove="Handlers\IHandler.cs" />
     </ItemGroup>
 

@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
 using WebApplication1.Services;
+using WebApplication1.Services.Messaging;
 using WebApplication1.Utils;
 
 namespace WebApplication1.Handlers;
@@ -25,6 +26,8 @@ public static class LobbyHandlers
             
             if (lobby == null)
             {
+                
+                // need to find standard for error messages
                 await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
                     action = "failed_lobby",
                     lobbyId
@@ -46,22 +49,10 @@ public static class LobbyHandlers
             
             
             //confirmation message 
-            await MessageSender.SendToPlayerAsync(player, "lobby_joined", new
-            {
-                lobbyId = lobbyId,
-                host = false,
-                player = new {
-                    name = player.Name,
-                    role = player.Role
-                }
-            });
-            await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new
-            {
-                player = new {
-                    name = player.Name,
-                    role = player.Role
-                }
-            });
+            await LobbyMessageSender.JoinedAsync(lobby, player);
+            
+            //broadcast to other players in the lobby that a new player joined (yes this is an actual human comment, not chatgpt)
+            await LobbyMessageSender.BroadcastPlayerJoinedAsync(lobby, player);
         });
         
         
@@ -82,14 +73,7 @@ public static class LobbyHandlers
                 lobby.AddPlayer(player);
                 player.SetHost(true);
 
-                await MessageSender.SendToPlayerAsync(player, "lobby_created", new
-                {
-                    lobbyId = lobbyId,
-                    player = new {
-                        name = player.Name,
-                        role = player.Role
-                    }
-                });
+                await LobbyMessageSender.CreateAsync(lobby, player);
             }
         });
 
@@ -106,21 +90,13 @@ public static class LobbyHandlers
 
             if (lobby == null||player == null)
             {
-                //implement with message sender
-                await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
-                    action = "failed",
-                    lobbyId
-                }), WebSocketMessageType.Text, true, CancellationToken.None);    
+                await LobbyMessageSender.ErrorMessageAsync(lobby, player);        
                 return;
             }
             
             lobby.RemovePlayer(player);
             
-            //implement with message sender 
-            await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new {
-                action = "removed",
-                lobbyId
-            }), WebSocketMessageType.Text, true, CancellationToken.None);
+           await LobbyMessageSender.LeaveAsync(lobby, player);
             
         });
         
@@ -130,11 +106,10 @@ public static class LobbyHandlers
             var lobbyId = data.GetProperty("lobbyId").GetString();
             
             var lobby = LobbyManager.Instance.GetLobby(lobbyId);
+
+            await LobbyMessageSender.StartGame(lobby);
             
-            await MessageSender.BroadcastLobbyAsync(lobby, "game_started", new
-            {
-                action = "started",
-            });
+            
         });
     }
 }
