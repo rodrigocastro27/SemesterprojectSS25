@@ -135,6 +135,7 @@ public static class LobbyHandlers
         else Console.WriteLine($"Lobby {lobby.Id} is not empty so adding player {player.Name} NOT as host.");
 
         string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, nickname!, isHost);
+        player.SetNickname(nickname);
 
         Console.WriteLine($"Notifying player {player.Name} that he successfully joined lobby {lobby.Id}.");
         await LobbyMessageSender.JoinedAsync(lobby, player, isHost);

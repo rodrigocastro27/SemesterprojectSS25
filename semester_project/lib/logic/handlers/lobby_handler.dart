@@ -10,30 +10,31 @@ class LobbyActions {
     dispatcher.register('lobby_joined', (data) {
       final lobbyId = data['lobbyId'];
       final playerData = data['player'];
-      final player = Player(name: playerData['name'], role: playerData['role']);
+      final player = Player(name: playerData['name'], role: playerData['role'], nickname: playerData['nickname']);
       Provider.of<LobbyState>(context, listen: false).setLobby(lobbyId, [player], isHost: false);
     });
 
     dispatcher.register('lobby_created', (data) {
       final lobbyId = data['lobbyId'];
       final playerData = data['player'];
-      final player = Player(name: playerData['name'], role: playerData['role']);
+      final player = Player(name: playerData['name'], role: playerData['role'], nickname: playerData['nickname']);
       Provider.of<LobbyState>(context, listen: false).setLobby(lobbyId, [player], isHost: true);
     });
 
     dispatcher.register('new_player_joined', (data) {
       final playerData = data['player'];
-      final player = Player(name: playerData['name'], role: playerData['role']);
+      final player = Player(name: playerData['name'], role: playerData['role'], nickname: playerData['nickname']);
       Provider.of<LobbyState>(context, listen: false).addPlayer(player);
     });
 
-    dispatcher.register('start_game', (data) {
+    dispatcher.register('game_started', (data) {
       Provider.of<LobbyState>(context, listen: false).startGame();
     });
 
     dispatcher.register('leave_lobby', (data) {
       final playerData = data['player'];
-      final player = Player(name: playerData['name'], role: playerData['role']);
+      final player = Player(name: playerData['name'], role: playerData['role'], nickname: playerData['nickname']);
+      _showError("The lobby was deleted.");
       Provider.of<LobbyState>(context, listen: false).leaveLobby(player);
     });
 
@@ -53,9 +54,9 @@ class LobbyActions {
                 return Player(
             name: playerData['name'],
             role: playerData['role'],
+            nickname: playerData['nickname'],
           );
         }).toList();
-
 
         Provider.of<LobbyState>(context, listen: false).updatePlayerList(newList);
     });

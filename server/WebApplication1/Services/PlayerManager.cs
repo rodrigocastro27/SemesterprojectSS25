@@ -31,7 +31,7 @@ public class PlayerManager
         DatabaseHandler.Instance.InsertIntoPlayers(deviceId, username);
 
         // Insert into the Manager player list
-        var player = new Player(username, deviceId, socket);
+        var player = new Player(username, "none", deviceId, socket);
         AddPlayer(username, player);
         return player;
     }

@@ -26,8 +26,8 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState) {
 
       if (!hasUsername) return '/auth';
       if (hasUsername && !inLobby && !isHome) return '/home';
-      if (hasUsername && inLobby) return '/lobby';
       if (hasUsername && inLobby && playing) return '/game';
+      if (hasUsername && inLobby) return '/lobby';
 
       return null;
     },

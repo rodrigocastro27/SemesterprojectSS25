@@ -16,6 +16,7 @@ public static class LobbyMessageSender
             {
                 name = player.Name,
                 role = player.Role,
+                nickname = player.Nickname,
             }
         });
     }
@@ -28,7 +29,8 @@ public static class LobbyMessageSender
             player = new
             {
                 name = player.Name,
-                role = player.Role
+                role = player.Role,
+                nickname = player.Nickname,
             }
         });
     }
@@ -50,7 +52,8 @@ public static class LobbyMessageSender
         {
             name = p.Name, //maybe only name is needed  
             role = p.Role,
-            id = p.Id
+            id = p.Id,
+            nickname = p.Nickname,
         }).ToList();
 
         await MessageSender.BroadcastLobbyAsync(lobby, "player_list", new
@@ -69,7 +72,8 @@ public static class LobbyMessageSender
             player = new
             {
                 name = player.Name,
-                role = player.Role
+                role = player.Role,
+                nickname = player.Nickname,
             }
         });
     }
@@ -84,7 +88,8 @@ public static class LobbyMessageSender
             player = new
             {
                 name = player!.Name,
-                role = player.Role
+                role = player.Role,
+                nickname = player.Nickname,
             }
         });
     }

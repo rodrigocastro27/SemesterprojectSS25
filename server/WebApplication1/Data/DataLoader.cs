@@ -41,7 +41,7 @@ public static class DataLoader
             string username = reader.GetString(1);
             string? email = reader.IsDBNull(2) ? null : reader.GetString(2);
 
-            var player = new Player(username, id, null!);
+            var player = new Player(username, "none", id, null!);
 
             PlayerManager.Instance.AddPlayer(username, player);
         }

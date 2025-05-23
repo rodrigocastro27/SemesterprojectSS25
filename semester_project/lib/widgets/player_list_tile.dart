@@ -9,7 +9,7 @@ class PlayerListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(player.name),
+      title: Text(player.nickname),
       subtitle: Text(player.role),
       leading: Icon(player.role == 'Seeker' ? Icons.search : Icons.hide_source),
     );

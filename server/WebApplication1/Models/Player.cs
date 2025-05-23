@@ -2,9 +2,11 @@
 
 namespace WebApplication1.Models;
 
-public class Player(string name, string deviceId, WebSocket socket)
+public class Player(string name, string nickname, string deviceId, WebSocket socket)
 {
     public string Name { get; set; } = name;
+
+    public string Nickname { get; set; } = nickname;
     public string Id { get; set; } = deviceId; //device id
     public WebSocket Socket { get; set; } = socket;
 
@@ -13,8 +15,10 @@ public class Player(string name, string deviceId, WebSocket socket)
     public string Role = "hider";
 
     public void UpdateLocation(GeoPosition pos) => Position = pos;
-    
-    public void SetHost(bool state)=> _isHost = state;
+
+    public void SetHost(bool state) => _isHost = state;
+
+    public void SetNickname(string nickname) => Nickname = nickname;
 }   
 
 public readonly struct GeoPosition(double lat, double lon)
