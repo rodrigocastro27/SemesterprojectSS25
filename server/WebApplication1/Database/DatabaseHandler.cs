@@ -62,12 +62,37 @@ public class DatabaseHandler
     }
 
 
+    public bool SelectIsHostFromLobbyPlayers(string username)
+    {
+        bool isHost = false;
+
+        using var conn = GetDBConnection();
+        var cmd = new SQLiteCommand("SELECT IsHost FROM LobbyPlayers WHERE Player = @username;", conn);
+        cmd.Parameters.AddWithValue("@username", username);
+        using var reader = cmd.ExecuteReader();
+
+        if (reader.Read())
+            isHost = reader.GetBoolean(0);
+        return isHost!;
+    }
+
+
     // UPDATE
     public void UpdetLobbyPlayersNickname(string username, string nickname)
     {
         using var conn = GetDBConnection();
         var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Nickname = @nickname WHERE Player = @username;", conn);
         cmd.Parameters.AddWithValue("@nickname", nickname);
+        cmd.Parameters.AddWithValue("@username", username);
+        cmd.ExecuteNonQuery();
+    }
+
+
+    public void UpdateLobbyPlayersLobby(string username, string lobbyId)
+    {
+        using var conn = GetDBConnection();
+        var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Lobby = @lobbyId WHERE Player = @username;", conn);
+        cmd.Parameters.AddWithValue("@lobbyId", lobbyId);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
     }
@@ -89,6 +114,8 @@ public class DatabaseHandler
         var cmd = new SQLiteCommand("DELETE FROM Lobbies WHERE `name` = @lobbyId;", conn);
         cmd.Parameters.AddWithValue("@lobbyId", lobbyId);
         cmd.ExecuteNonQuery();
+
+        DeleteFromLobbyPlayersLobby(lobbyId);
     }
 
 
@@ -98,15 +125,22 @@ public class DatabaseHandler
         var cmd = new SQLiteCommand("DELETE FROM Players WHERE username = @username;", conn);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
-    }    
+    }
 
 
-    public void DeleteFromLobbyPlayers(string lobbyId, string username)
+    public void DeleteFromLobbyPlayersPlayer(string lobbyId, string username)
     {
         using var conn = GetDBConnection();
         var cmd = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Lobby = @lobbyId AND Player = @username;", conn);
         cmd.Parameters.AddWithValue("@lobbyId", lobbyId);
         cmd.Parameters.AddWithValue("@username", username);
+        cmd.ExecuteNonQuery();
+    }
+
+    public void DeleteFromLobbyPlayersLobby(string lobbyId) {
+        using var conn = GetDBConnection();
+        var cmd = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Lobby = @lobbyId;", conn);
+        cmd.Parameters.AddWithValue("@lobbyId", lobbyId);
         cmd.ExecuteNonQuery();
     }
 }

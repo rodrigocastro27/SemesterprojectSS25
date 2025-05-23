@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using WebApplication1.Data;
 using WebApplication1.Database;
 using WebApplication1.Services.Messaging;
+using System.Threading.Tasks;
 
 namespace WebApplication1.Services;
 
@@ -101,8 +102,13 @@ public class PlayerManager
             }
             else    // Or another one
             {
-                Console.WriteLine("Player is trying to join a DIFFERENT lobby it is currently in.");
-                playerInLobby = null!;
+                Console.WriteLine("Player is trying to join a DIFFERENT lobby it is currently in. Changing player from lobbies.");
+                // Update the lobby in the database
+                DatabaseHandler.Instance.UpdateLobbyPlayersLobby(player.Name, lobby.Id);
+                // Update the manager's lists
+                Lobby? oldLobby = LobbyManager.Instance.GetLobby(playerInLobby);
+                oldLobby!.RemovePlayer(player);
+                lobby.AddPlayer(player);
             }
         }
         else  // Add the player to the given lobby
@@ -168,6 +174,6 @@ public class PlayerManager
         Console.WriteLine($"The player {player.Name} is not the host of lobby {lobby.Id}. Proceeding to delete the player from the lobby in database.");
 
         // Delete player from lobby in database
-        DatabaseHandler.Instance.DeleteFromLobbyPlayers(lobby.Id, player.Name);
+        DatabaseHandler.Instance.DeleteFromLobbyPlayersPlayer(lobby.Id, player.Name);
     }
 }

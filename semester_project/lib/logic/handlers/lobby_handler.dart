@@ -4,7 +4,6 @@ import 'package:semester_project/models/player.dart';
 import 'package:semester_project/state/lobby_state.dart';
 import '../action_dispatcher.dart';
 import 'package:semester_project/services/navigation_service.dart';
-import 'package:semester_project/state/player_state.dart';
 
 class LobbyActions {
   static void register(ServerActionDispatcher dispatcher, BuildContext context) {
@@ -32,18 +31,10 @@ class LobbyActions {
       Provider.of<LobbyState>(context, listen: false).startGame();
     });
 
-    dispatcher.register('failed_lobby', (data) {
-      _showError("Could not join lobby because it doesn't exist.");
-    });
-
     dispatcher.register('leave_lobby', (data) {
       final playerData = data['player'];
       final player = Player(name: playerData['name'], role: playerData['role']);
       Provider.of<LobbyState>(context, listen: false).leaveLobby(player);
-    });
-
-    dispatcher.register('player_already_in_lobby', (data) {
-      _showError("Player is already in another lobby.");
     });
 
     dispatcher.register('new_host', (data) {
@@ -67,6 +58,28 @@ class LobbyActions {
 
 
         Provider.of<LobbyState>(context, listen: false).updatePlayerList(newList);
+    });
+
+
+    // ERRORS
+    // 1
+    dispatcher.register('error_creating_lobby', (data) {
+      _showError("There was an error creating the lobby.");
+    });
+
+    // 2
+    dispatcher.register('player_already_in_lobby', (data) {
+      _showError("Player is already in another lobby.");
+    });
+
+    // 3
+    dispatcher.register('lobby_does_not_exist', (data) {
+      _showError("Could not join lobby because it doesn't exist.");
+    });
+
+    // general
+    dispatcher.register('error', (data) {
+      _showError("There was an unexpected error.");
     });
   }
 

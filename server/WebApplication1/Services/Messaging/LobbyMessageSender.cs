@@ -5,6 +5,7 @@ namespace WebApplication1.Services.Messaging;
 
 public static class LobbyMessageSender
 {
+    // [lobby_joined]
     public static async Task JoinedAsync(Lobby lobby, Player player, bool asHost)
     {
         await MessageSender.SendToPlayerAsync(player, "lobby_joined", new
@@ -19,6 +20,7 @@ public static class LobbyMessageSender
         });
     }
 
+    // [new_player_joined]
     public static async Task BroadcastPlayerJoinedAsync(Lobby lobby, Player player)
     {
         await MessageSender.BroadcastLobbyAsync(lobby, "new_player_joined", new
@@ -31,6 +33,7 @@ public static class LobbyMessageSender
         });
     }
 
+    // [new_host]
     public static async Task SetNewHost(Player player)
     {
         await MessageSender.SendToPlayerAsync(player, "new_host", new
@@ -39,6 +42,8 @@ public static class LobbyMessageSender
         }); // Notify the handler to send a message to the UI
     }
 
+
+    // [player_list]
     public static async Task BroadcastPlayerList(Lobby lobby)
     {
         var playersData = lobby.Players.Select(p => new
@@ -54,6 +59,8 @@ public static class LobbyMessageSender
         });
     }
 
+
+    // [lobby_created]
     public static async Task CreatedLobbyAsync(Lobby lobby, Player player)
     {
         await MessageSender.SendToPlayerAsync(player, "lobby_created", new
@@ -67,18 +74,23 @@ public static class LobbyMessageSender
         });
     }
     
+    
+    // [leave_lobby]
     public static async Task LeaveAsync(Lobby lobby, Player player)
     {
         await MessageSender.SendToPlayerAsync(player, "leave_lobby", new
         {
             lobby = lobby.Id,
-            player = new {
+            player = new
+            {
                 name = player!.Name,
                 role = player.Role
             }
         });
     }
 
+
+    // [lobby_deleted]
     public static async Task DeletedLobby(Lobby lobby)
     {
         await MessageSender.BroadcastLobbyAsync(lobby, "lobby_deleted", new
@@ -87,19 +99,28 @@ public static class LobbyMessageSender
         });
     }
 
+    
+    // Errors
     public static async Task ErrorMessageAsync(string lobbyId, Player player, int errorCode)
     {
         switch (errorCode)
         {
             case 1:
-                await MessageSender.SendToPlayerAsync(player, "failed", new
+                await MessageSender.SendToPlayerAsync(player, "error_creating_lobby", new
                 {
-                    action = "failed",
+                    action = "error_creating_lobby",
                     lobbyId = lobbyId,
                 });
                 break;
             case 2:
                 await MessageSender.SendToPlayerAsync(player, "player_already_in_lobby", new
+                {
+                    username = player.Name,
+                    lobbyId = lobbyId,
+                });
+                break;
+            case 3:
+                await MessageSender.SendToPlayerAsync(player, "lobby_does_not_exist", new
                 {
                     username = player.Name,
                     lobbyId = lobbyId,
@@ -115,9 +136,11 @@ public static class LobbyMessageSender
         }
     }
 
+
+    // [game_started]
     public static async Task StartGame(Lobby lobby)
     {
-        await MessageSender.BroadcastLobbyAsync(lobby, "game_started", new
+        await MessageSender.BroadcastLobbyAsync(lobby, "start_game", new
         {
             action = "started",
         });

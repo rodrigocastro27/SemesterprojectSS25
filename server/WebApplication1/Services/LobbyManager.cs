@@ -43,6 +43,17 @@ public class LobbyManager
         return lobby;
     }
 
+    public bool IsLobbyEmpty(string lobbyId)
+    {
+        Lobby? lobby = GetLobby(lobbyId);
+        return lobby!.Players.Count == 0;
+    }
+
+    public bool IsHost(string username)
+    {
+        return DatabaseHandler.Instance.SelectIsHostFromLobbyPlayers(username);
+    }
+
     public Lobby DeleteLobby(Lobby lobby)
     {
         if (GetLobby(lobby.Id) == null) return null!;
@@ -63,7 +74,7 @@ public class LobbyManager
         foreach (var elem in _lobbies)
         {
             var lobby = elem.Value;
-            if (lobby.Players.Count == 0)
+            if (IsLobbyEmpty(lobby.Id))
             {
                 Console.WriteLine($"Lobby {elem.Key} has no players.");
                 DeleteLobby(lobby);
