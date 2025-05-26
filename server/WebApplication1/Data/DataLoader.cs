@@ -89,7 +89,7 @@ public static class DataLoader
                 player.SetHost(true);
             }
 
-            // Set nickname, if supported
+            player.SetNickname(nickname);
             player.SetRole(role);
         }
 

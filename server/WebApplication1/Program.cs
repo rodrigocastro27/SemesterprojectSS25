@@ -3,6 +3,8 @@ using System.Text;
 using WebApplication1.Handlers;
 using WebApplication1.Utils;
 using WebApplication1.Data;
+using WebApplication1.Models;
+using WebApplication1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,7 @@ var dispatcher = new WebSocketActionDispatcher();
 
 LobbyHandlers.Register(dispatcher);
 PlayerHandlers.Register(dispatcher);
+GameHandlers.Register(dispatcher);
 
 DataLoader.LoadAll();
 

@@ -140,14 +140,4 @@ public static class LobbyMessageSender
                 break;
         }
     }
-
-
-    // [game_started]
-    public static async Task StartGame(Lobby lobby)
-    {
-        await MessageSender.BroadcastLobbyAsync(lobby, "start_game", new
-        {
-            action = "started",
-        });
-    }
 }

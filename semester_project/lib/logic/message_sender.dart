@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:semester_project/main.dart';
 
 class MessageSender {
@@ -58,4 +59,14 @@ class MessageSender {
       "lobbyId": lobbyId,
     });
   }
+
+  static void pingRequest(String name, String lobbyId) {
+    webSocketService.send("ping_request", {
+      "name": name,
+      "lobbyId": lobbyId,
+    });
+  } 
+  
+
+  
 }

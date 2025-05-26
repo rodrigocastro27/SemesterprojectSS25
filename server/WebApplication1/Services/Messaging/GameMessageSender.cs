@@ -36,12 +36,22 @@ public static class GameMessageSender
         });
     }
     
-    public static async Task SendGameEnded(Lobby lobby, string message)
+    public static async Task SendGameEnded(Lobby lobby)
     {
         await MessageSender.BroadcastLobbyAsync(lobby, "game_ended", new
         {
             //who won, other relevant info
         });
     }
+
+    #region Task Messages
+
+    public static async Task Task1(Lobby lobby)
+    {
+            //communicate random task has begun
+    }
+    
+
+    #endregion
     
 }

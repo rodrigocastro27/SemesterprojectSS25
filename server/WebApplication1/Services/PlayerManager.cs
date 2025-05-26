@@ -98,7 +98,7 @@ public class PlayerManager
             {
                 Console.WriteLine("Player is trying to join the SAME lobby it is currently in. Updating player's nickname.");
                 // Update the nickname if it has been changed
-                DatabaseHandler.Instance.UpdetLobbyPlayersNickname(player.Name, nickname, role);
+                DatabaseHandler.Instance.UpdateLobbyPlayersNickname(player.Name, nickname, role);
             }
             else    // Or another one
             {

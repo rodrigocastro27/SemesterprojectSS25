@@ -10,9 +10,12 @@ public class GameSession(Lobby lobby)
 
     private readonly ConcurrentDictionary<Player, PlayerGameSession> _playerGameSessions = new ConcurrentDictionary<Player, PlayerGameSession>();
     
+    private readonly List<Func<Task>> _taskList = [];
     
+    private readonly Random _random = new Random();  
+
     //game session starting logic
-    public async void Start()
+    public async Task Start()
     {
         lobby.SetGameSession(this);
         
@@ -23,12 +26,16 @@ public class GameSession(Lobby lobby)
         }
         
         
-        Update();
+       // await Update();
     }
 
-    private async void Update()
+    private async Task Update()
     {
-        //some sort of async loop maybe
+        while (true)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(15)); // Every 15s (or whatever interval)
+            SpawnRandomTask();
+        }
     }
 
 
@@ -64,4 +71,17 @@ public class GameSession(Lobby lobby)
     
     public PlayerGameSession GetPlayerGameSession(Player requestingPlayer) => _playerGameSessions[requestingPlayer];
     public Lobby GetLobby() => _lobby;
+
+
+    private void SpawnRandomTask()
+    {
+        if (_taskList.Count == 0)
+            return;
+
+        int index = _random.Next(_taskList.Count);
+        var selectedTask = _taskList[index];
+    
+        // Fire and forget
+        _ = selectedTask();
+    }
 }

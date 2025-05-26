@@ -5,11 +5,11 @@ using WebApplication1.Utils;
 
 namespace WebApplication1.Handlers;
 
-public class GameHandlers
+public static class GameHandlers
 {
-    public static void Register(WebSocketActionDispatcher dispatcher, LobbyManager manager)
+    public static void Register(WebSocketActionDispatcher dispatcher)
     {
-       
+        
         dispatcher.Register("start_game", async (data, socket) =>
         {
             var lobbyId = data.GetProperty("lobbyId").GetString();
@@ -17,10 +17,26 @@ public class GameHandlers
             Console.WriteLine($"\n[start_game] Proceeding to start game for lobby {lobbyId}.");
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
-
+            
             Console.WriteLine("Notifying all players in the lobby that the game is starting.");
-            await GameMessageSender.SendGameStarted(lobby!, "started");
+            await GameMessageSender.SendGameStarted(lobby!);
+            
+            /*START the GAME in GameSession:
+
+                ->Instantiate a GameSession Class
+
+                -> Link a lobby to a GameSession
+
+                -> call tart function to kick off the logic
+            */
+            
+            GameSession gameSession = new GameSession(lobby!);
+            
+            gameSession.Start();
+
         });
+        
+        
         
         dispatcher.Register("ping_request", (data, socket) =>
         {
@@ -32,17 +48,15 @@ public class GameHandlers
             
             Console.WriteLine($"\n {player?.Name} requested a ping in lobby: {lobbyId}.");
             
-            //start pinging logic here
-
-            
             GameSession? session = lobby?.GetGameSession();
             
+            //starts ping logic 
             if (player != null) session?.RequestPing(player);
             return Task.CompletedTask;
         });
         
         //request received when players send their original location
-        dispatcher.Register("location_update", (data, socket) =>
+        dispatcher.Register("update_position", (data, socket) =>
         {
             
             var username = data.GetProperty("username").GetString();

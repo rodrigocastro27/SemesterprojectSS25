@@ -32,7 +32,7 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     
     public void SetRole(Role role) => RoleEnum = role;
     public void SetRole(string role) => RoleEnum = Enum.Parse<Role>(role);
-    public string GetRole_s() => nameof(RoleEnum);
+    public string GetRole_s() => RoleEnum.ToString();
     public Role GetRole()=> RoleEnum;
 
     public bool IsLocationFresh(TimeSpan maxAge)

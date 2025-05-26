@@ -42,7 +42,7 @@ class SeekerMapView extends StatelessWidget {
           bottom: 20,
           left: 20,
           child: PingButton(
-            onPing: () => gameState.startPing(() {}),
+            onPing: () => gameState.startPing(context),
             pingState: gameState.pingState,
             cooldownSeconds: gameState.cooldownSeconds,
           ),

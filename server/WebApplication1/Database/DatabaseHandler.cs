@@ -78,7 +78,7 @@ public class DatabaseHandler
 
 
     // UPDATE
-    public void UpdetLobbyPlayersNickname(string username, string nickname, string role)
+    public void UpdateLobbyPlayersNickname(string username, string nickname, string role)
     {
         using var conn = GetDBConnection();
         var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Nickname = @nickname, Role = @role WHERE Player = @username;", conn);

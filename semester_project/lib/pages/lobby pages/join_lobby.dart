@@ -33,7 +33,7 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
     );
 
     // Update the game_state
-    Provider.of<GameState>(context).setRole(_selectedRole == 'Hider');
+    Provider.of<GameState>(context, listen: false).setRole(_selectedRole == 'Hider');
 
   }
 
