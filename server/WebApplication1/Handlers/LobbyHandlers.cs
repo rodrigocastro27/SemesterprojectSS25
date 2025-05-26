@@ -125,7 +125,22 @@ public static class LobbyHandlers
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
 
             Console.WriteLine("Notifying all players in the lobby that the game is starting.");
-            await GameMessageSender.SendGameStarted(lobby!, "started");
+            await GameMessageSender.SendGameStarted(lobby!);
+            
+            
+            /*START the GAME in GameSession:
+        
+                ->Instantiate a GameSession Class
+                
+                -> Link a lobby to a GameSession
+               
+                -> call tart function to kick off the logic
+            */
+            
+            GameSession gameSession = new GameSession(lobby!);
+            
+            gameSession.Start();
+            
         });
     }
 

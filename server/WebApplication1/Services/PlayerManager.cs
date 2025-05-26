@@ -115,7 +115,7 @@ public class PlayerManager
         {
             Console.WriteLine($"The player {player.Name} hasn't joined any lobby yet. Adding player in the lobby in the database.");
             // Add player into database
-            DatabaseHandler.Instance.InsertIntoLobbyPlayers(lobby.Id, player.Name, nickname, isHost, player.Role);
+            DatabaseHandler.Instance.InsertIntoLobbyPlayers(lobby.Id, player.Name, nickname, isHost, player.GetRole_s());
 
             lobby.AddPlayer(player);
             playerInLobby = lobby.Id;
@@ -137,7 +137,7 @@ public class PlayerManager
         lobby.RemovePlayer(player);
 
         // See if player is host and act accordingly
-        if (player._isHost == true)
+        if (player.IsHost == true)
         {
             Console.WriteLine($"Player {player.Name} is the host of the lobby. Proceeding to change it.");
             // Set new host if there is someone still left in the lobby

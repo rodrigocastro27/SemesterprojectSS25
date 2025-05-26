@@ -11,11 +11,18 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
 
     public bool IsHost;
     public GeoPosition Position { get; private set; }
+   
     public string Role = "hider";
 
+    public DateTime LastLocationUpdate { get; private set; } = DateTime.MinValue;
     private Role RoleEnum { get; set; }
 
-    public void UpdateLocation(GeoPosition pos) => Position = pos;
+    public void UpdateLocation(GeoPosition pos)
+    {
+    Position = pos;
+    LastLocationUpdate = DateTime.UtcNow;
+    }
+        
 
     public void SetHost(bool state) => IsHost = state;
 
@@ -27,6 +34,11 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     public void SetRole(string role) => RoleEnum = Enum.Parse<Role>(role);
     public string GetRole_s() => nameof(RoleEnum);
     public Role GetRole()=> RoleEnum;
+
+    public bool IsLocationFresh(TimeSpan maxAge)
+    {
+        return (DateTime.UtcNow - LastLocationUpdate) <= maxAge;
+    }
 }
 
 public readonly struct GeoPosition(double lat, double lon)

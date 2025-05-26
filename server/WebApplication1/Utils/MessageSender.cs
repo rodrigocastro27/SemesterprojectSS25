@@ -60,5 +60,27 @@ namespace WebApplication1.Utils
                 }
             }
         }
+
+        public static async Task BroadcastToHiders(Lobby lobby, string action, object data)
+        {
+            foreach (var player in lobby.Players)
+            {
+                if (player.GetRole() == Role.hider)
+                {
+                    await SendToPlayerAsync(player, action, data);
+                }
+            }
+        }
+
+        public static async Task BroadcastToSeekers(Lobby lobby, string action, object data)
+        {
+            foreach (var player in lobby.Players)
+            {
+                if (player.GetRole() == Role.seeker)
+                {
+                    await SendToPlayerAsync(player, action, data);
+                }
+            }
+        }
     }
 }

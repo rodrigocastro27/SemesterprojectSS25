@@ -90,7 +90,7 @@ public static class DataLoader
             }
 
             // Set nickname, if supported
-            player.Role = role;
+            player.SetRole(role);
         }
 
         LobbyManager.Instance.DeleteEmptyLobbies();

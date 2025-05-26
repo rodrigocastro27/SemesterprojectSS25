@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using WebApplication1.Services;
 
 namespace WebApplication1.Models;
 
@@ -10,36 +11,11 @@ public class Lobby
     public List<Player> Players { get; } = new();
     private bool _timerRunning = false;
 
+    private GameSession _session;
+
     public Lobby(string id)
     {
         Id = id;
-    }
-    private async Task StartTimerAsync()
-    {
-        for (int i = 10; i >= 0; i--)
-        {
-            var message = JsonSerializer.Serialize(new
-            {
-                action = "timer_update",
-                seconds = i
-            });
-
-            var buffer = Encoding.UTF8.GetBytes(message);
-            foreach (var p in Players)
-            {
-                if (p.Socket.State == WebSocketState.Open)
-                {
-                    await p.Socket.SendAsync(
-                        new ArraySegment<byte>(buffer),
-                        WebSocketMessageType.Text,
-                        true,
-                        CancellationToken.None
-                    );
-                }
-            }
-
-            await Task.Delay(1000);
-        }
     }
 
     public void AddPlayer(Player player)
@@ -62,20 +38,23 @@ public class Lobby
         if (Players.Count == 0) return null!;
         return Players[0];  // return first player in list, to select someone
     }
-
-    public void PrintPlayers()
+    
+    public void SetGameSession(GameSession current)
     {
-        if (Players.Count == 0)
-        {
-            Console.WriteLine("\nNo players in the list.\n");
-            return;
-        }
-
-        Console.WriteLine($"\nPlayers in lobby {Id}:");
-        foreach (var player in Players)
-        {
-            Console.WriteLine($"{player.Name}");
-        }
-        Console.WriteLine();
+        _session = current;
     }
+
+    public GameSession GetGameSession() => _session;
+
+
+    public List<Player> GetHidersList()
+    {
+        return Players.Where(p => p.GetRole() == Role.hider).ToList();
+    }
+
+    public List<Player> GetSeekerList()
+    {
+        return Players.Where(p => p.GetRole() == Role.seeker).ToList();
+    }
+
 }

@@ -1,8 +1,7 @@
 ﻿
 using System.Collections.Concurrent;
+using System.Security.Cryptography.X509Certificates;
 using WebApplication1.Models;
-using System.Data.SQLite;
-using WebApplication1.Data;
 using WebApplication1.Database;
 
 namespace WebApplication1.Services;
@@ -68,7 +67,7 @@ public class LobbyManager
 
         return result!;
     }
-
+    
     public void DeleteEmptyLobbies()
     {
         foreach (var elem in _lobbies)

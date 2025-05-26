@@ -37,16 +37,5 @@ public static class PlayerHandlers
                 user = username
             });
         });
-
-        dispatcher.Register("update_position", async (data, socket) =>
-        {
-            // TODO
-        });
-        
-        
-        dispatcher.Register("eliminate_player", async (data, socket) =>
-        {
-            // TODO
-        });
     }
 }

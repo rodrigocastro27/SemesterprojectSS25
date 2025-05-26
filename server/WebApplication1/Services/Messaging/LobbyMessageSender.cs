@@ -15,7 +15,7 @@ public static class LobbyMessageSender
             player = new
             {
                 name = player.Name,
-                role = player.Role,
+                role = player.GetRole_s(),
                 nickname = player.Nickname,
             }
         });
@@ -29,7 +29,7 @@ public static class LobbyMessageSender
             player = new
             {
                 name = player.Name,
-                role = player.Role,
+                role = player.GetRole_s(),
                 nickname = player.Nickname,
             }
         });
@@ -51,7 +51,7 @@ public static class LobbyMessageSender
         var playersData = lobby.Players.Select(p => new
         {
             name = p.Name, //maybe only name is needed  
-            role = p.Role,
+            role = p.GetRole_s(),
             id = p.Id,
             nickname = p.Nickname,
         }).ToList();
@@ -72,7 +72,7 @@ public static class LobbyMessageSender
             player = new
             {
                 name = player.Name,
-                role = player.Role,
+                role = player.GetRole_s(),
                 nickname = player.Nickname,
             }
         });
@@ -88,7 +88,7 @@ public static class LobbyMessageSender
             player = new
             {
                 name = player!.Name,
-                role = player.Role,
+                role = player.GetRole_s(),
                 nickname = player.Nickname,
             }
         });
