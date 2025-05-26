@@ -11,18 +11,21 @@ class MessageSender {
   }
 
   // LOBBIES --------------------------------------------------------------
-  static void createLobby(String lobbyId, String username) {
+  static void createLobby(String lobbyId, String username, String role) {
     webSocketService.send("create_lobby", {
       "lobbyId": lobbyId,
       "username": username,
+      "role": role,
+
     });
   }
 
-  static void joinLobby(String lobbyId, String username, String nickname) {
+  static void joinLobby(String lobbyId, String username, String nickname, String role) {
     webSocketService.send("join_lobby", {
       "lobbyId": lobbyId,
       "username": username,
       "nickname": nickname,
+      "role": role,
     });
   }
 

@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
-import '../widgets/map_widget.dart';   // 0 -> seeker; 1 -> hider
+import 'package:provider/provider.dart';
+import 'package:semester_project/state/game_state.dart';
+import 'package:semester_project/widgets/seeker_map_view.dart';
+import 'package:semester_project/widgets/hider_map_view.dart';
+
 
 class MapPage extends StatelessWidget {
-  const MapPage({super.key} 
-  );
+  const MapPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final gameState = Provider.of<GameState>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Open Street Map in Flutter'),
-        backgroundColor: Colors.indigo,
+        title: const Text('Map'),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        shadowColor: Colors.black,
       ),
-      body: const MapWidget(),
+      body: gameState.isHider ? const HiderMapView() : const SeekerMapView(),
     );
   }
 }

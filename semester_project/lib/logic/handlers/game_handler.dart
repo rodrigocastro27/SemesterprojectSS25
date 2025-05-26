@@ -2,22 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
 import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/models/player.dart';
+import 'package:provider/provider.dart';
+
 import 'package:semester_project/state/lobby_state.dart';
+import '../action_dispatcher.dart';
 import 'package:semester_project/state/player_state.dart';
 
 class GameActions {
-  static void register(
-    ServerActionDispatcher dispatcher,
-    BuildContext context,
-    PlayerState playerState,
-    LobbyState lobbyState,
-  ) {
-    dispatcher.register("location_request", (data) {
-      final username = playerState.getUsername();
-      final lobbyId = lobbyState.lobbyId;
+  static void register(ServerActionDispatcher dispatcher, BuildContext context) 
+  {
+    
+    dispatcher.register('game_started', (data) {
+     
+      Provider.of<LobbyState>(context, listen: false).startGame();
 
-  
-      /*
+      });
+      dispatcher.register("location_request", (data) 
+      {
+        /*
       final location = playerState.getLocation();
 
 
@@ -30,11 +32,13 @@ class GameActions {
           location.latitude,
         );
       }*/
-    });
-    
+        
+        
+      });
+
     dispatcher.register("location_update_list", (data){
 
-    /*
+      /*
         final playersData = data['players'] as List<dynamic>;
         final updatedPlayers = playersData.map((playerData) {
     return Player(
@@ -48,5 +52,8 @@ class GameActions {
        lobbyState.updatePlayerLocations(updatedPlayers);
     */
     });
+
+    
+
   }
 }

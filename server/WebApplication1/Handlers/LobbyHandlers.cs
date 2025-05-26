@@ -15,10 +15,12 @@ public static class LobbyHandlers
         dispatcher.Register("create_lobby", async (data, socket) =>
         {
             if (data.TryGetProperty("username", out var nameElem) &&
-                data.TryGetProperty("lobbyId", out var lobbyIdElem))
+                data.TryGetProperty("lobbyId", out var lobbyIdElem) &&
+                data.TryGetProperty("role", out var roleElem))
             {
                 var username = nameElem.GetString();
                 var lobbyId = lobbyIdElem.GetString();
+                var role = roleElem.GetString();
 
                 Console.WriteLine($"\n[create_lobby] Atempting to create lobby {lobbyId}.");
 
@@ -34,7 +36,7 @@ public static class LobbyHandlers
                 {
                     Console.WriteLine($"Successfully created lobby {lobbyId}.");
 
-                    AddPlayerToLobbyProcedure(player!, username!, lobby, true);
+                    AddPlayerToLobbyProcedure(player!, username!, lobby, true, role!);
                 }
             }
         });
@@ -46,6 +48,7 @@ public static class LobbyHandlers
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
             var nickname = data.GetProperty("nickname").GetString();
+            var role = data.GetProperty("role").GetString();
 
             Console.WriteLine($"\n[join_lobby] Player {username} attempting to join lobby {lobbyId}.");
 
@@ -66,7 +69,7 @@ public static class LobbyHandlers
             bool isHost = lobby.GetRandomPlayer() == null ? true : false;
             player!.SetHost(isHost);
 
-            AddPlayerToLobbyProcedure(player, nickname!, lobby, isHost);
+            AddPlayerToLobbyProcedure(player, nickname!, lobby, isHost, role!);
         });
 
 
@@ -116,40 +119,14 @@ public static class LobbyHandlers
         });
 
 
-        dispatcher.Register("start_game", async (data, socket) =>
-        {
-            var lobbyId = data.GetProperty("lobbyId").GetString();
-
-            Console.WriteLine($"\n[start_game] Proceeding to start game for lobby {lobbyId}.");
-
-            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
-
-            Console.WriteLine("Notifying all players in the lobby that the game is starting.");
-            await GameMessageSender.SendGameStarted(lobby!);
-            
-            
-            /*START the GAME in GameSession:
-        
-                ->Instantiate a GameSession Class
-                
-                -> Link a lobby to a GameSession
-               
-                -> call tart function to kick off the logic
-            */
-            
-            GameSession gameSession = new GameSession(lobby!);
-            
-            gameSession.Start();
-            
-        });
     }
 
-    public async static void AddPlayerToLobbyProcedure(Player player, string nickname, Lobby lobby, bool isHost)
+    public async static void AddPlayerToLobbyProcedure(Player player, string nickname, Lobby lobby, bool isHost, string role)
     {
         if (isHost) Console.WriteLine($"Lobby {lobby.Id} is empty so adding player {player.Name} as host.");
         else Console.WriteLine($"Lobby {lobby.Id} is not empty so adding player {player.Name} NOT as host.");
 
-        string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, nickname!, isHost);
+        string lobbyAdded = PlayerManager.Instance.AddPlayerToLobby(player, lobby, nickname!, isHost, role);
         player.SetNickname(nickname);
 
         Console.WriteLine($"Notifying player {player.Name} that he successfully joined lobby {lobby.Id}.");

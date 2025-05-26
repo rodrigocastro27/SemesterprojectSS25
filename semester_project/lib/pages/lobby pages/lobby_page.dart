@@ -12,6 +12,7 @@ class LobbyPage extends StatelessWidget {
     final lobbyId = state.lobbyId;
     if (lobbyId == null) return;
 
+    // Notify the server
     MessageSender.startGame(lobbyId);
     print('Start game message sent for lobby $lobbyId');
   }
