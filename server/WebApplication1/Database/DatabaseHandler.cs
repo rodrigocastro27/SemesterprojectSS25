@@ -78,21 +78,23 @@ public class DatabaseHandler
 
 
     // UPDATE
-    public void UpdetLobbyPlayersNickname(string username, string nickname)
+    public void UpdetLobbyPlayersNickname(string username, string nickname, string role)
     {
         using var conn = GetDBConnection();
-        var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Nickname = @nickname WHERE Player = @username;", conn);
+        var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Nickname = @nickname, Role = @role WHERE Player = @username;", conn);
         cmd.Parameters.AddWithValue("@nickname", nickname);
+        cmd.Parameters.AddWithValue("@role", role);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
     }
 
 
-    public void UpdateLobbyPlayersLobby(string username, string lobbyId)
+    public void UpdateLobbyPlayersLobby(string username, string lobbyId, string role)
     {
         using var conn = GetDBConnection();
-        var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Lobby = @lobbyId WHERE Player = @username;", conn);
+        var cmd = new SQLiteCommand("UPDATE LobbyPlayers SET Lobby = @lobbyId, Role = @role WHERE Player = @username;", conn);
         cmd.Parameters.AddWithValue("@lobbyId", lobbyId);
+        cmd.Parameters.AddWithValue("@role", role);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
     }

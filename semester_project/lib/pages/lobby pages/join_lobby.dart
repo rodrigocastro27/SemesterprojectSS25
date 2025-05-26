@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:semester_project/logic/message_sender.dart';
-// import 'package:semester_project/models/player.dart';
+import 'package:semester_project/state/game_state.dart';
 
 class JoinLobbyPage extends StatefulWidget {
   final String username;
@@ -22,13 +24,17 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
 
     // final player = Player(name: widget.username, role: _selectedRole);
 
-    MessageSender.joinLobby(lobbyName, widget.username, nickname);
+    MessageSender.joinLobby(lobbyName, widget.username, nickname, _selectedRole.toLowerCase());
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
+
+    // Update the game_state
+    Provider.of<GameState>(context).setRole(_selectedRole == 'Hider');
+
   }
 
   @override

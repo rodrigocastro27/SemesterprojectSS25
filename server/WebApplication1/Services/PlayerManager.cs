@@ -83,7 +83,7 @@ public class PlayerManager
         return lobbyId;
     }
 
-    public string AddPlayerToLobby(Player player, Lobby lobby, string nickname, bool isHost)
+    public string AddPlayerToLobby(Player player, Lobby lobby, string nickname, bool isHost, string role)
     {
         Console.WriteLine($"\nAttempting to add player {player.Name} into lobby {lobby.Id}.");
 
@@ -98,13 +98,13 @@ public class PlayerManager
             {
                 Console.WriteLine("Player is trying to join the SAME lobby it is currently in. Updating player's nickname.");
                 // Update the nickname if it has been changed
-                DatabaseHandler.Instance.UpdetLobbyPlayersNickname(player.Name, nickname);
+                DatabaseHandler.Instance.UpdetLobbyPlayersNickname(player.Name, nickname, role);
             }
             else    // Or another one
             {
                 Console.WriteLine("Player is trying to join a DIFFERENT lobby it is currently in. Changing player from lobbies.");
                 // Update the lobby in the database
-                DatabaseHandler.Instance.UpdateLobbyPlayersLobby(player.Name, lobby.Id);
+                DatabaseHandler.Instance.UpdateLobbyPlayersLobby(player.Name, lobby.Id, role);
                 // Update the manager's lists
                 Lobby? oldLobby = LobbyManager.Instance.GetLobby(playerInLobby);
                 oldLobby!.RemovePlayer(player);
@@ -115,11 +115,13 @@ public class PlayerManager
         {
             Console.WriteLine($"The player {player.Name} hasn't joined any lobby yet. Adding player in the lobby in the database.");
             // Add player into database
-            DatabaseHandler.Instance.InsertIntoLobbyPlayers(lobby.Id, player.Name, nickname, isHost, player.Role);
+            DatabaseHandler.Instance.InsertIntoLobbyPlayers(lobby.Id, player.Name, nickname, isHost, role);
 
             lobby.AddPlayer(player);
             playerInLobby = lobby.Id;
         }
+
+        player.SetRole(role == "hider" ? Role.hider : Role.seeker);
 
         Console.WriteLine($"Finished attempt to add player {player.Name} in lobby {lobby.Id}.");
 
@@ -137,7 +139,7 @@ public class PlayerManager
         lobby.RemovePlayer(player);
 
         // See if player is host and act accordingly
-        if (player._isHost == true)
+        if (player.IsHost == true)
         {
             Console.WriteLine($"Player {player.Name} is the host of the lobby. Proceeding to change it.");
             // Set new host if there is someone still left in the lobby

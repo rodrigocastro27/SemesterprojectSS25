@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
+import 'package:semester_project/logic/handlers/game_handler.dart';
 import 'package:semester_project/logic/handlers/lobby_handler.dart';
 import 'package:semester_project/logic/handlers/player_handler.dart';
 import 'package:semester_project/router/router.dart';
 import 'package:semester_project/services/websocket_service.dart';
 import 'package:semester_project/state/lobby_state.dart';
 import 'package:semester_project/state/player_state.dart';
+import 'package:semester_project/state/game_state.dart';
 
 final dispatcher = ServerActionDispatcher();
 late WebSocketService webSocketService;
@@ -17,6 +19,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => PlayerState()),
         ChangeNotifierProvider(create: (_) => LobbyState()),
+        ChangeNotifierProvider(create: (_) => GameState()),
       ],
       child: const MyApp(),
     ),
@@ -32,10 +35,11 @@ class MyApp extends StatelessWidget {
 
     final playerState = Provider.of<PlayerState>(context, listen: false);
     final lobbyState = Provider.of<LobbyState>(context, listen: false);
-    final router = createRouter(playerState, lobbyState);
+    final gameState = Provider.of<GameState>(context, listen: false);
+    final router = createRouter(playerState, lobbyState, gameState);
 
     webSocketService = WebSocketService(dispatcher);
-    webSocketService.connect('wss://7ccc-193-170-132-8.ngrok-free.app/ws');
+    webSocketService.connect('wss://97b4-193-170-124-206.ngrok-free.app/ws');
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
@@ -47,4 +51,5 @@ class MyApp extends StatelessWidget {
 void setupActionHandlers(BuildContext context) {
   LobbyActions.register(dispatcher, context);
   PlayerActions.register(dispatcher, context);
+  GameActions.register(dispatcher, context);
 }

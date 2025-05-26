@@ -27,10 +27,6 @@ class LobbyActions {
       Provider.of<LobbyState>(context, listen: false).addPlayer(player);
     });
 
-    dispatcher.register('game_started', (data) {
-      Provider.of<LobbyState>(context, listen: false).startGame();
-    });
-
     dispatcher.register('leave_lobby', (data) {
       final playerData = data['player'];
       final player = Player(name: playerData['name'], role: playerData['role'], nickname: playerData['nickname']);

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:semester_project/logic/message_sender.dart';
+import 'package:semester_project/state/game_state.dart';
 
 class CreateLobbyPage extends StatefulWidget {
   final String username;
@@ -11,18 +14,22 @@ class CreateLobbyPage extends StatefulWidget {
 
 class _CreateLobbyPageState extends State<CreateLobbyPage> {
   final TextEditingController _lobbyNameController = TextEditingController();
+  String _selectedRole = 'Hider';
 
   void _createLobby() async {
     final lobbyName = _lobbyNameController.text.trim();
     if (lobbyName.isEmpty) return;
 
-    MessageSender.createLobby(lobbyName, widget.username);
+    MessageSender.createLobby(lobbyName, widget.username, _selectedRole.toLowerCase());
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
+    
+    // Update the game_state
+    Provider.of<GameState>(context).setRole(_selectedRole == 'Hider');
   }
 
   @override
@@ -36,6 +43,22 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
             TextField(
               controller: _lobbyNameController,
               decoration: const InputDecoration(labelText: "Lobby Name"),
+            ),
+            const SizedBox(height: 20),
+            DropdownButton<String>(
+              value: _selectedRole,
+              onChanged: (value) {
+                setState(() {
+                  _selectedRole = value!;
+                });
+              },
+              items:
+                  ['Hider', 'Seeker']
+                      .map(
+                        (role) =>
+                            DropdownMenuItem(value: role, child: Text(role)),
+                      )
+                      .toList(),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

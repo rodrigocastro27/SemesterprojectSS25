@@ -9,15 +9,16 @@ public class GameHandlers
 {
     public static void Register(WebSocketActionDispatcher dispatcher, LobbyManager manager)
     {
-        dispatcher.Register("command1", async (data, socket) =>
+        dispatcher.Register("start_game", async (data, socket) =>
         {
-            // GameMessageSender.SendGameStarted(, "Game Message");   //placeholder
-        });
-        
-        
-        dispatcher.Register("command2", async (data, socket) =>
-        {
-            
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+
+            Console.WriteLine($"\n[start_game] Proceeding to start game for lobby {lobbyId}.");
+
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+
+            Console.WriteLine("Notifying all players in the lobby that the game is starting.");
+            await GameMessageSender.SendGameStarted(lobby!, "started");
         });
     }
 }
