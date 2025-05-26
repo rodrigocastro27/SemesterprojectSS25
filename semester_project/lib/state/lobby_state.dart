@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:semester_project/models/player.dart';
+import 'package:semester_project/state/game_state.dart';
 
 class LobbyState extends ChangeNotifier {
   String? lobbyId;
@@ -46,13 +48,25 @@ class LobbyState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void startGame() {
+  void startGame(BuildContext context)
+  {
     playing = true;
+
+    Provider.of<GameState>(context, listen: false).initGame(context);
+
     notifyListeners();
   }
 
   void updatePlayerList(List<Player> newList){
-      players= newList;
+      players = newList;
       notifyListeners();
+  }
+
+  String? getLobbyId(){
+    return lobbyId;
+  }
+
+  List<Player> getPlayerList(){
+    return players;
   }
 }

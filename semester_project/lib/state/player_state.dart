@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:semester_project/models/player.dart';
 
 class PlayerState extends ChangeNotifier {
   String? username;
   String? nickname;
+  Player? player;
 
   void register(String name) {
     username = name;
@@ -17,4 +19,5 @@ class PlayerState extends ChangeNotifier {
   String? getUsername() {
     return username;
   }
+
 }

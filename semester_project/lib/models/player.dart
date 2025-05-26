@@ -1,7 +1,11 @@
+import 'package:latlong2/latlong.dart';
+
 class Player {
   final String name;
   final String role;
   final String nickname;
+
+  LatLng? position;
 
   Player({required this.name, required this.role, required this.nickname});
 
