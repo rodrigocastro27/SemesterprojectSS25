@@ -1,13 +1,12 @@
-﻿using WebApplication1.Models;
-using WebApplication1.Services;
+﻿using WebApplication1.Services;
 using WebApplication1.Services.Messaging;
 using WebApplication1.Utils;
 
 namespace WebApplication1.Handlers;
 
-public class GameHandlers
+public static class GameHandlers
 {
-    public static void Register(WebSocketActionDispatcher dispatcher, LobbyManager manager)
+    public static void Register(WebSocketActionDispatcher dispatcher)
     {
         dispatcher.Register("start_game", async (data, socket) =>
         {

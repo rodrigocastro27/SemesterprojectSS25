@@ -83,7 +83,9 @@ public static class DataLoader
             // Don't add the player to the lobby if it is not online, and delete instance in the table
             if (!player.IsOnline())
             {
-                DatabaseHandler.Instance.DeleteFromLobbyPlayersPlayer(player.Name);
+                var cmd1 = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Player = @username;", conn);
+                cmd1.Parameters.AddWithValue("@username", username);
+                cmd1.ExecuteNonQuery();
                 continue;
             }
 

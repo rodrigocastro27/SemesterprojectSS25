@@ -17,6 +17,7 @@ var dispatcher = new WebSocketActionDispatcher();
 
 LobbyHandlers.Register(dispatcher);
 PlayerHandlers.Register(dispatcher);
+GameHandlers.Register(dispatcher);
 
 DataLoader.LoadAll();
 
