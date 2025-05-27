@@ -23,8 +23,8 @@ class GameActions {
       gameState.updatePosition(context);
 
       final location = gameState.getCurrentPosition();
-      final name = Provider.of<PlayerState>(context).getUsername();
-      final lobbyId = Provider.of<LobbyState>(context).getLobbyId();
+      final name = Provider.of<PlayerState>(context,listen: false).getUsername();
+      final lobbyId = Provider.of<LobbyState>(context, listen: false).getLobbyId();
 
       if (name != null && lobbyId != null && location != null) {
         MessageSender.updatePosition(
@@ -38,7 +38,7 @@ class GameActions {
 
     dispatcher.register("location_update_list", (data) {
       
-      var gameState = Provider.of<GameState>(context);
+      var gameState = Provider.of<GameState>(context, listen: false);
       
       //handle ping button change of state logic for other seekers
       gameState.handlePingStartedFromServer();

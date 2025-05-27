@@ -15,7 +15,7 @@ class MapPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Map'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.blueGrey,
         foregroundColor: Colors.white,
         shadowColor: Colors.black,
       ),
