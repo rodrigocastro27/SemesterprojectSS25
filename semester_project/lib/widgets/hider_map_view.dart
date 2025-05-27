@@ -14,7 +14,7 @@ class HiderMapView extends StatelessWidget {
     final gameState = Provider.of<GameState>(context);
 
     if (gameState.userLocation == null) {
-      Provider.of<GameState>(context).initLocation(context);
+      Provider.of<GameState>(context, listen: false).initLocation(context);
       return const Center(child: CircularProgressIndicator());
     }
 

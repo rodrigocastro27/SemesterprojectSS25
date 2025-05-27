@@ -10,7 +10,7 @@ class MapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gameState = Provider.of<GameState>(context);
+    final gameState = Provider.of<GameState>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(

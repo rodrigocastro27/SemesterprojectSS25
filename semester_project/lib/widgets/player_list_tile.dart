@@ -11,7 +11,7 @@ class PlayerListTile extends StatelessWidget {
     return ListTile(
       title: Text(player.nickname),
       subtitle: Text(player.role),
-      leading: Icon(player.role == 'Seeker' ? Icons.search : Icons.hide_source),
+      leading: Icon(player.role == 'seeker' ? Icons.search : Icons.hide_source),
     );
   }
 }

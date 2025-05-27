@@ -18,14 +18,19 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState, GameState 
       final hasUsername = playerState.username != null;
       final inLobby = lobbyState.lobbyId != null;
       final playing = lobbyState.playing;
-      final isHider = gameState.isHider;
 
       // final isAuth = state.fullPath == '/auth';
       final isHome = state.fullPath == '/home';
       // final isLobby = state.fullPath == '/lobby';
 
-      if (!hasUsername) return '/auth';
-      if (hasUsername && !inLobby && !isHome) return '/home';
+      if (!hasUsername) {
+        playerState.setOnline(false);
+        return '/auth';
+      }
+      if (hasUsername && !inLobby && !isHome) {
+        playerState.setOnline(true);
+        return '/home';
+      }
       if (hasUsername && inLobby && playing) return '/game';
       if (hasUsername && inLobby) return '/lobby';
 

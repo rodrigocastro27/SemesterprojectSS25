@@ -36,7 +36,7 @@ namespace WebApplication1.Utils
 
         public static async Task SendToPlayerAsync(Player player, string action, object data)
         {
-            if (player.Socket.State == WebSocketState.Open)
+            if (player.Socket != null && player.Socket.State == WebSocketState.Open)
             {
                 await SendAsync(player.Socket, action, data);
             }
@@ -50,7 +50,7 @@ namespace WebApplication1.Utils
         {
             foreach (var player in lobby.Players)
             {
-                if (player.Socket.State == WebSocketState.Open)
+                if (player.Socket != null && player.Socket.State == WebSocketState.Open)
                 {
                     await SendToPlayerAsync(player, action, data);
                 }

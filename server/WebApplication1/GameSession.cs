@@ -4,29 +4,29 @@ namespace WebApplication1;
 
 public class GameSession
 {
-    private Lobby lobby;
+    // private Lobby lobby;
     
     
-    async void Start()
-    {
+    // async void Start()
+    // {
         
-        Update();
-    }
+    //     Update();
+    // }
 
-    async void Update()
-    {
-        while (true)
-        {
+    // async void Update()
+    // {
+    //     while (true)
+    //     {
             
             
             
             
-        }
-    }
+    //     }
+    // }
 
-    public void SetLobby(Lobby _lobby)
-    {
-        lobby = _lobby;
-    }
+    // public void SetLobby(Lobby _lobby)
+    // {
+    //     lobby = _lobby;
+    // }
     
 }

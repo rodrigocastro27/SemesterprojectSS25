@@ -53,6 +53,16 @@ public class PlayerManager
         }
     }
 
+    public Player? FindPlayerWithSocket(WebSocket socket)
+    {
+        return _players.Values.FirstOrDefault(player => player.Socket == socket);
+    }
+
+    public void LoginPlayer(string username)
+    {
+        DatabaseHandler.Instance.UpdatePlayersIsOnline(username, true);
+    }
+
     public Player? GetPlayer(string id)
     {
         _players.TryGetValue(id, out var player);
@@ -68,12 +78,10 @@ public class PlayerManager
 
     public void PrintPlayers()
     {
-        Console.WriteLine("\n\n");
         foreach (var player in _players.Values)
         {
-            Console.WriteLine($"Player Name: {player.Name}");
+            Console.WriteLine($"Player Name: {player.Name}\n");
         }
-        Console.WriteLine("\n\n");
     }
 
     public string IsPlayerInLobby(Player player) {
@@ -176,6 +184,6 @@ public class PlayerManager
         Console.WriteLine($"The player {player.Name} is not the host of lobby {lobby.Id}. Proceeding to delete the player from the lobby in database.");
 
         // Delete player from lobby in database
-        DatabaseHandler.Instance.DeleteFromLobbyPlayersPlayer(lobby.Id, player.Name);
+        DatabaseHandler.Instance.DeleteFromLobbyPlayersLobbyPlayer(lobby.Id, player.Name);
     }
 }

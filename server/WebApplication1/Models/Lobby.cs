@@ -8,7 +8,7 @@ public class Lobby
 {
     public string Id { get; }
     public List<Player> Players { get; } = new();
-    private bool _timerRunning = false;
+    // private bool _timerRunning = false;
 
     public Lobby(string id)
     {

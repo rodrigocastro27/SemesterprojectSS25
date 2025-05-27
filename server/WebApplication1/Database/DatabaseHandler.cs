@@ -27,7 +27,7 @@ public class DatabaseHandler
     public void InsertIntoPlayers(string deviceId, string username)
     {
         using var conn = GetDBConnection();
-        var cmd = new SQLiteCommand("INSERT INTO Players (id, username) VALUES (@id, @username);", conn);
+        var cmd = new SQLiteCommand("INSERT INTO Players (id, username, isOnline) VALUES (@id, @username, 1);", conn);
         cmd.Parameters.AddWithValue("@id", deviceId);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
@@ -89,6 +89,16 @@ public class DatabaseHandler
     }
 
 
+    public void UpdatePlayersIsOnline(string username, bool isOnline)
+    {
+        using var conn = GetDBConnection();
+        var cmd = new SQLiteCommand("UPDATE Players SET isOnline = @isOnline WHERE username = @username;", conn);
+        cmd.Parameters.AddWithValue("@isOnline", isOnline);
+        cmd.Parameters.AddWithValue("@username", username);
+        cmd.ExecuteNonQuery();
+    }
+
+
     public void UpdateLobbyPlayersLobby(string username, string lobbyId, string role)
     {
         using var conn = GetDBConnection();
@@ -130,7 +140,7 @@ public class DatabaseHandler
     }
 
 
-    public void DeleteFromLobbyPlayersPlayer(string lobbyId, string username)
+    public void DeleteFromLobbyPlayersLobbyPlayer(string lobbyId, string username)
     {
         using var conn = GetDBConnection();
         var cmd = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Lobby = @lobbyId AND Player = @username;", conn);
@@ -139,10 +149,19 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    public void DeleteFromLobbyPlayersLobby(string lobbyId) {
+    public void DeleteFromLobbyPlayersLobby(string lobbyId)
+    {
         using var conn = GetDBConnection();
         var cmd = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Lobby = @lobbyId;", conn);
         cmd.Parameters.AddWithValue("@lobbyId", lobbyId);
+        cmd.ExecuteNonQuery();
+    }
+
+    public void DeleteFromLobbyPlayersPlayer(string username)
+    {
+        using var conn = GetDBConnection();
+        var cmd = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Player = @username;", conn);
+        cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
     }
 }
