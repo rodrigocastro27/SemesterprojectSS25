@@ -46,7 +46,7 @@ class MessageSender {
   // GAME -------------------------------------------------------------------------------
   static void updatePosition(String name, String lobbyId, double lat, double lon) {
     webSocketService.send("update_position", {
-      "name": name,
+      "username": name,
       "lobbyId": lobbyId,
       "lat": lat,
       "lon": lon,
@@ -62,7 +62,7 @@ class MessageSender {
 
   static void pingRequest(String name, String lobbyId) {
     webSocketService.send("ping_request", {
-      "name": name,
+      "username": name,
       "lobbyId": lobbyId,
     });
   } 
