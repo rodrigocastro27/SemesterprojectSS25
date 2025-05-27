@@ -96,6 +96,11 @@ public class DatabaseHandler
         cmd.Parameters.AddWithValue("@isOnline", isOnline);
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
+
+        if (!isOnline)
+        {
+            DeleteFromLobbyPlayersPlayer(username);
+        }
     }
 
 

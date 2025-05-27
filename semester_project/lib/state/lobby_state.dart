@@ -20,6 +20,14 @@ class LobbyState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Player? getPlayerByUsername(String username) {
+    try {
+      return players.firstWhere((player) => player.name == username);
+    } catch (e) {
+      return null;
+    }
+  }
+
   void addPlayer(Player player) {
     if (!players.any((p) => p.name == player.name)) {
       players.add(player);
@@ -43,6 +51,11 @@ class LobbyState extends ChangeNotifier {
 
   void setNewHost() {
     isHost = true;
+    notifyListeners();
+  }
+
+  void stopPlaying() {
+    playing = false;
     notifyListeners();
   }
 

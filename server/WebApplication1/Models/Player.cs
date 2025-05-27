@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using WebApplication1.Services;
 
 namespace WebApplication1.Models;
 
@@ -26,7 +27,13 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     public void SetRole(Role role) => RoleEnum = role;
     public void SetRole(string role) => RoleEnum = Enum.Parse<Role>(role);
 
-    public void SetOnline(bool isOnline) => this.isOnline = isOnline;
+    public void SetOnline(bool isOnline)
+    {
+        this.isOnline = isOnline;
+
+        // Delete player from lobby as well
+        LobbyManager.Instance.DeletePlayerFromLobby(Name);
+    }
     public string GetRole_s() => nameof(RoleEnum);
     public Role GetRole() => RoleEnum;
 

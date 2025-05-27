@@ -63,6 +63,7 @@ app.Map("/ws", async context =>
                 Console.WriteLine($"Unexpected error for player {player.Name}: {ex.Message}");
                 player.SetOnline(false);
                 DatabaseHandler.Instance.UpdatePlayersIsOnline(player.Name, false);
+                LobbyManager.Instance.DeleteEmptyLobbies();
             }
             else Console.WriteLine("Unexpected error.");
         }
