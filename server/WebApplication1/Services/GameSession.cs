@@ -14,6 +14,13 @@ public class GameSession(Lobby lobby)
     
     private readonly Random _random = new Random();  
 
+    // Add ping state tracking
+    private bool _isPinging = false;
+    private Player? _currentPingingPlayer = null;
+    private DateTime _pingStartTime;
+    private readonly TimeSpan _pingDuration = TimeSpan.FromSeconds(5);
+    private readonly TimeSpan _pingCooldown = TimeSpan.FromSeconds(10);
+
     //game session starting logic
     public async Task Start()
     {
@@ -38,20 +45,32 @@ public class GameSession(Lobby lobby)
         }
     }
 
-
-    public async void RequestPing(Player requestingPlayer)
+    public async Task<bool> RequestPing(Player requestingPlayer)
     {
+        // Check if a ping is already active
+        if (_isPinging)
+        {
+            // Ping already active, reject the request
+            await GameMessageSender.SendPingRejected(requestingPlayer);
+            return false;
+        }
         
+        // Set ping state
+        _isPinging = true;
+        _currentPingingPlayer = requestingPlayer;
+        _pingStartTime = DateTime.UtcNow;
+        
+        // Get hiders' locations
         var hiders = _lobby.GetHidersList();
-        var staleThreshold = TimeSpan.FromSeconds(6);   //could be altered, maximum time interval allowed from last ping
+        var staleThreshold = TimeSpan.FromSeconds(6);
         
         await GameMessageSender.RequestHidersLocation(_lobby);
         
-        var timeout = TimeSpan.FromSeconds(10); //after 10 seconds it quits
+        var timeout = TimeSpan.FromSeconds(10);
         var start = DateTime.UtcNow;
-
+        
         var freshHiders = new HashSet<Player>();
-
+        
         while (DateTime.UtcNow - start < timeout)
         {
             foreach (var hider in hiders.Where(hider => hider.IsLocationFresh(staleThreshold)))
@@ -61,13 +80,52 @@ public class GameSession(Lobby lobby)
             
             if (freshHiders.Count == hiders.Count)
                 break;
-
+                
             await Task.Delay(200);
         }
-
-        await GameMessageSender.SendPingToSeekers(_lobby, freshHiders.ToList());
+        
+        // Send ping activated message to all seekers
+        await GameMessageSender.SendPingActivated(_lobby, freshHiders.ToList(), requestingPlayer.Name);
+        
+        // Start ping timer
+        _ = StartPingTimer();
+        
+        return true;
     }
     
+    private async Task StartPingTimer()
+    {
+        // Wait for ping duration
+        await Task.Delay(_pingDuration);
+        
+        // End ping active state
+        _isPinging = false;
+        
+        // Send ping ended message to all seekers
+        await GameMessageSender.SendPingEnded(_lobby, _currentPingingPlayer!.Name);
+        
+        // Start cooldown timer
+        _ = StartCooldownTimer();
+    }
+    
+    private async Task StartCooldownTimer()
+    {
+        // Wait for cooldown duration
+        await Task.Delay(_pingCooldown);
+        
+        // Send cooldown ended message to all seekers
+        await GameMessageSender.SendPingCooldownEnded(_lobby);
+    }
+    
+    public bool IsPingActive()
+    {
+        return _isPinging;
+    }
+    
+    public Player? GetCurrentPingingPlayer()
+    {
+        return _currentPingingPlayer;
+    }
     
     public PlayerGameSession GetPlayerGameSession(Player requestingPlayer) => _playerGameSessions[requestingPlayer];
     public Lobby GetLobby() => _lobby;
@@ -85,3 +143,4 @@ public class GameSession(Lobby lobby)
         _ = selectedTask();
     }
 }
+
