@@ -114,6 +114,8 @@ class GameState extends ChangeNotifier {
   void updateHidersLocation(List<Player> newList) {
     hiders.clear();
     hiders = newList;
+    notifyListeners();
+
   }
 
   void handlePingStartedFromServer() {

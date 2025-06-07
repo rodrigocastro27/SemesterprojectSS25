@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
 import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/models/player.dart';
@@ -52,7 +53,7 @@ class GameActions {
               name: playerData['name'],
               role: "",
               nickname: '',
-            );
+            )..position = LatLng(playerData['lat'],playerData['lon']);
           }).toList();
 
        gameState.updateHidersLocation(updatedPlayers);
