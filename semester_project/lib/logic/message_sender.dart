@@ -48,8 +48,8 @@ class MessageSender {
     webSocketService.send("update_position", {
       "username": name,
       "lobbyId": lobbyId,
-      "lat": lat,
-      "lon": lon,
+      "latitude": lat,
+      "longitude": lon,
     });
   } 
 

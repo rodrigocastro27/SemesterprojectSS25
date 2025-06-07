@@ -33,4 +33,8 @@ class PlayerState extends ChangeNotifier {
   void setOnline(bool isOnline) {
     this.isOnline = isOnline;
   }
+
+  String? getDeviceId(){
+    return username;
+  }
 }

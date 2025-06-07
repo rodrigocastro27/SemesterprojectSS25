@@ -38,7 +38,7 @@ public static class GameHandlers
         
         
         
-        dispatcher.Register("ping_request", (data, socket) =>
+        dispatcher.Register("ping_request", async (data, socket) =>
         {
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
@@ -50,9 +50,11 @@ public static class GameHandlers
             
             GameSession? session = lobby?.GetGameSession();
             
-            //starts ping logic 
-            if (player != null) session?.RequestPing(player);
-            return Task.CompletedTask;
+            // Request ping and check if it was successful
+            if (player != null && session != null)
+            {
+                await session.RequestPing(player);
+            }
         });
         
         //request received when players send their original location
@@ -61,8 +63,8 @@ public static class GameHandlers
             
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
-            var longitude = data.GetProperty("lon").GetDouble();
-            var latitude = data.GetProperty("lat").GetDouble();
+            var longitude = data.GetProperty("longitude").GetDouble();
+            var latitude = data.GetProperty("latitude").GetDouble();
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             var player = PlayerManager.Instance.GetPlayer(username!);
@@ -78,3 +80,4 @@ public static class GameHandlers
         
     }
 }
+
