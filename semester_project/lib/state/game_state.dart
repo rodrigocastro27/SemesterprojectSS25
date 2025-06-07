@@ -21,7 +21,7 @@ class GameState extends ChangeNotifier {
   List<Player> players = [];
 
   void initGame(BuildContext context) {
-    players = Provider.of<LobbyState>(context).getPlayerList();
+    players = Provider.of<LobbyState>(context, listen: false).getPlayerList();
 
     //maybe unecessary:
 

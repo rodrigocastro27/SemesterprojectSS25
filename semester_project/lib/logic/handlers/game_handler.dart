@@ -50,7 +50,7 @@ class GameActions {
               playersData.map((playerData) {
             return Player(
               name: playerData['name'],
-              role: playerData['role'],
+              role: "",
               nickname: '',
             );
           }).toList();

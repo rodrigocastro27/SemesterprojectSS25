@@ -1,4 +1,5 @@
-﻿using WebApplication1.Services;
+﻿using WebApplication1.Models;
+using WebApplication1.Services;
 using WebApplication1.Services.Messaging;
 using WebApplication1.Utils;
 
@@ -60,8 +61,8 @@ public static class GameHandlers
             
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
-            var longitude = data.GetProperty("longitude").GetDouble();
-            var latitude = data.GetProperty("latitude").GetDouble();
+            var longitude = data.GetProperty("lon").GetDouble();
+            var latitude = data.GetProperty("lat").GetDouble();
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             var player = PlayerManager.Instance.GetPlayer(username!);

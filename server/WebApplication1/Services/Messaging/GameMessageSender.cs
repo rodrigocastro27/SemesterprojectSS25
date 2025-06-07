@@ -26,11 +26,11 @@ public static class GameMessageSender
         {
             name = p.Name,
             id = p.Id,
-            latitude = p.Position.Latitude,
-            longitude = p.Position.Longitude,
+            lat = p.Position.Latitude,
+            lon = p.Position.Longitude,
         });
 
-        await MessageSender.BroadcastToSeekers(lobby, "player_location_list", new
+        await MessageSender.BroadcastToSeekers(lobby, "location_update_list", new
         {
             players = playersData
         });
