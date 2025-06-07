@@ -36,11 +36,22 @@ class MyApp extends StatelessWidget {
     final playerState = Provider.of<PlayerState>(context, listen: false);
     final lobbyState = Provider.of<LobbyState>(context, listen: false);
     final gameState = Provider.of<GameState>(context, listen: false);
-    
     final router = createRouter(playerState, lobbyState, gameState);
 
     webSocketService = WebSocketService(dispatcher);
-    webSocketService.connect('wss://c235-193-170-132-8.ngrok-free.app/ws');
+
+    webSocketService.setOnConnect(() {
+      playerState.setConnectionState(true);
+      print("✅ WebSocket connected - player marked as connected.");
+    });
+    // Set disconnect callback here
+    webSocketService.setOnDisconnect(() {
+      playerState.setConnectionState(false); // You need to implement this method in PlayerState
+      // Optionally: show a toast/snackbar or navigate away
+      print("⚠️ WebSocket disconnected - player marked as disconnected.");
+    });
+
+    webSocketService.connect('wss://58b0-193-170-132-8.ngrok-free.app/ws');
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

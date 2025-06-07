@@ -1,4 +1,5 @@
-﻿using WebApplication1.Models;
+﻿using WebApplication1.Database;
+using WebApplication1.Models;
 using WebApplication1.Services;
 using WebApplication1.Utils;
 
@@ -22,13 +23,16 @@ public static class PlayerHandlers
 
                 Console.WriteLine($"Player {username} is new. Proceeding to creat it.");
                 player = PlayerManager.Instance.CreatePlayer(deviceId!, username!, socket);
-                
+
             }
             else
             {
                 Console.WriteLine($"Player is already registered. Proceeding to update its socket.");
                 PlayerManager.Instance.UpdatePlayerSocket(username!, socket);
+                PlayerManager.Instance.LoginPlayer(username!);
             }
+
+            player.SetOnline(true);
 
             // Potentially also create a PlayerMessageSender
             await MessageSender.SendToPlayerAsync(player!, "player_registered", new
@@ -37,5 +41,16 @@ public static class PlayerHandlers
                 user = username
             });
         });
+
+        // dispatcher.Register("update_position", async (data, socket) =>
+        // {
+        //     // TODO
+        // });
+        
+        
+        // dispatcher.Register("eliminate_player", async (data, socket) =>
+        // {
+        //     // TODO
+        // });
     }
 }

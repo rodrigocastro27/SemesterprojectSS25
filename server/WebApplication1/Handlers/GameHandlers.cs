@@ -1,5 +1,4 @@
-﻿using WebApplication1.Models;
-using WebApplication1.Services;
+﻿using WebApplication1.Services;
 using WebApplication1.Services.Messaging;
 using WebApplication1.Utils;
 

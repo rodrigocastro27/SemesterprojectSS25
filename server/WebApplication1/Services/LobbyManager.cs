@@ -80,4 +80,17 @@ public class LobbyManager
             }
         }
     }
+
+    public void DeletePlayerFromLobby(string username)
+    {
+        Player? player = PlayerManager.Instance.GetPlayer(username);
+        // Find lobby the player is from and delete it
+        foreach (var lobby in _lobbies.Values)
+        {
+            if (lobby.Players.Any(p => p.Name == username))
+            {
+                lobby.Players.Remove(player!);
+            }
+        }
+    }
 }

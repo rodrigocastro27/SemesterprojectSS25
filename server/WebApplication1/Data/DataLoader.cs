@@ -1,4 +1,5 @@
 using System.Data.SQLite;
+using WebApplication1.Database;
 using WebApplication1.Models;
 using WebApplication1.Services;
 
@@ -32,7 +33,7 @@ public static class DataLoader
     private static void LoadPlayers()
     {
         using var conn = SQLiteConnector.GetConnection();
-        var cmd = new SQLiteCommand("SELECT id, username, email FROM Players;", conn);
+        var cmd = new SQLiteCommand("SELECT id, username, email, isOnline FROM Players;", conn);
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
@@ -40,8 +41,10 @@ public static class DataLoader
             string id = reader.GetString(0);
             string username = reader.GetString(1);
             string? email = reader.IsDBNull(2) ? null : reader.GetString(2);
+            bool isOnline = reader.GetBoolean(3);
 
             var player = new Player(username, "none", id, null!);
+            player.SetOnline(isOnline);
 
             PlayerManager.Instance.AddPlayer(username, player);
         }
@@ -77,6 +80,15 @@ public static class DataLoader
                 continue;
             }
 
+            // Don't add the player to the lobby if it is not online, and delete instance in the table
+            if (!player.IsOnline())
+            {
+                var cmd1 = new SQLiteCommand("DELETE FROM LobbyPlayers WHERE Player = @username;", conn);
+                cmd1.Parameters.AddWithValue("@username", username);
+                cmd1.ExecuteNonQuery();
+                continue;
+            }
+
             // Add player to the lobby if not already present
             if (!lobby.HasPlayer(player))
             {
@@ -93,6 +105,6 @@ public static class DataLoader
             player.SetRole(role);
         }
 
-        LobbyManager.Instance.DeleteEmptyLobbies();
+        LobbyManager.Instance.DeleteEmptyLobbies();        
     }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart'; // For VoidCallback
 
 import '../logic/action_dispatcher.dart';
 
@@ -10,15 +11,29 @@ class WebSocketService {
   WebSocket? _socket;
   bool _isConnected = false;
   Completer<void>? _connectionCompleter;
+  Uri? _uri; // Store the connected URI
+  VoidCallback? onDisconnected; // Optional external handler
+  VoidCallback? onDisconnect;
+  VoidCallback? onConnect;
+
+  void setOnDisconnect(VoidCallback callback) {
+    onDisconnect = callback;
+  }
+
+  void setOnConnect(VoidCallback callback) {
+    onConnect = callback;
+  }
 
   WebSocketService(this.dispatcher);
 
   Future<void> connect(String url) async {
     _connectionCompleter = Completer();
+    _uri = Uri.parse(url);
 
     try {
       _socket = await WebSocket.connect(url);
       _isConnected = true;
+      onConnect?.call();
 
       print("✅ Connected to WebSocket at $url");
 
@@ -28,13 +43,12 @@ class WebSocketService {
         onError: _onConnectionError,
       );
 
-      _connectionCompleter!.complete(); // ✅ Connection successful
-
+      _connectionCompleter!.complete();
     } catch (e, stack) {
       print("❌ WebSocket connection failed: $e");
       print(stack);
       _isConnected = false;
-      _connectionCompleter!.completeError(e); // ❌ Propagate error
+      _connectionCompleter!.completeError(e);
     }
   }
 
@@ -55,11 +69,24 @@ class WebSocketService {
   void _onConnectionClosed() {
     _isConnected = false;
     print("🔌 WebSocket connection closed");
+
+    // Notify external listeners
+    if (onDisconnected != null) {
+      onDisconnected!();
+    }
+
+    onDisconnect?.call();
   }
 
   void _onConnectionError(error) {
     _isConnected = false;
     print("🚫 WebSocket error: $error");
+
+    if (onDisconnected != null) {
+      onDisconnected!();
+    }
+
+    onDisconnect?.call();
   }
 
   void send(String action, Map<String, dynamic> data) {
@@ -79,4 +106,6 @@ class WebSocketService {
   }
 
   bool get isConnected => _isConnected;
+
+  Uri? get uri => _uri; // Optional getter if you need to know the current URL
 }

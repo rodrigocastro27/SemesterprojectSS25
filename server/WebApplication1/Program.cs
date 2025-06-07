@@ -5,6 +5,9 @@ using WebApplication1.Utils;
 using WebApplication1.Data;
 using WebApplication1.Models;
 using WebApplication1.Services;
+using WebApplication1.Models;
+using WebApplication1.Services;
+using WebApplication1.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,16 +31,59 @@ app.Map("/ws", async context =>
         var socket = await context.WebSockets.AcceptWebSocketAsync();
         var buffer = new byte[1024];
 
-        while (socket.State == WebSocketState.Open)
+        Player? player;
+
+        try
         {
-            var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
-            if (result.MessageType == WebSocketMessageType.Text)
+            while (socket.State == WebSocketState.Open)
             {
-                var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                Console.WriteLine(msg);
-                await dispatcher.HandleMessage(msg, socket);
+                var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                if (result.MessageType == WebSocketMessageType.Text)
+                {
+                    var msg = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    Console.WriteLine(msg);
+                    await dispatcher.HandleMessage(msg, socket);
+                }
             }
         }
+        catch (WebSocketException wsex)
+        {
+            player = PlayerManager.Instance.FindPlayerWithSocket(socket);
+            if (player != null)
+            {
+                Console.WriteLine($"WebSocketException for player {player.Name}: {wsex.Message}");
+                player.SetOnline(false);
+                DatabaseHandler.Instance.UpdatePlayersIsOnline(player.Name, false);
+            }
+            else Console.WriteLine("WebSocketException.");
+        }
+        catch (Exception ex)
+        {
+            player = PlayerManager.Instance.FindPlayerWithSocket(socket);
+            if (player != null)
+            {
+                Console.WriteLine($"Unexpected error for player {player.Name}: {ex.Message}");
+                player.SetOnline(false);
+                DatabaseHandler.Instance.UpdatePlayersIsOnline(player.Name, false);
+                LobbyManager.Instance.DeleteEmptyLobbies();
+            }
+            else Console.WriteLine("Unexpected error.");
+        }
+        finally
+        {
+            player = PlayerManager.Instance.FindPlayerWithSocket(socket);
+            if (player != null)
+            {
+                player = PlayerManager.Instance.FindPlayerWithSocket(socket);
+                // Ensure cleanup
+                if (player!.IsOnline())
+                    player.SetOnline(false);
+                    DatabaseHandler.Instance.UpdatePlayersIsOnline(player.Name, false);
+
+                player.Socket = null!;
+            }            
+        }
+        
     }
 });
 

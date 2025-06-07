@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using WebApplication1.Services;
 
 namespace WebApplication1.Models;
 
@@ -8,6 +9,8 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     public string Nickname { get; private set; } = nickname;
     public string Id { get; set; } = deviceId; //device id
     public WebSocket Socket { get; set; } = socket;
+
+    public bool isOnline { get; set; } = false;
 
     public bool IsHost;
     public GeoPosition Position { get; private set; }
@@ -32,6 +35,7 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     
     public void SetRole(Role role) => RoleEnum = role;
     public void SetRole(string role) => RoleEnum = Enum.Parse<Role>(role);
+    
     public string GetRole_s() => RoleEnum.ToString();
     public Role GetRole()=> RoleEnum;
 
@@ -39,6 +43,16 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     {
         return (DateTime.UtcNow - LastLocationUpdate) <= maxAge;
     }
+
+    public void SetOnline(bool isOnline)
+    {
+        this.isOnline = isOnline;
+
+        // Delete player from lobby as well
+        LobbyManager.Instance.DeletePlayerFromLobby(Name);
+    }
+
+    public bool IsOnline() => isOnline;
 }
 
 public readonly struct GeoPosition(double lat, double lon)
