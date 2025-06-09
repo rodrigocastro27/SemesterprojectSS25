@@ -1,11 +1,9 @@
-// lib/services/websocket_service.dart
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io'; // Required for WebSocket
-import 'package:flutter/foundation.dart'; // For VoidCallback
+import 'dart:io'; 
 
-import 'package:flutter/foundation.dart'; // Required for VoidCallback
-import '../logic/action_dispatcher.dart'; // Assuming your dispatcher path
+import 'package:flutter/foundation.dart';
+import '../logic/action_dispatcher.dart'; 
 
 class WebSocketService {
   final ServerActionDispatcher dispatcher;
@@ -23,19 +21,7 @@ class WebSocketService {
   VoidCallback? _onConnectCallback;
   VoidCallback? _onDisconnectCallback;
 
-  // Constructor now only takes the dispatcher; URL is passed to connect()  Uri? _uri; // Store the connected URI
-  VoidCallback? onDisconnected; // Optional external handler
-  VoidCallback? onDisconnect;
-  VoidCallback? onConnect;
-
-  void setOnDisconnect(VoidCallback callback) {
-    onDisconnect = callback;
-  }
-
-  void setOnConnect(VoidCallback callback) {
-    onConnect = callback;
-  }
-
+  // Constructor now only takes the dispatcher; URL is passed to connect()
   WebSocketService(this.dispatcher); 
 
   /// Sets the callback to be invoked when the WebSocket successfully connects.
@@ -48,47 +34,38 @@ class WebSocketService {
     _onDisconnectCallback = callback;
   }
 
-  /// Initiates the WebSocket connection to the provided URL.
+  /// Connects to the WebSocket server at the specified URL.
   void connect(String url) {
     _manuallyDisconnected = false;
-    _url = url; // Store the URL for reconnects
+    _url = url; 
     _initConnection();
   }
 
-  /// Internal method to handle connection attempts and stream listening.
+
   void _initConnection() async {
-    // Cancel any existing reconnect timer if we're trying to connect now
+    
     _reconnectTimer?.cancel();
-    _uri = Uri.parse(url);
 
     try {
       print("🔌 Trying to connect to $_url...");
       _socket = await WebSocket.connect(_url);
       _isConnected = true;
-      _retrySeconds = 1; // Reset retry seconds on successful connection
-      onConnect?.call();
+      _retrySeconds = 1; 
 
       print("✅ Connected to WebSocket at $_url");
-      _onConnectCallback?.call(); // Invoke the onConnect callback
+      _onConnectCallback?.call();
 
-      // Listen to the WebSocket stream
+ 
       _socket!.listen(
-        _onMessageReceived,
-        onDone: _onConnectionClosed,
-        onError: _onConnectionError,
-      );
-
-      _connectionCompleter!.complete();
-    } catch (e, stack) {
-        _onMessageReceived, // <--- This is the method that was causing the "Undefined name" error
-        onDone: _handleDisconnect, // Called when connection is closed (gracefully)
-        onError: _handleError,     // Called when an error occurs on the socket (e.g., abrupt disconnect)
-        // Removed: cancelOnError: true, to ensure both onDone/onError are properly handled
+        _onMessageReceived, 
+        onDone: _handleDisconnect, 
+        onError: _handleError,     
+      
       );
     } catch (e) {
       // This catch block handles errors during the initial WebSocket.connect() attempt (e.g., server not running)
       print("❌ WebSocket connection failed: $e");
-      _isConnected = false; // Ensure connection state is false
+      _isConnected = false; 
       _scheduleReconnect();
     }
   }
@@ -101,7 +78,7 @@ class WebSocketService {
       // Delegate message handling to the dispatcher
       dispatcher.handleMessage(message);
     } catch (e) {
-      print("⚠️ Failed to handle message: $e");
+      print("⚠ Failed to handle message: $e");
     }
   }
 
@@ -121,10 +98,10 @@ class WebSocketService {
   /// Handles errors occurring on the active WebSocket connection.
   void _handleError(error) {
     _isConnected = false;
-    _onDisconnectCallback?.call(); // Invoke the onDisconnect callback
-    // Log the actual error object for better debugging
+    _onDisconnectCallback?.call();
+ 
     print("🚫 WebSocket error: $error");
-    // Only attempt to reconnect if not manually disconnected
+    
     if (!_manuallyDisconnected) {
       _scheduleReconnect();
     } else {
@@ -143,9 +120,9 @@ class WebSocketService {
     print("⏳ Reconnecting in ${_retrySeconds}s...");
 
     _reconnectTimer = Timer(delay, () {
-      // Exponential backoff, clamp to prevent extremely long delays
+      
       _retrySeconds = (_retrySeconds * 2).clamp(1, 64);
-      _initConnection(); // Attempt to reconnect using the stored _url
+      _initConnection();
     });
   }
 
@@ -156,23 +133,21 @@ class WebSocketService {
       _socket!.add(message);
       print("📤 Sent message: $message");
     } else {
-      // Added more detail to the warning for debugging
-      print("⚠️ Can't send message, socket not connected. Current state: ${_socket?.readyState}");
-      // Optionally, you might want to queue messages or throw an error here.
+     
+      print("⚠ Can't send message, socket not connected. Current state: ${_socket?.readyState}");
+     
     }
   }
 
   /// Disconnects from the WebSocket manually.
   void disconnect() {
     _manuallyDisconnected = true;
-    _reconnectTimer?.cancel(); // Cancel any pending reconnects
-    _socket?.close(1000, "Client initiated disconnect"); // 1000 is normal closure status code
+    _reconnectTimer?.cancel(); 
+    _socket?.close(1000, "Client initiated disconnect"); 
     _isConnected = false;
-    _onDisconnectCallback?.call(); // Invoke the onDisconnect callback on manual disconnect
+    _onDisconnectCallback?.call(); 
     print("👋 Disconnected from WebSocket.");
   }
 
   bool get isConnected => _isConnected;
-
-  Uri? get uri => _uri; // Optional getter if you need to know the current URL
 }
