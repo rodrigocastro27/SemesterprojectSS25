@@ -26,9 +26,7 @@ class RegisterCat extends StatelessWidget {
             children: [
               const SizedBox(height: 16),
               ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  16,
-                ), // Adjust radius as needed
+                borderRadius: BorderRadius.circular(16),
                 child: const Image(
                   image: AssetImage('assets/images/test-image.jpeg'),
                   height: 100,
@@ -42,7 +40,7 @@ class RegisterCat extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
-                  color: Color(0xff3a57e8),
+                  color: Color(0xff36c8bb), // Changed to green
                 ),
               ),
               const SizedBox(height: 8),
@@ -64,17 +62,17 @@ class RegisterCat extends StatelessWidget {
                 onPressed: () {
                   // Registration logic here
                 },
-                color: const Color(0xff3a57e8),
+                color: const Color(0xff36c8bb), // Main green color
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(22.0), // Rounded corners
                 ),
                 padding: const EdgeInsets.all(16),
                 child: const Text(
                   "Register",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
-                textColor: Colors.white,
+                textColor: Colors.white, // White text
                 height: 45,
                 minWidth: MediaQuery.of(context).size.width,
               ),
@@ -96,7 +94,7 @@ class RegisterCat extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: Color(0xff3a57e8),
+                        color: Color(0xff36c8bb), // Main green color
                       ),
                     ),
                   ),
@@ -119,15 +117,15 @@ class RegisterCat extends StatelessWidget {
           prefixIcon: Icon(icon, color: const Color(0xff212435)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Color(0xff3a57e8), width: 1),
+            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1), // Outline color
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Color(0xff3a57e8), width: 1),
+            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1), // Outline color
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Color(0xff3a57e8), width: 1),
+            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1), // Outline color
           ),
         ),
       ),

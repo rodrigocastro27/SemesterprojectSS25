@@ -12,35 +12,33 @@ class CreateLobbyPage extends StatefulWidget {
 
 class _CreateLobbyPageState extends State<CreateLobbyPage> {
   final TextEditingController _lobbyNameController = TextEditingController();
+  String _selectedRole = 'Hider'; // Default role
 
   void _createLobby() async {
     final lobbyName = _lobbyNameController.text.trim();
     if (lobbyName.isEmpty) return;
 
     final username = await _getUsername();
-    final role = "hider";
 
     try {
-     final lobbyDoc =  await FirebaseFirestore.instance.collection('lobbies').add({
+      final lobbyDoc = await FirebaseFirestore.instance.collection('lobbies').add({
         'lobbyName': lobbyName,
         'members': [
           {
             'name': username,
-           'role': role
+            'role': _selectedRole.toLowerCase(), // Use selected role
           },
         ],
       });
 
-      print('Lobby created successfully!');
       Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LobbyPage(lobbyRef: lobbyDoc)),
-);
-    } catch (e) {
-      print('Error creating lobby: $e');
-      ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to create lobby: $e')));
+        MaterialPageRoute(builder: (_) => LobbyPage(lobbyRef: lobbyDoc)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create lobby: $e')),
+      );
     }
   }
 
@@ -53,21 +51,104 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Lobby")),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            TextField(
-              controller: _lobbyNameController,
-              decoration: const InputDecoration(labelText: "Lobby Name"),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _createLobby,
-              child: const Text("Create"),
-            ),
-          ],
+      backgroundColor: Color(0xffffffff),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Color(0xffffffff),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xff212435)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Create Lobby",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            children: [
+              // Image at the top
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/images/floppa.png', // Replace with your image path
+                  height: 120,
+                  width: 120,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Lobby Name Input
+              TextField(
+                controller: _lobbyNameController,
+                decoration: InputDecoration(
+                  labelText: "Lobby Name",
+                  labelStyle: TextStyle(color: Color(0xff7c7878)),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xff0c9c90)),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xff0c9c90)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Role Selection Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedRole,
+                decoration: InputDecoration(
+                  labelText: "Your Role",
+                  labelStyle: TextStyle(color: Color(0xff7c7878)),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xff0c9c90)),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xff0c9c90)),
+                  ),
+                ),
+                items: ['Hider', 'Seeker']
+                    .map((role) => DropdownMenuItem(
+                          value: role,
+                          child: Text(role),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedRole = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 40),
+              
+              // Create Lobby Button
+              MaterialButton(
+                onPressed: _createLobby,
+                color: Color(0xff36c8bb),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22.0),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: const Text(
+                  "Create Lobby",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                height: 50,
+                minWidth: MediaQuery.of(context).size.width,
+              ),
+            ],
+          ),
         ),
       ),
     );

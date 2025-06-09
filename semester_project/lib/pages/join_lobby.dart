@@ -31,43 +31,119 @@ class _JoinLobbyPageState extends State<JoinLobbyPage> {
         MaterialPageRoute(builder: (_) => LobbyPage(lobbyRef: lobbyDoc)),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lobby not found')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lobby not found')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Join Lobby")),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
+      backgroundColor: Color(0xffffffff),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Color(0xffffffff),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xff212435)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Join Lobby",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/images/bingus.png',
+                height: 120,
+                width: 120,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 24),
             TextField(
               controller: _lobbyNameController,
-              decoration: const InputDecoration(labelText: "Lobby Name"),
+              decoration: InputDecoration(
+                labelText: "Lobby Name",
+                labelStyle: TextStyle(color: Color(0xff7c7878)),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xff0c9c90)),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xff0c9c90)),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(labelText: "Username"),
+              decoration: InputDecoration(
+                labelText: "Username",
+                labelStyle: TextStyle(color: Color(0xff7c7878)),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xff0c9c90)),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xff0c9c90)),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
-            DropdownButton<String>(
+            DropdownButtonFormField<String>(
               value: _selectedRole,
+              decoration: InputDecoration(
+                labelText: "Role",
+                labelStyle: TextStyle(color: Color(0xff7c7878)),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xff0c9c90)),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xff0c9c90)),
+                ),
+              ),
               onChanged: (value) {
                 setState(() {
                   _selectedRole = value!;
                 });
               },
               items: ['Hider', 'Seeker']
-                  .map((role) => DropdownMenuItem(value: role, child: Text(role)))
+                  .map(
+                    (role) => DropdownMenuItem(
+                      value: role,
+                      child: Text(
+                        role,
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
+            const SizedBox(height: 40),
+            MaterialButton(
               onPressed: _joinLobby,
-              child: const Text("Join Lobby"),
+              color: Color(0xff36c8bb),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22.0),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: const Text(
+                "Join Lobby",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+              height: 50,
+              minWidth: double.infinity,
             ),
           ],
         ),
