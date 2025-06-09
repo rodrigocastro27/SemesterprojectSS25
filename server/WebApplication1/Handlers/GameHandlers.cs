@@ -32,7 +32,7 @@ public static class GameHandlers
             
             GameSession gameSession = new GameSession(lobby!);
             
-            gameSession.Start();
+            await gameSession.Start();
 
         });
         

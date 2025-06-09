@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Newtonsoft.Json;
 using WebApplication1.Services;
 
 namespace WebApplication1.Models;
@@ -11,7 +12,7 @@ public class Lobby
     public List<Player> Players { get; } = new();
     // private bool _timerRunning = false;
 
-    private GameSession _session;
+    private GameSession? _session;
 
     public Lobby(string id)
     {
@@ -44,7 +45,7 @@ public class Lobby
         _session = current;
     }
 
-    public GameSession GetGameSession() => _session;
+    public GameSession? GetGameSession() => _session;
 
 
     public List<Player> GetHidersList()

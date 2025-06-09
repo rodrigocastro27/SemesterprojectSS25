@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using WebApplication1.Models;
 using WebApplication1.Services.Messaging;
 
@@ -6,9 +7,7 @@ namespace WebApplication1.Services;
 
 public class GameSession(Lobby lobby)
 {
-    private readonly Lobby _lobby = lobby;
-
-    private readonly ConcurrentDictionary<Player, PlayerGameSession> _playerGameSessions = new ConcurrentDictionary<Player, PlayerGameSession>();
+        private readonly ConcurrentDictionary<Player, PlayerGameSession> _playerGameSessions = new ConcurrentDictionary<Player, PlayerGameSession>();
     
     private readonly List<Func<Task>> _taskList = [];
     
@@ -20,13 +19,12 @@ public class GameSession(Lobby lobby)
         lobby.SetGameSession(this);
         
 
-        foreach (Player p in _lobby.Players)
+        foreach (Player p in lobby.Players)
         {
             _playerGameSessions[p] = new PlayerGameSession(p, this);       //instantiate a player game session per player
-        }
+        }        
         
-        
-       // await Update();
+       await Update();
     }
 
     private async Task Update()
@@ -34,7 +32,7 @@ public class GameSession(Lobby lobby)
         while (true)
         {
             await Task.Delay(TimeSpan.FromSeconds(15)); // Every 15s (or whatever interval)
-            SpawnRandomTask();
+            await SpawnRandomTask();
         }
     }
 
@@ -42,10 +40,10 @@ public class GameSession(Lobby lobby)
     public async void RequestPing(Player requestingPlayer)
     {
         
-        var hiders = _lobby.GetHidersList();
+        var hiders = lobby.GetHidersList();
         var staleThreshold = TimeSpan.FromSeconds(6);   //could be altered, maximum time interval allowed from last ping
         
-        await GameMessageSender.RequestHidersLocation(_lobby);
+        await GameMessageSender.RequestHidersLocation(lobby);
         
         var timeout = TimeSpan.FromSeconds(10); //after 10 seconds it quits
         var start = DateTime.UtcNow;
@@ -65,15 +63,15 @@ public class GameSession(Lobby lobby)
             await Task.Delay(200);
         }
 
-        await GameMessageSender.SendPingToSeekers(_lobby, freshHiders.ToList());
+        await GameMessageSender.SendPingToSeekers(lobby, freshHiders.ToList());
     }
     
     
     public PlayerGameSession GetPlayerGameSession(Player requestingPlayer) => _playerGameSessions[requestingPlayer];
-    public Lobby GetLobby() => _lobby;
+    public Lobby GetLobby() => lobby;
 
 
-    private void SpawnRandomTask()
+    private async Task SpawnRandomTask()
     {
         if (_taskList.Count == 0)
             return;
@@ -82,6 +80,6 @@ public class GameSession(Lobby lobby)
         var selectedTask = _taskList[index];
     
         // Fire and forget
-        _ = selectedTask();
+        await selectedTask();
     }
 }

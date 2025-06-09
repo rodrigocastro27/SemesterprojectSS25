@@ -5,8 +5,6 @@ using WebApplication1.Utils;
 using WebApplication1.Data;
 using WebApplication1.Models;
 using WebApplication1.Services;
-using WebApplication1.Models;
-using WebApplication1.Services;
 using WebApplication1.Database;
 
 var builder = WebApplication.CreateBuilder(args);

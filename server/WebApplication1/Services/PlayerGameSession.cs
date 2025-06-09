@@ -5,6 +5,8 @@ namespace WebApplication1.Services;
 
 public class PlayerGameSession(Player player, GameSession gameSession)
 {
+    private Player _player = player;
+    private GameSession _gameSession = gameSession;
     /*      logic for indevidually pinging without global synchronization
     private Player _player = player;
     private readonly GameSession _gameSession = gameSession;

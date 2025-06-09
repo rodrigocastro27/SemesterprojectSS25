@@ -46,10 +46,10 @@ public static class GameMessageSender
 
     #region Task Messages
 
-    public static async Task Task1(Lobby lobby)
-    {
-            //communicate random task has begun
-    }
+    // public static async Task Task1(Lobby lobby)
+    // {
+    //         //communicate random task has begun
+    // }
     
 
     #endregion
