@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:semester_project/models/player.dart';
+import 'package:semester_project/state/game_state.dart';
 import 'package:semester_project/state/lobby_state.dart';
+import 'package:semester_project/state/player_state.dart';
 import '../action_dispatcher.dart';
 import 'package:semester_project/services/navigation_service.dart';
 
 class LobbyActions {
   static void register(ServerActionDispatcher dispatcher, BuildContext context) {
     dispatcher.register('lobby_joined', (data) {
+     
       final lobbyId = data['lobbyId'];
       final playerData = data['player'];
       final player = Player(name: playerData['name'], role: playerData['role'], nickname: playerData['nickname']);
+      Provider.of<PlayerState>(context, listen: false).setPlayer(player);
       Provider.of<LobbyState>(context, listen: false).setLobby(lobbyId, [player], isHost: false);
+      Provider.of<GameState>(context, listen: false).reset();
     });
 
     dispatcher.register('lobby_created', (data) {
       final lobbyId = data['lobbyId'];
       final playerData = data['player'];
       final player = Player(name: playerData['name'], role: playerData['role'], nickname: playerData['nickname']);
+     
+      Provider.of<PlayerState>(context, listen: false).setPlayer(player);
       Provider.of<LobbyState>(context, listen: false).setLobby(lobbyId, [player], isHost: true);
     });
 

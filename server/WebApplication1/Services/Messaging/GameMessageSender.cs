@@ -43,7 +43,17 @@ public static class GameMessageSender
             //who won, other relevant info
         });
     }
-
+    
+    public static async Task SendTimeUpdate(Lobby lobby, TimeSpan time)
+    {
+        DateTime now = DateTime.Now;
+        await MessageSender.BroadcastLobbyAsync(lobby, "time_update", new
+        {
+            time = time,
+            time_offset = now,
+        });
+    }
+    
     #region Task Messages
 
     // public static async Task Task1(Lobby lobby)

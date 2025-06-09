@@ -37,7 +37,7 @@ public class GameSession
             _playerGameSessions[player] = new PlayerGameSession(player, this);
         }
 
-        //await GameMessageSender.SendTimeUpdate(_lobby, _timer);
+        await GameMessageSender.SendTimeUpdate(_lobby, _timer);
         _lastTaskSpawnTime = DateTime.UtcNow;
 
         _ = Task.Run(UpdateLoop);
@@ -58,7 +58,7 @@ public class GameSession
     private async Task EndGame()
     {
         await GameMessageSender.SendGameEnded(_lobby);
-       // _lobby.ClearGameSession();
+        _lobby.ClearGameSession();
     }
 
     #endregion
@@ -69,7 +69,7 @@ public class GameSession
     public async Task AddTime(TimeSpan duration)
     {
         _timer += duration;
-        //await GameMessageSender.SendTimeUpdate(_lobby, _timer);
+        await GameMessageSender.SendTimeUpdate(_lobby, _timer);
     }
 
     public async Task SubtractTime(TimeSpan duration)
@@ -78,7 +78,7 @@ public class GameSession
         if (_timer < TimeSpan.Zero)
             _timer = TimeSpan.Zero;
 
-        //await GameMessageSender.SendTimeUpdate(_lobby, _timer);
+        await GameMessageSender.SendTimeUpdate(_lobby, _timer);
     }
 
     #endregion

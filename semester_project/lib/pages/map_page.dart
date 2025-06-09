@@ -8,7 +8,6 @@ import 'package:semester_project/widgets/seeker_map_view.dart';
 import 'package:semester_project/widgets/hider_map_view.dart';
 import 'package:semester_project/models/player.dart';
 
-
 class MapPage extends StatelessWidget {
   const MapPage({super.key});
 
@@ -18,9 +17,8 @@ class MapPage extends StatelessWidget {
     final lobbyState = Provider.of<LobbyState>(context, listen: false);
     final playerState = Provider.of<PlayerState>(context, listen: false);
 
-    final mapView = gameState.isHider
-        ? const HiderMapView()
-        : const SeekerMapView();
+    final mapView =
+        gameState.isHider ? const HiderMapView() : const SeekerMapView();
 
     return Scaffold(
       appBar: AppBar(
@@ -33,6 +31,34 @@ class MapPage extends StatelessWidget {
         children: [
           // Fullscreen map view
           Positioned.fill(child: mapView),
+          
+          
+          //Countdown timer
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Consumer<GameState>(
+              builder: (context, gameState, child) {
+                final remaining = gameState.remainingTime;
+                if (remaining == null) return const SizedBox();
+
+                String format(Duration d) =>
+                    "${d.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(d.inSeconds.remainder(60)).toString().padLeft(2, '0')}";
+
+                return Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "Time left: ${format(remaining)}",
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                );
+              },
+            ),
+          ),
 
           // Positioned button (bottom right corner, like a FAB)
           Positioned(
@@ -40,11 +66,14 @@ class MapPage extends StatelessWidget {
             right: 24,
             child: ElevatedButton.icon(
               onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
+                showDialog(
+                  context: context,
+                  builder:
+                      (ctx) => AlertDialog(
                         title: const Text("Confirm"),
-                        content: const Text("Are you sure you want to leave the game? You will also leave the current lobby."),
+                        content: const Text(
+                          "Are you sure you want to leave the game? You will also leave the current lobby.",
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx),
@@ -57,8 +86,7 @@ class MapPage extends StatelessWidget {
                               if (username != null && lobbyId != null) {
                                 lobbyState.stopPlaying();
                                 MessageSender.leaveLobby(lobbyId, username);
-                              }
-                              else {
+                              } else {
                                 // Should never happen
                               }
                             },
@@ -66,12 +94,15 @@ class MapPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                    );
-                  },
+                );
+              },
               icon: const Icon(Icons.logout),
               label: const Text("Leave Game"),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
           ),
