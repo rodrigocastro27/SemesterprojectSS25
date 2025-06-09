@@ -6,7 +6,7 @@ class PlayerState extends ChangeNotifier {
   String? nickname;
   bool isConnected = false;
   bool isOnline = false;
-  Player? player;
+  Player? _player;
 
   void register(String name) {
     username = name;
@@ -22,6 +22,10 @@ class PlayerState extends ChangeNotifier {
     return username;
   }
 
+  String? getNickname(){
+    return nickname;
+  }
+
   void setConnectionState(bool isConnected) {
     this.isConnected = isConnected;
     if (!isConnected) {
@@ -32,5 +36,13 @@ class PlayerState extends ChangeNotifier {
 
   void setOnline(bool isOnline) {
     this.isOnline = isOnline;
+  }
+
+  void setPlayer(Player player) {
+    _player = player;
+  }
+
+  Player? getPlayer(){
+    return _player;
   }
 }

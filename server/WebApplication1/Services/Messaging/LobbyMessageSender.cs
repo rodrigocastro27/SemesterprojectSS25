@@ -61,22 +61,6 @@ public static class LobbyMessageSender
             players = playersData
         });
     }
-
-
-    // [lobby_created]
-    public static async Task CreatedLobbyAsync(Lobby lobby, Player player)
-    {
-        await MessageSender.SendToPlayerAsync(player, "lobby_created", new
-        {
-            lobbyId = lobby.Id,
-            player = new
-            {
-                name = player.Name,
-                role = player.GetRole_s(),
-                nickname = player.Nickname,
-            }
-        });
-    }
     
     
     // [leave_lobby]

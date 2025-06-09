@@ -27,6 +27,9 @@ class GameState extends ChangeNotifier {
   Timer? _countdownTimer;
 
   void initGame(BuildContext context) {
+   
+   hiders.clear();
+   seekers.clear();
     players = Provider.of<LobbyState>(context, listen: false).getPlayerList();
 
     for (var p in players) {
@@ -157,12 +160,17 @@ class GameState extends ChangeNotifier {
 
   void stopGame() 
   {
-
     //additionally clean game logic...
-
     gameEnded = true;
     notifyListeners();
   }
+
+  void reset() {
+  gameEnded = false;
+  // reset any other fields if needed
+  notifyListeners();
+}
+
 
   @override
   void dispose() {
