@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:semester_project/pages/authentication_page.dart';
+import 'package:semester_project/pages/end_page.dart';
 import 'package:semester_project/pages/home_page.dart';
 import 'package:semester_project/pages/lobby%20pages/lobby_page.dart';
 import 'package:semester_project/pages/map_page.dart';
@@ -18,10 +19,13 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState, GameState 
       final hasUsername = playerState.username != null;
       final inLobby = lobbyState.lobbyId != null;
       final playing = lobbyState.playing;
-
+      final gameEnded = gameState.gameEnded;
       // final isAuth = state.fullPath == '/auth';
       final isHome = state.fullPath == '/home';
       // final isLobby = state.fullPath == '/lobby';
+
+      final isEnd = state.fullPath == '/end';
+
 
       if (!hasUsername) {
         playerState.setOnline(false);
@@ -33,6 +37,7 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState, GameState 
       }
       if (hasUsername && inLobby && playing) return '/game';
       if (hasUsername && inLobby) return '/lobby';
+      if(gameEnded && !isEnd) return '/end';
 
       return null;
     },
@@ -53,6 +58,15 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState, GameState 
         path: '/game',
         builder: (context, state) => const MapPage(),
       ),
+      
+      GoRoute(
+      path: '/end',
+      builder: (context, state) => const EndGamePage(
+         resultMessage: "Game Over",
+         additionalInfo: "You were removed from the game.",
+  ),
+),
+
     ],
   );
 }
