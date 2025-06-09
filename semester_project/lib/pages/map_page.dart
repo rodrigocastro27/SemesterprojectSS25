@@ -6,7 +6,7 @@ import 'package:semester_project/state/lobby_state.dart';
 import 'package:semester_project/state/player_state.dart';
 import 'package:semester_project/widgets/seeker_map_view.dart';
 import 'package:semester_project/widgets/hider_map_view.dart';
-import 'package:semester_project/models/player.dart';
+import 'package:semester_project/widgets/task_overlay.dart';
 
 class MapPage extends StatelessWidget {
   const MapPage({super.key});
@@ -31,8 +31,7 @@ class MapPage extends StatelessWidget {
         children: [
           // Fullscreen map view
           Positioned.fill(child: mapView),
-          
-          
+
           //Countdown timer
           Positioned(
             top: 16,
@@ -60,6 +59,31 @@ class MapPage extends StatelessWidget {
             ),
           ),
 
+          Positioned(
+            top: 24,
+            right: 24,
+            child: Align(
+              alignment: Alignment.center,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  MessageSender.startTask(playerState.getUsername()!, lobbyState.getLobbyId()!);  // CANNOT BE NULL
+                },
+                icon: const Icon(Icons.task),
+                label: const Text("Start Task"),
+                style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            ),
+          ),
+
+          Consumer<GameState>(
+            builder: (context, gameState, _) {
+              if (gameState.currentTaskName != null) return const TaskOverlay();
+              return Container();   // to not build the correct widget
+            },
+          ),
+
           // Positioned button (bottom right corner, like a FAB)
           Positioned(
             bottom: 24,
@@ -85,6 +109,7 @@ class MapPage extends StatelessWidget {
                               final lobbyId = lobbyState.lobbyId;
                               if (username != null && lobbyId != null) {
                                 lobbyState.stopPlaying();
+                                gameState.stopGame();
                                 MessageSender.leaveLobby(lobbyId, username);
                               } else {
                                 // Should never happen

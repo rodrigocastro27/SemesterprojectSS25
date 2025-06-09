@@ -11,10 +11,10 @@ public class GameSession
 
     private readonly Lobby _lobby;
     private readonly ConcurrentDictionary<Player, PlayerGameSession> _playerGameSessions = new();
-    private readonly List<Func<Task>> _taskList = [];
+    private readonly List<GameTask> _taskList = [];
     private readonly Random _random = new();
 
-    private TimeSpan _timer = TimeSpan.FromSeconds(25);
+    private TimeSpan _timer = TimeSpan.FromMinutes(10);
     private readonly TimeSpan _tickRate = TimeSpan.FromSeconds(1);
     private readonly TimeSpan _taskInterval = TimeSpan.FromSeconds(15);
     private DateTime _lastTaskSpawnTime;
@@ -22,6 +22,9 @@ public class GameSession
     public GameSession(Lobby lobby)
     {
         _lobby = lobby;
+        RegisterTask(new ClickingRaceTask());
+        // Register more tasks here
+        // ...
     }
 
     #endregion
@@ -128,26 +131,43 @@ public class GameSession
             if (DateTime.UtcNow - _lastTaskSpawnTime >= _taskInterval)
             {
                 _lastTaskSpawnTime = DateTime.UtcNow;
-                await SpawnRandomTask();
+                // SpawnRandomTask();
             }
 
             await Task.Delay(_tickRate);
         }
     }
 
-    private async Task SpawnRandomTask()
+    private GameTask? SpawnRandomTask()
     {
         if (_taskList.Count == 0)
-            return;
+            return null;
 
         int index = _random.Next(_taskList.Count);
         var selectedTask = _taskList[index];
-        await selectedTask();
+        return selectedTask;
     }
 
-    public void RegisterTask(Func<Task> task)
+    public void RegisterTask(GameTask task)
     {
         _taskList.Add(task);
+    }
+
+    public async Task StartTask(Lobby lobby)
+    {
+        Console.WriteLine("\n[task] Selecting task to play.");
+
+        GameTask? selectedTask = SpawnRandomTask();
+        if (selectedTask != null)
+        {
+            Console.WriteLine($"[task] Executing task {selectedTask.GetName()}");
+            await GameMessageSender.BroadcastTask(lobby, selectedTask);
+            await selectedTask.ExecuteAsync(lobby);
+        }
+        else
+        {
+            Console.WriteLine("[task] Could not find any task to play.");
+        }
     }
 
     #endregion

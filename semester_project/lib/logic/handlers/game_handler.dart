@@ -16,9 +16,11 @@ class GameActions {
     ServerActionDispatcher dispatcher,
     BuildContext context,
   ) {
+
     dispatcher.register('game_started', (data) {
       Provider.of<LobbyState>(context, listen: false).startGame(context);
     });
+
     dispatcher.register("location_request", (data) {
       final gameState = Provider.of<GameState>(context, listen: false);
       gameState.updatePosition(context);
@@ -88,6 +90,15 @@ class GameActions {
         print("❌ Error parsing time_update message: $e");
         print(stack);
       }
+    });
+
+    dispatcher.register("task_started", (data) {
+
+      final gameState = Provider.of<GameState>(context, listen: false);
+
+      final taskName = data['name'];
+
+      gameState.startTask(taskName);
     });
 
     dispatcher.register("game_ended", (data) {

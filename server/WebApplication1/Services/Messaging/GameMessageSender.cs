@@ -56,10 +56,14 @@ public static class GameMessageSender
     
     #region Task Messages
 
-    // public static async Task Task1(Lobby lobby)
-    // {
-    //         //communicate random task has begun
-    // }
+    public static async Task BroadcastTask(Lobby lobby, GameTask task)
+    {
+        Console.WriteLine($"Notifying players in lobby {lobby.Id} that the task is starting.");
+        await MessageSender.BroadcastLobbyAsync(lobby, "task_started", new
+        {
+            name = task.GetName(),
+        });
+    }
     
 
     #endregion
