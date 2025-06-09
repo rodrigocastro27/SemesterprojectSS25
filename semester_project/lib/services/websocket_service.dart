@@ -1,111 +1,153 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
-import 'package:flutter/foundation.dart'; // For VoidCallback
+import 'dart:convert';
+import 'dart:io'; 
 
-import '../logic/action_dispatcher.dart';
+import 'package:flutter/foundation.dart';
+import '../logic/action_dispatcher.dart'; 
 
 class WebSocketService {
   final ServerActionDispatcher dispatcher;
-
   WebSocket? _socket;
+
   bool _isConnected = false;
-  Completer<void>? _connectionCompleter;
-  Uri? _uri; // Store the connected URI
-  VoidCallback? onDisconnected; // Optional external handler
-  VoidCallback? onDisconnect;
-  VoidCallback? onConnect;
+  bool _manuallyDisconnected = false;
+  int _retrySeconds = 1;
+  Timer? _reconnectTimer;
 
-  void setOnDisconnect(VoidCallback callback) {
-    onDisconnect = callback;
-  }
+  // The URL is now set by the connect() method, so it's not final
+  String _url = ''; 
 
+  // Callbacks for connection status
+  VoidCallback? _onConnectCallback;
+  VoidCallback? _onDisconnectCallback;
+
+  // Constructor now only takes the dispatcher; URL is passed to connect()
+  WebSocketService(this.dispatcher); 
+
+  /// Sets the callback to be invoked when the WebSocket successfully connects.
   void setOnConnect(VoidCallback callback) {
-    onConnect = callback;
+    _onConnectCallback = callback;
   }
 
-  WebSocketService(this.dispatcher);
+  /// Sets the callback to be invoked when the WebSocket disconnects (gracefully or due to error).
+  void setOnDisconnect(VoidCallback callback) {
+    _onDisconnectCallback = callback;
+  }
 
-  Future<void> connect(String url) async {
-    _connectionCompleter = Completer();
-    _uri = Uri.parse(url);
+  /// Connects to the WebSocket server at the specified URL.
+  void connect(String url) {
+    _manuallyDisconnected = false;
+    _url = url; 
+    _initConnection();
+  }
+
+
+  void _initConnection() async {
+    
+    _reconnectTimer?.cancel();
 
     try {
-      _socket = await WebSocket.connect(url);
+      print("🔌 Trying to connect to $_url...");
+      _socket = await WebSocket.connect(_url);
       _isConnected = true;
-      onConnect?.call();
+      _retrySeconds = 1; 
 
-      print("✅ Connected to WebSocket at $url");
+      print("✅ Connected to WebSocket at $_url");
+      _onConnectCallback?.call();
 
+ 
       _socket!.listen(
-        _onMessageReceived,
-        onDone: _onConnectionClosed,
-        onError: _onConnectionError,
+        _onMessageReceived, 
+        onDone: _handleDisconnect, 
+        onError: _handleError,     
+      
       );
-
-      _connectionCompleter!.complete();
-    } catch (e, stack) {
+    } catch (e) {
+      // This catch block handles errors during the initial WebSocket.connect() attempt (e.g., server not running)
       print("❌ WebSocket connection failed: $e");
-      print(stack);
-      _isConnected = false;
-      _connectionCompleter!.completeError(e);
+      _isConnected = false; 
+      _scheduleReconnect();
     }
   }
 
-  Future<void> get connectionDone {
-    return _connectionCompleter?.future ?? Future.error("WebSocket not initialized");
-  }
-
+  /// Handles incoming messages from the server.
   void _onMessageReceived(dynamic message) {
     print("📩 Message from server: $message");
 
     try {
+      // Delegate message handling to the dispatcher
       dispatcher.handleMessage(message);
     } catch (e) {
-      print("⚠️ Failed to handle message: $e");
+      print("⚠ Failed to handle message: $e");
     }
   }
 
-  void _onConnectionClosed() {
+  /// Handles the WebSocket connection being closed gracefully or abruptly.
+  void _handleDisconnect() {
     _isConnected = false;
-    print("🔌 WebSocket connection closed");
-
-    // Notify external listeners
-    if (onDisconnected != null) {
-      onDisconnected!();
+    _onDisconnectCallback?.call(); // Invoke the onDisconnect callback
+    print("🔌 WebSocket connection closed.");
+    // Only attempt to reconnect if not manually disconnected
+    if (!_manuallyDisconnected) {
+      _scheduleReconnect();
+    } else {
+      print("👋 Manually disconnected, no reconnect attempt.");
     }
-
-    onDisconnect?.call();
   }
 
-  void _onConnectionError(error) {
+  /// Handles errors occurring on the active WebSocket connection.
+  void _handleError(error) {
     _isConnected = false;
+    _onDisconnectCallback?.call();
+ 
     print("🚫 WebSocket error: $error");
-
-    if (onDisconnected != null) {
-      onDisconnected!();
+    
+    if (!_manuallyDisconnected) {
+      _scheduleReconnect();
+    } else {
+      print("👋 Manually disconnected due to error, no reconnect attempt.");
     }
-
-    onDisconnect?.call();
   }
 
+  /// Schedules a reconnect attempt with exponential backoff.
+  void _scheduleReconnect() {
+    // Prevent multiple reconnect timers from running concurrently
+    if (_reconnectTimer != null && _reconnectTimer!.isActive) {
+      return;
+    }
+
+    final delay = Duration(seconds: _retrySeconds);
+    print("⏳ Reconnecting in ${_retrySeconds}s...");
+
+    _reconnectTimer = Timer(delay, () {
+      
+      _retrySeconds = (_retrySeconds * 2).clamp(1, 64);
+      _initConnection();
+    });
+  }
+
+  /// Sends a message to the server.
   void send(String action, Map<String, dynamic> data) {
     if (_socket != null && _isConnected) {
       final message = jsonEncode({'action': action, 'data': data});
       _socket!.add(message);
       print("📤 Sent message: $message");
     } else {
-      print("⚠️ Can't send message, socket not connected.");
+     
+      print("⚠ Can't send message, socket not connected. Current state: ${_socket?.readyState}");
+     
     }
   }
 
+  /// Disconnects from the WebSocket manually.
   void disconnect() {
-    _socket?.close();
+    _manuallyDisconnected = true;
+    _reconnectTimer?.cancel(); 
+    _socket?.close(1000, "Client initiated disconnect"); 
     _isConnected = false;
+    _onDisconnectCallback?.call(); 
     print("👋 Disconnected from WebSocket.");
   }
 
   bool get isConnected => _isConnected;
-
-  Uri? get uri => _uri; // Optional getter if you need to know the current URL
 }
