@@ -25,6 +25,7 @@ class GameState extends ChangeNotifier {
   String? currentTaskName;
   Map<String,dynamic>? currentTaskPayload;
   bool startFinishingTask = false;
+  String? taskResult;
 
   // Countdown timer fields
   DateTime? _endTime;
@@ -195,6 +196,15 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setTaskResult(String winners) {
+    taskResult = winners;
+    notifyListeners();
+
+    Future.delayed(const Duration(seconds: 3), () {
+      taskResult = null;
+      notifyListeners();
+    });
+  }
   // More task functions
   // ...
 

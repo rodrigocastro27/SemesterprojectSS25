@@ -127,5 +127,11 @@ class GameActions {
 
       Provider.of<GameState>(context, listen: false).updatePayload(update);
     });
+
+    dispatcher.register("task_result", (data) {
+      final gameState = Provider.of<GameState>(context, listen: false);
+      final winners = data['winners'];
+      gameState.setTaskResult(winners);
+    });
   }
 }

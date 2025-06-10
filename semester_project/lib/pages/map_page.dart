@@ -142,6 +142,59 @@ class MapPage extends StatelessWidget {
               ),
             ),
           ),
+
+          Consumer<GameState>(
+            builder: (context, gameState, _) {
+              final result = gameState.taskResult;
+
+              if (result == null) return const SizedBox();
+
+              String message;
+              Color color;
+
+              switch (result) {
+                case 'hiders':
+                  message = 'Hiders Win!';
+                  color = Colors.green;
+                  break;
+                case 'seekers':
+                  message = 'Seekers Win!';
+                  color = Colors.red;
+                  break;
+                case 'tie':
+                  message = 'It\'s a Tie!';
+                  color = Colors.orange;
+                  break;
+                default:
+                  return const SizedBox();
+              }
+
+              return Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.7),
+                  alignment: Alignment.center,
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black45, blurRadius: 12),
+                      ],
+                    ),
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
