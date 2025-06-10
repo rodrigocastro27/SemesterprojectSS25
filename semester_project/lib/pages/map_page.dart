@@ -64,15 +64,26 @@ class MapPage extends StatelessWidget {
             right: 24,
             child: Align(
               alignment: Alignment.center,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  MessageSender.startTask(playerState.getUsername()!, lobbyState.getLobbyId()!);  // CANNOT BE NULL
+              child: Consumer<GameState>(
+                builder: (context, gameState, _) {
+                  final isTaskOngoing = gameState.currentTaskName != null;
+
+                  return ElevatedButton.icon(
+                    onPressed: isTaskOngoing
+                        ? null // Disabled when task is ongoing
+                        : () {
+                            MessageSender.startTask(
+                              playerState.getUsername()!,
+                              lobbyState.getLobbyId()!,
+                            );
+                          },
+                    icon: const Icon(Icons.task),
+                    label: const Text("Start Task"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  );
                 },
-                icon: const Icon(Icons.task),
-                label: const Text("Start Task"),
-                style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
               ),
             ),
           ),

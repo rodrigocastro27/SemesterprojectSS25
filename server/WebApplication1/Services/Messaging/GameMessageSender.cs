@@ -35,7 +35,7 @@ public static class GameMessageSender
             players = playersData
         });
     }
-    
+
     public static async Task SendGameEnded(Lobby lobby)
     {
         await MessageSender.BroadcastLobbyAsync(lobby, "game_ended", new
@@ -43,7 +43,7 @@ public static class GameMessageSender
             //who won, other relevant info
         });
     }
-    
+
     public static async Task SendTimeUpdate(Lobby lobby, TimeSpan time)
     {
         DateTime now = DateTime.Now;
@@ -53,7 +53,7 @@ public static class GameMessageSender
             time_offset = now,
         });
     }
-    
+
     #region Task Messages
 
     public static async Task BroadcastTask(Lobby lobby, GameTask task)
@@ -64,8 +64,21 @@ public static class GameMessageSender
             name = task.GetName(),
         });
     }
-    
+
+    public static async Task BroadcastUpdateTask(Lobby lobby, object payload)
+    {
+        Console.WriteLine($"Updating task for lobby {lobby.Id}.");
+        await MessageSender.BroadcastLobbyAsync(lobby, "task_update", payload);
+    }
+
+    public static async Task BroadcastTaskResult(Lobby lobby, string winners)
+    {
+        await MessageSender.BroadcastLobbyAsync(lobby, "task_result", new
+        {
+            winners = winners,
+        });
+    }
 
     #endregion
-    
+
 }

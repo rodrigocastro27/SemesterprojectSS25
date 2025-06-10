@@ -82,8 +82,37 @@ public static class GameHandlers
             var lobbyId = data.GetProperty("lobbyId").GetString();
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            var gameSession = lobby!.GetGameSession()!;
 
-            await lobby!.GetGameSession()!.StartTask(lobby);   // assuming game session and lobby are not null
+            await gameSession.StartTask(lobby);   // assuming game session and lobby are not null
+        });
+
+
+        dispatcher.Register("update_task", (data, socket) =>
+        {
+            Console.Write("\nReceived update from task.");
+            var username = data.GetProperty("username").GetString();
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            var payload = data.GetProperty("payload");
+
+            var taskName = payload.GetProperty("taskName").GetString();
+            var update = payload.GetProperty("update");
+            var type = update.GetProperty("type").GetString();
+            var info = update.GetProperty("info");
+
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            var player = PlayerManager.Instance.GetPlayerByName(username!);
+            var gameSession = lobby!.GetGameSession();
+
+            // Find PlayerSession by username or socket
+            var playerSession = gameSession!.GetPlayerGameSession(player!);
+
+            if (playerSession != null)
+            {
+                playerSession.MarkUpdateReceived(taskName!, info); // set a flag inside PlayerSession
+            }
+
+            return Task.CompletedTask;
         });
     }
 }

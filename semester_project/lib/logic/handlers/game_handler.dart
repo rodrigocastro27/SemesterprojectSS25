@@ -106,5 +106,26 @@ class GameActions {
 
       gameState.stopGame();
     });
+
+
+    dispatcher.register("task_update", (data) {
+
+      final gameState = Provider.of<GameState>(context, listen: false);
+
+      final taskName = data['taskName'];
+      final update = data['update'];
+      final updateType = update['type'];
+
+      switch (taskName) {
+        case 'ClickingRace': {
+          if (updateType == 'time_out') {
+            gameState.finishTask(true);
+          }
+        }
+        default: print("NO task specified in update");
+      }
+
+      Provider.of<GameState>(context, listen: false).updatePayload(update);
+    });
   }
 }

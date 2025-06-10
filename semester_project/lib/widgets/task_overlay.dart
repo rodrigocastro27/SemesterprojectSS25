@@ -12,21 +12,20 @@ class TaskOverlay extends StatelessWidget {
     final gameState = Provider.of<GameState>(context);
 
     final taskName = gameState.currentTaskName;
-    final payload = gameState.currentTaskPayload;
 
     if (taskName == null) return const SizedBox.shrink();
 
-    Widget? taskWidget = _buildTaskWidget(taskName, payload ?? {});
+    Widget? taskWidget = _buildTaskWidget(taskName);
 
     return taskWidget;
   }
 
-  Widget _buildTaskWidget(String taskName, Map<String, dynamic>? payload) {
+  Widget _buildTaskWidget(String taskName) {
     switch (taskName) {
       case 'ClickingRace':
-        return ClickingRaceTaskWidget(payload: payload ?? {});
+        return ClickingRaceTaskWidget();
       // Add more cases as you implement new tasks
-
+      // ...
 
 
 

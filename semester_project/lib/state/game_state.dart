@@ -24,6 +24,7 @@ class GameState extends ChangeNotifier {
   // Tasks fields
   String? currentTaskName;
   Map<String,dynamic>? currentTaskPayload;
+  bool startFinishingTask = false;
 
   // Countdown timer fields
   DateTime? _endTime;
@@ -181,6 +182,16 @@ class GameState extends ChangeNotifier {
   void startTask(String name) {
     print("changing state");
     currentTaskName = name;
+    notifyListeners();
+  }
+
+  void updatePayload(Map<String,dynamic> payload) {
+    currentTaskPayload = payload;
+    notifyListeners();
+  }
+
+  void finishTask(bool finish) {
+    startFinishingTask = finish;
     notifyListeners();
   }
 

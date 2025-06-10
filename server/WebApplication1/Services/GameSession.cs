@@ -162,12 +162,57 @@ public class GameSession
         {
             Console.WriteLine($"[task] Executing task {selectedTask.GetName()}");
             await GameMessageSender.BroadcastTask(lobby, selectedTask);
-            await selectedTask.ExecuteAsync(lobby);
+
+            Task waitingTask = WaitForAllPlayersUpdateAsync(lobby, selectedTask, TimeSpan.FromSeconds(25));
+            Task executionTask = selectedTask.ExecuteAsync(lobby);
+
+            await Task.WhenAny(waitingTask, executionTask); // for both tasks to run in parallel!!
         }
         else
         {
             Console.WriteLine("[task] Could not find any task to play.");
         }
+    }
+
+    public GameTask? GetTask(string taskName)
+    {
+        foreach (var task in _taskList)
+        {
+            if (task.Name == taskName) return task;
+        }
+        return null;
+    }
+
+    public async Task WaitForAllPlayersUpdateAsync(Lobby lobby, GameTask task, TimeSpan timeout)
+    {
+        Console.WriteLine("Starting to wait for player responses from task...");
+
+        var startTime = DateTime.UtcNow;
+
+        var playerSessions = _playerGameSessions.Values.ToList();  // all PlayerSessions in this game
+
+        var respondedSessions = new HashSet<PlayerGameSession>();
+
+        while (DateTime.UtcNow - startTime < timeout)
+        {
+            foreach (var session in playerSessions)
+            {
+                if (session.HasSentUpdate(task.GetName()))
+                {
+                    respondedSessions.Add(session);
+                }
+            }
+
+            if (respondedSessions.Count == playerSessions.Count)
+                break;  // all players responded
+
+            await Task.Delay(200);  // small delay before checking again
+        }
+
+        Console.WriteLine("Finished waiting for players...");
+
+
+        await task.EndTask(lobby, respondedSessions);
     }
 
     #endregion
