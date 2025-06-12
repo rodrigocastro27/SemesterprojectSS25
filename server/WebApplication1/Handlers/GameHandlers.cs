@@ -1,4 +1,5 @@
-﻿using WebApplication1.Models;
+﻿using Microsoft.Net.Http.Headers;
+using WebApplication1.Models;
 using WebApplication1.Services;
 using WebApplication1.Services.Messaging;
 using WebApplication1.Utils;
@@ -31,9 +32,25 @@ public static class GameHandlers
             */
 
             GameSession gameSession = new GameSession(lobby!);
-
             await gameSession.Start();
+        });
 
+
+        dispatcher.Register("set_map_center", (data, socket) =>
+        {
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            var lat = data.GetProperty("latitude").GetDouble();
+            var lon = data.GetProperty("longitude").GetDouble();
+
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            GameSession gameSession = lobby!.GetGameSession()!;
+            if (gameSession != null)
+            {
+                gameSession.SetMapCenter(lat, lon);
+                Console.WriteLine($"SET MAP CENTER TO ({lat},{lon})");
+            }
+
+            return Task.CompletedTask;
         });
 
 

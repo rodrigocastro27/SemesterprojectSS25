@@ -14,6 +14,7 @@ class GameState extends ChangeNotifier {
   PingState pingState = PingState.idle;
   int cooldownSeconds = 10;
   LatLng? userLocation;
+  int locationUpdateIntervalSeconds = 10;
 
   bool gameEnded = false;
 
@@ -31,12 +32,14 @@ class GameState extends ChangeNotifier {
   DateTime? _endTime;
   Duration remainingTime = Duration.zero;
   Timer? _countdownTimer;
+  Timer? _locationUpdateTimer;
 
   void initGame(BuildContext context) {
    
     hiders.clear();
     seekers.clear();
     players = Provider.of<LobbyState>(context, listen: false).getPlayerList();
+    startLocationUpdates(context); // start updating location every 10s
 
     for (var p in players) {
       if (p.role == "hider") {
@@ -51,6 +54,18 @@ class GameState extends ChangeNotifier {
     print("🧑 Total players: ${players.length}");
     print("🎭 Hiders: ${hiders.map((p) => p.name).toList()}");
     print("🔍 Seekers: ${seekers.map((p) => p.name).toList()}");
+  }
+
+  void startLocationUpdates(BuildContext context) {
+    // Cancel if already running
+    _locationUpdateTimer?.cancel();
+
+    // Start a new timer
+    _locationUpdateTimer = Timer.periodic(
+      Duration(seconds: locationUpdateIntervalSeconds),
+      (_) => updatePosition(context),
+    );
+    notifyListeners();
   }
 
   void setRole(bool hider) {
@@ -76,7 +91,7 @@ class GameState extends ChangeNotifier {
     }
   }
 
-  void initLocation(BuildContext context) async {
+  void initLocation(BuildContext context, String lobbyId) async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
 
@@ -90,6 +105,9 @@ class GameState extends ChangeNotifier {
       desiredAccuracy: LocationAccuracy.high,
     );
     setLocation(LatLng(position.latitude, position.longitude));
+
+    // Sent the location to the server
+    MessageSender.setMapCenter(lobbyId, position.latitude, position.longitude);
   }
 
   void updatePosition(BuildContext context) async {
@@ -217,6 +235,7 @@ class GameState extends ChangeNotifier {
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _locationUpdateTimer?.cancel();
     super.dispose();
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:semester_project/state/game_state.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:semester_project/state/lobby_state.dart';
 
 import 'ping_button.dart';
 import 'user_marker.dart'; // You can rename to HiderMarker if specific
@@ -14,10 +14,11 @@ class SeekerMapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameState>(context);
+    final lobbyState = Provider.of<LobbyState>(context);
 
     // Show loading indicator while user location is initializing
     if (gameState.userLocation == null) {
-      Provider.of<GameState>(context, listen: false).initLocation(context);
+      Provider.of<GameState>(context, listen: false).initLocation(context, lobbyState.getLobbyId()!);
       return const Center(child: CircularProgressIndicator());
     }
 

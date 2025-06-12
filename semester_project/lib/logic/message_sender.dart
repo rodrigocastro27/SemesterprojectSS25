@@ -53,6 +53,14 @@ class MessageSender {
     });
   } 
 
+  static void setMapCenter(String lobbyId, double lat, double lon) {
+    webSocketService.send("set_map_center", {
+      "lobbyId": lobbyId,
+      "latitude": lat,
+      "longitude": lon,
+    });
+  }
+
   static void startGame(String lobbyId)
   {
     webSocketService.send("start_game", {
