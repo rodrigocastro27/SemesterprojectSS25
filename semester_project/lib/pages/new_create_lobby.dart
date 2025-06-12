@@ -12,7 +12,7 @@ class CreateLobbyPage extends StatefulWidget {
 
 class _CreateLobbyPageState extends State<CreateLobbyPage> {
   final TextEditingController _lobbyNameController = TextEditingController();
-  String _selectedRole = 'Hider'; // Default role
+  String _selectedRole = 'Hider';
 
   void _createLobby() async {
     final lobbyName = _lobbyNameController.text.trim();
@@ -26,7 +26,7 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
         'members': [
           {
             'name': username,
-            'role': _selectedRole.toLowerCase(), // Use selected role
+            'role': _selectedRole.toLowerCase(),
           },
         ],
       });
@@ -72,11 +72,10 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             children: [
-              // Image at the top
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
-                  'assets/images/floppa.png', // Replace with your image path
+                  'assets/images/floppa.png',
                   height: 120,
                   width: 120,
                   fit: BoxFit.contain,
@@ -84,7 +83,6 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
               ),
               const SizedBox(height: 20),
               
-              // Lobby Name Input
               TextField(
                 controller: _lobbyNameController,
                 decoration: InputDecoration(
@@ -100,7 +98,6 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
               ),
               const SizedBox(height: 20),
               
-              // Role Selection Dropdown
               DropdownButtonFormField<String>(
                 value: _selectedRole,
                 decoration: InputDecoration(
@@ -127,7 +124,6 @@ class _CreateLobbyPageState extends State<CreateLobbyPage> {
               ),
               const SizedBox(height: 40),
               
-              // Create Lobby Button
               MaterialButton(
                 onPressed: _createLobby,
                 color: Color(0xff36c8bb),

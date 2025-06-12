@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login.dart'; // Make sure this file exists and contains your login page
+import 'new_login.dart';
 
 class RegisterCat extends StatelessWidget {
   const RegisterCat({super.key});
@@ -40,7 +40,7 @@ class RegisterCat extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
-                  color: Color(0xff36c8bb), // Changed to green
+                  color: Color(0xff36c8bb),
                 ),
               ),
               const SizedBox(height: 8),
@@ -60,19 +60,18 @@ class RegisterCat extends StatelessWidget {
               const SizedBox(height: 16),
               MaterialButton(
                 onPressed: () {
-                  // Registration logic here
                 },
-                color: const Color(0xff36c8bb), // Main green color
+                color: const Color(0xff36c8bb),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(22.0), // Rounded corners
+                  borderRadius: BorderRadius.circular(22.0),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: const Text(
                   "Register",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
-                textColor: Colors.white, // White text
+                textColor: Colors.white,
                 height: 45,
                 minWidth: MediaQuery.of(context).size.width,
               ),
@@ -87,14 +86,14 @@ class RegisterCat extends StatelessWidget {
                   const SizedBox(width: 8),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context); // Go back to login page
+                      Navigator.pop(context); 
                     },
                     child: const Text(
                       "Sign In",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: Color(0xff36c8bb), // Main green color
+                        color: Color(0xff36c8bb),
                       ),
                     ),
                   ),
@@ -117,15 +116,15 @@ class RegisterCat extends StatelessWidget {
           prefixIcon: Icon(icon, color: const Color(0xff212435)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1), // Outline color
+            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1), // Outline color
+            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1), // Outline color
+            borderSide: const BorderSide(color: Color(0xff0c9c90), width: 1),
           ),
         ),
       ),

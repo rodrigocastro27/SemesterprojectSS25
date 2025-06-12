@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'register.dart';
-import 'lobby.dart';
+import 'new_register.dart';
+import 'new_lobby.dart';
 
 class LoginCat extends StatefulWidget {
   const LoginCat({super.key});
@@ -145,7 +145,7 @@ class _LoginCatState extends State<LoginCat> {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: Color(0xff36c8bb), // First color
+                      color: Color(0xff36c8bb),
                     ),
                   ),
                 ),
@@ -158,10 +158,10 @@ class _LoginCatState extends State<LoginCat> {
                         MaterialPageRoute(builder: (context) => LobbyCat()),
                       );
                     },
-                    color: Color(0xff36c8bb), // First color
+                    color: Color(0xff36c8bb),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(22.0), // New border radius
+                      borderRadius: BorderRadius.circular(22.0),
                     ),
                     padding: EdgeInsets.all(16),
                     child: Text(
@@ -185,12 +185,12 @@ class _LoginCatState extends State<LoginCat> {
                       ),
                     );
                   },
-                  color: Colors.white, // White interior
+                  color: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(22.0), // New border radius
+                    borderRadius: BorderRadius.circular(22.0),
                     side: BorderSide(
-                      color: Color(0xff0c9c90), // Second color for outline
+                      color: Color(0xff0c9c90),
                       width: 1,
                     ),
                   ),

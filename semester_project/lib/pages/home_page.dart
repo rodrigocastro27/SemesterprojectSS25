@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'create_lobby.dart';
-import 'join_lobby.dart';
+import 'new_create_lobby.dart';
+import 'new_join_lobby.dart';
 
 class HomePage extends StatefulWidget{
   const HomePage({super.key});

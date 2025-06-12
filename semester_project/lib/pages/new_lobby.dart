@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'join_lobby.dart';
-import 'create_lobby.dart';
+import 'new_join_lobby.dart';
+import 'new_create_lobby.dart';
 
 class LobbyCat extends StatelessWidget {
   @override
