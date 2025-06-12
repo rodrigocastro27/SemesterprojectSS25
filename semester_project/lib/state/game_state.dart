@@ -14,7 +14,7 @@ class GameState extends ChangeNotifier {
   PingState pingState = PingState.idle;
   int cooldownSeconds = 10;
   LatLng? userLocation;
-  int locationUpdateIntervalSeconds = 10;
+  int locationUpdateIntervalSeconds = 2;
 
   bool gameEnded = false;
 
@@ -63,9 +63,10 @@ class GameState extends ChangeNotifier {
     // Start a new timer
     _locationUpdateTimer = Timer.periodic(
       Duration(seconds: locationUpdateIntervalSeconds),
-      (_) => updatePosition(context),
+      (_) {updatePosition(context); print("New position: (${userLocation!.latitude},${userLocation!.longitude})"); },
     );
     notifyListeners();
+
   }
 
   void setRole(bool hider) {
