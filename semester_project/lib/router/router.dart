@@ -4,7 +4,7 @@ import 'package:semester_project/pages/authentication_page.dart';
 import 'package:semester_project/pages/end_page.dart';
 import 'package:semester_project/pages/home_page.dart';
 import 'package:semester_project/pages/lobby%20pages/lobby_page.dart';
-import 'package:semester_project/pages/map_page.dart';
+import 'package:semester_project/pages/game%20pages/map_page.dart';
 import 'package:semester_project/services/navigation_service.dart';
 import 'package:semester_project/state/game_state.dart';
 import 'package:semester_project/state/player_state.dart';
@@ -75,7 +75,9 @@ GoRouter createRouter(
         builder: (context, state) => HomePage(username: playerState.username!),
       ),
       GoRoute(path: '/lobby', builder: (context, state) => const LobbyPage()),
+
       GoRoute(path: '/game', builder: (context, state) => const MapPage()),
+
 
       GoRoute(
         path: '/end',
