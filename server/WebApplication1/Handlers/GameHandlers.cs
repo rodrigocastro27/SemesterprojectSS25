@@ -60,6 +60,7 @@ public static class GameHandlers
 
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
+           
             var longitude = data.GetProperty("lon").GetDouble();
             var latitude = data.GetProperty("lat").GetDouble();
 
@@ -112,6 +113,26 @@ public static class GameHandlers
                 playerSession.MarkUpdateReceived(taskName!, info); // set a flag inside PlayerSession
             }
 
+            return Task.CompletedTask;
+        });
+
+
+
+        dispatcher.Register("player_eliminated", (data, socket) =>
+        {
+            var username = data.GetProperty("username").GetString();
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            var player = PlayerManager.Instance.GetPlayer(username!);
+
+            if (player == null || lobby == null) return Task.CompletedTask;
+            
+            Console.WriteLine($"Player is eliminated: {player.Name}");
+            
+            var session = lobby?.GetGameSession();
+            session?.EliminatePlayer(player);
+            
             return Task.CompletedTask;
         });
     }

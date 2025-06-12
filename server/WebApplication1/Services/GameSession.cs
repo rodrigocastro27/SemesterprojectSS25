@@ -65,7 +65,6 @@ public class GameSession
     }
 
     #endregion
-
     
     #region Timer Adjustment
 
@@ -190,7 +189,8 @@ public class GameSession
         var startTime = DateTime.UtcNow;
 
         var playerSessions = _playerGameSessions.Values.ToList();  // all PlayerSessions in this game
-
+            
+        
         var respondedSessions = new HashSet<PlayerGameSession>();
 
         while (DateTime.UtcNow - startTime < timeout)
@@ -223,6 +223,20 @@ public class GameSession
         _playerGameSessions.TryGetValue(player, out var session) ? session : null;
 
     public Lobby GetLobby() => _lobby;
+
+    #endregion
+
+
+    #region Elimination
+
+    public void EliminatePlayer(Player player)
+    {
+        if(_playerGameSessions.TryGetValue(player, out var session))
+        {
+            session.Eliminate();
+            _ = GameMessageSender.BroadcastEliminatedPlayer(_lobby, player);
+        }
+    }
 
     #endregion
 }

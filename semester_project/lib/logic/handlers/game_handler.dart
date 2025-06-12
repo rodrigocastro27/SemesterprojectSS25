@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
 import 'package:semester_project/logic/message_sender.dart';
@@ -8,7 +6,6 @@ import 'package:semester_project/models/player.dart';
 import 'package:provider/provider.dart';
 import 'package:semester_project/state/game_state.dart';
 import 'package:semester_project/state/lobby_state.dart';
-import '../action_dispatcher.dart';
 import 'package:semester_project/state/player_state.dart';
 
 class GameActions {
@@ -133,5 +130,17 @@ class GameActions {
       final winners = data['winners'];
       gameState.setTaskResult(winners);
     });
+
+
+    dispatcher.register("eliminated_player", (data){
+        final gameState = Provider.of<GameState>(context, listen: false);
+    });
+
+    dispatcher.register("current_player_eliminated", (data){
+        final gameState = Provider.of<GameState>(context, listen: false);
+        gameState.stopGame();
+        print("you are eliminated!!!");
+    });
+    
   }
 }
