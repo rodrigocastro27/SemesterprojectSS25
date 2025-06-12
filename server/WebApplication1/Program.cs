@@ -52,6 +52,7 @@ app.Map("/ws", async context =>
                 Console.WriteLine($"WebSocketException for player {player.Name}: {wsex.Message}");
                 player.SetOnline(false);
                 DatabaseHandler.Instance.UpdatePlayersIsOnline(player.Name, false);
+                LobbyManager.Instance.DeleteEmptyLobbies();
             }
             else Console.WriteLine("WebSocketException.");
         }
@@ -76,10 +77,11 @@ app.Map("/ws", async context =>
                 // Ensure cleanup
                 if (player!.IsOnline())
                     player.SetOnline(false);
-                    DatabaseHandler.Instance.UpdatePlayersIsOnline(player.Name, false);
+                DatabaseHandler.Instance.UpdatePlayersIsOnline(player.Name, false);
+                LobbyManager.Instance.DeleteEmptyLobbies();
 
                 player.Socket = null!;
-            }            
+            }
         }
         
     }

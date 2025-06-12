@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
 import 'package:semester_project/logic/message_sender.dart';
+import 'package:semester_project/models/ability_type.dart';
 import 'package:semester_project/models/player.dart';
 import 'package:provider/provider.dart';
 import 'package:semester_project/state/game_state.dart';
@@ -132,6 +133,16 @@ class GameActions {
       final gameState = Provider.of<GameState>(context, listen: false);
       final winners = data['winners'];
       gameState.setTaskResult(winners);
+    });
+
+    dispatcher.register("gained_ability", (data) {
+      final playerState = Provider.of<PlayerState>(context, listen: false);
+      final role = playerState.getPlayer()!.role;
+      if (role == "hider") {
+        playerState.addHiderAbility();
+      } else {
+        playerState.addSeekerAbility();
+      }
     });
   }
 }

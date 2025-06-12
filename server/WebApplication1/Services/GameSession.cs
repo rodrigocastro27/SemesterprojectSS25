@@ -198,7 +198,7 @@ public class GameSession
 
         var playerSessions = _playerGameSessions.Values.ToList();  // all PlayerSessions in this game
 
-        var respondedSessions = new HashSet<PlayerGameSession>();
+        var respondedSessions = new List<PlayerGameSession>();
 
         while (DateTime.UtcNow - startTime < timeout)
         {

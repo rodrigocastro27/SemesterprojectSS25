@@ -24,12 +24,25 @@ public class ClickingRaceTask : GameTask
             },
         };
 
+        ResetCounters();
+
         await GameMessageSender.BroadcastUpdateTask(lobby, payload);
     }
 
-    public override async Task EndTask(Lobby lobby, HashSet<PlayerGameSession> respondedSessions)
+    private void ResetCounters()
+    {
+        hidersCounter = 0;
+        seekersCounter = 0;
+    }
+
+    public override async Task EndTask(Lobby lobby, List<PlayerGameSession> respondedSessions)
     {
         Console.WriteLine("Ending task...");
+        Player? hidersMVP = null;
+        int hidersMVPcount = 0;
+        Player? seekersMVP = null;
+        int seekersMVPcount = 0;
+
         foreach (var session in respondedSessions)
         {
             var info = session.GetInfoFrom("ClickingRace");
@@ -38,9 +51,20 @@ public class ClickingRaceTask : GameTask
 
             if (isHider) hidersCounter += count;
             else seekersCounter += count;
+
+            if (count > hidersMVPcount && isHider)
+            {
+                hidersMVPcount = count;
+                hidersMVP = session.GetPlayer();
+            }
+            else if (count > seekersMVPcount && !isHider)
+            {
+                seekersMVPcount = count;
+                seekersMVP = session.GetPlayer();
+            }
         }
 
-        Console.WriteLine($"RESULT: hiders {hidersCounter} - seekers {seekersCounter}");
+        Console.WriteLine($"RESULT: hiders {hidersCounter} - seekers {seekersCounter}.");
         var winners = "";
         if (hidersCounter > seekersCounter) winners = "hiders";
         else if (hidersCounter < seekersCounter) winners = "seekers";
@@ -48,6 +72,23 @@ public class ClickingRaceTask : GameTask
 
         Console.WriteLine("Notifying players of the result.");
         await GameMessageSender.BroadcastTaskResult(lobby, winners);
+        if (hidersMVP != null || seekersMVP != null)
+        {
+            if (winners == "hiders" && hidersMVP != null)
+            {
+                Console.WriteLine($"Notifying hider {hidersMVP.Name} that he won an ability!");
+                await GameMessageSender.NotifyAbilityGainAsync(hidersMVP, "hider");
+            }
+            else if (winners == "seekers" && seekersMVP != null)
+            {
+                Console.WriteLine($"Notifying seeker {seekersMVP.Name} that he won an ability!");
+                await GameMessageSender.NotifyAbilityGainAsync(seekersMVP, "hider");
+            }
+            else
+            {
+                Console.WriteLine("Unconclusive result. Either tie or uncontrolled case.");
+            }
+        }
 
         // Clear all used variables
         foreach (var session in respondedSessions)

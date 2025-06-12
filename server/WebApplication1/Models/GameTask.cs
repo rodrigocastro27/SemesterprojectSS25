@@ -15,7 +15,7 @@ public abstract class GameTask
     // What happens when task starts
     public abstract Task ExecuteAsync(Lobby lobby);
 
-    public abstract Task EndTask(Lobby lobby, HashSet<PlayerGameSession> respondedSessions);
+    public abstract Task EndTask(Lobby lobby, List<PlayerGameSession> respondedSessions);
 
     // Optional: how to validate completion or broadcast updates
     public virtual Task OnTickAsync(Lobby lobby) => Task.CompletedTask;

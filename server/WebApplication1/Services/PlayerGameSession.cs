@@ -20,7 +20,7 @@ public class PlayerGameSession(Player player, GameSession gameSession)
         if (_taskUpdates == null)
             return false;
 
-        return _taskUpdates.TryGetValue(taskName, out var value) && value.ValueKind != System.Text.Json.JsonValueKind.Undefined;;
+        return _taskUpdates.TryGetValue(taskName, out var value) && value.ValueKind != System.Text.Json.JsonValueKind.Undefined; ;
     }
 
     public System.Text.Json.JsonElement GetInfoFrom(string taskName)
@@ -55,4 +55,9 @@ public class PlayerGameSession(Player player, GameSession gameSession)
         }
         
     }*/
+
+    public Player GetPlayer()
+    {
+        return _player;
+    }
 }
