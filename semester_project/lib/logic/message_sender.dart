@@ -90,5 +90,11 @@ class MessageSender {
       "payload" : payload,
     });
   }
+
+  static void makeHidersPhonesSound(String lobbyId) {
+    webSocketService.send("make_hiders_phone_sound", {
+      "lobbyId": lobbyId,
+    });
+  }
   
 }

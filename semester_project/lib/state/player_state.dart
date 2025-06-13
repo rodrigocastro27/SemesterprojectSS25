@@ -1,7 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/models/player.dart';
 import 'package:semester_project/models/ability_type.dart';
+import 'package:semester_project/state/game_state.dart';
+import 'package:semester_project/state/lobby_state.dart';
+import 'package:audioplayers/audioplayers.dart' as audioplayers;
 
 class PlayerState extends ChangeNotifier {
   String? username;
@@ -11,6 +16,9 @@ class PlayerState extends ChangeNotifier {
   Player? _player;
   List<HiderAbility> hiderAbilities = [];
   List<SeekerAbility> seekerAbilities = [];
+  bool hiderIsHidden = false;
+  String? fakeName;
+  int pings = 0;
 
   void register(String name) {
     username = name;
@@ -62,5 +70,47 @@ class PlayerState extends ChangeNotifier {
     final randomIndex = Random().nextInt(values.length);
     seekerAbilities.add(values[randomIndex]);
     print("Player ${_player!.name} gained ability: ${values[randomIndex]}");
+  }
+
+  void useAbility(Enum ability, BuildContext context) {
+    switch(ability) {
+      case HiderAbility.hidePing:
+        hidePlayer();
+      case HiderAbility.swapQR:
+        swapQRcode(context);
+      // Add more hider abilities here
+      // ...
+
+      case SeekerAbility.gainPing:
+        addPing();
+      case SeekerAbility.hiderSound:
+        makeHidersPhonesSound(context);
+      // Add more seeker abilities here
+      // ...
+    }
+  }
+
+  void hidePlayer() {
+    hiderIsHidden = true;
+    notifyListeners();
+  }
+
+  void swapQRcode(BuildContext context) {
+    final gameState = Provider.of<GameState>(context, listen: false);
+    final random = Random();
+    final chosenPlayer =  gameState.hiders[random.nextInt(gameState.hiders.length)];
+    fakeName = chosenPlayer.name;
+    notifyListeners();
+  }
+
+  void addPing() {
+    pings += 1;
+    notifyListeners();
+  }
+
+  void makeHidersPhonesSound(BuildContext context) {
+    final lobbyState = Provider.of<LobbyState>(context, listen: false);
+    var lobbyId = lobbyState.lobbyId;
+    MessageSender.makeHidersPhonesSound(lobbyId!);
   }
 }

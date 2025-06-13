@@ -1,2 +1,2 @@
-enum HiderAbility { swapQR }
+enum HiderAbility { swapQR , hidePing }
 enum SeekerAbility { hiderSound, gainPing }

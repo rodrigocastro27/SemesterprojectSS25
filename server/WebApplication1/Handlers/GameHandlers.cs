@@ -131,5 +131,12 @@ public static class GameHandlers
 
             return Task.CompletedTask;
         });
+    
+        dispatcher.Register("make_hiders_phone_sound", async (data, socket) => 
+        {
+            Console.WriteLine("[make_hiders_phone_sound] Notifying hiders to make sound.");
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            await PlayerMessageSender.SendMakeNoise(lobbyId!);
+        });
     }
 }
