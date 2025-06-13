@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:semester_project/state/game_state.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:semester_project/state/lobby_state.dart';
+import 'package:semester_project/state/player_state.dart';
 
 import 'ping_button.dart';
 import 'user_marker.dart'; // You can rename to HiderMarker if specific
@@ -58,10 +59,17 @@ class SeekerMapView extends StatelessWidget {
         Positioned(
           bottom: 20,
           left: 20,
-          child: PingButton(
-            onPing: () => gameState.startPing(context),
-            pingState: gameState.pingState,
-            cooldownSeconds: gameState.cooldownSeconds,
+          child: Consumer2<PlayerState, GameState>(
+            builder: (context, playerState, gameState, _) {
+              final hasPings = playerState.pings > 0;
+
+              return PingButton(
+                onPing: () => gameState.startPing(context),
+                pingState: gameState.pingState,
+                cooldownSeconds: gameState.cooldownSeconds,
+                isEnabled: hasPings,
+              );
+            },
           ),
         ),
       ],

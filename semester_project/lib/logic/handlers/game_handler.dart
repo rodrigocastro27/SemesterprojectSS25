@@ -11,6 +11,9 @@ import 'package:semester_project/state/game_state.dart';
 import 'package:semester_project/state/lobby_state.dart';
 import '../action_dispatcher.dart';
 import 'package:semester_project/state/player_state.dart';
+import 'package:semester_project/services/navigation_service.dart';
+import 'package:semester_project/widgets/mvp_overlay.dart';
+
 
 class GameActions {
   static void register(
@@ -138,6 +141,13 @@ class GameActions {
     dispatcher.register("gained_ability", (data) {
       final playerState = Provider.of<PlayerState>(context, listen: false);
       final role = playerState.getPlayer()!.role;
+      
+      rootNavigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => MVPOverlay(abilityMessage: "You won a new ability!"),
+        ),
+      );
+
       if (role == "hider") {
         playerState.addHiderAbility();
       } else {

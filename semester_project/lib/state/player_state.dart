@@ -18,7 +18,7 @@ class PlayerState extends ChangeNotifier {
   List<SeekerAbility> seekerAbilities = [];
   bool hiderIsHidden = false;
   String? fakeName;
-  int pings = 0;
+  int pings = 1;
 
   void register(String name) {
     username = name;
@@ -65,6 +65,11 @@ class PlayerState extends ChangeNotifier {
     print("Player ${_player!.name} gained ability: ${values[randomIndex]}");
   }
 
+  void removeHiderAbility(HiderAbility ability) {
+    hiderAbilities.remove(ability);
+    notifyListeners();
+  }
+
   void addSeekerAbility() {
     final values = SeekerAbility.values;
     final randomIndex = Random().nextInt(values.length);
@@ -72,22 +77,33 @@ class PlayerState extends ChangeNotifier {
     print("Player ${_player!.name} gained ability: ${values[randomIndex]}");
   }
 
+  void removeSeekerAbility(SeekerAbility ability) {
+    seekerAbilities.remove(ability);
+    notifyListeners();
+  }
+
   void useAbility(Enum ability, BuildContext context) {
     switch(ability) {
       case HiderAbility.hidePing:
         hidePlayer();
+        removeHiderAbility(HiderAbility.hidePing);
       case HiderAbility.swapQR:
         swapQRcode(context);
+        removeHiderAbility(HiderAbility.swapQR);
       // Add more hider abilities here
       // ...
 
       case SeekerAbility.gainPing:
         addPing();
+        removeSeekerAbility(SeekerAbility.gainPing);
       case SeekerAbility.hiderSound:
         makeHidersPhonesSound(context);
+        removeSeekerAbility(SeekerAbility.hiderSound);
       // Add more seeker abilities here
       // ...
     }
+
+
   }
 
   void hidePlayer() {
@@ -105,6 +121,11 @@ class PlayerState extends ChangeNotifier {
 
   void addPing() {
     pings += 1;
+    notifyListeners();
+  }
+
+  void removePing() {
+    pings -= 1;
     notifyListeners();
   }
 

@@ -84,12 +84,16 @@ class GameState extends ChangeNotifier {
     pingState = PingState.pinging;
     notifyListeners();
 
-    final username = Provider.of<PlayerState>(context, listen: false).getUsername();
+    final playerState = Provider.of<PlayerState>(context, listen: false);
+
+    final username = playerState.getUsername();
     final lobbyId = Provider.of<LobbyState>(context, listen: false).getLobbyId();
 
     if (lobbyId != null && username != null) {
       MessageSender.pingRequest(username, lobbyId);
     }
+
+    playerState.removePing();
   }
 
   void initLocation(BuildContext context, String lobbyId) async {
