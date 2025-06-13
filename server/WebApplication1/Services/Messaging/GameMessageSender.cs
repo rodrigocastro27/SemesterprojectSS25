@@ -14,13 +14,13 @@
         }
         public static async Task RequestHidersLocation(Lobby lobby)
         {
-            await MessageSender.BroadcastToHiders(lobby, "location_request", new
+            await MessageSender.BroadcastToHidersAsync(lobby, "location_request", new
             {
                 //idk what else to send
             });
         }
 
-        public static async Task SendPingToSeekers(Lobby lobby, List<Player> updatedLocations)
+        public static Task SendPingToSeekers(Lobby lobby, List<Player> updatedLocations)
         {
             var playersData = updatedLocations.Select(p => new
             {
@@ -30,7 +30,7 @@
                 lon = p.Position.Longitude,
             });
 
-            await MessageSender.BroadcastToSeekers(lobby, "location_update_list", new
+            return MessageSender.BroadcastToSeekersAsync(lobby, "location_update_list", new
             {
                 players = playersData
             });

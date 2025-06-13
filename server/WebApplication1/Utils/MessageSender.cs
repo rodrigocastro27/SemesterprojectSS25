@@ -45,22 +45,7 @@ namespace WebApplication1.Utils
                 Console.WriteLine($"Cannot send to player {player.Name} - socket not open.");
             }
         }
-
-        public static async Task BroadcastLobbyAsync(Lobby lobby, string action, object data)
-        {
-            foreach (var player in lobby.Players)
-            {
-                if (player.Socket != null && player.Socket.State == WebSocketState.Open)
-                {
-                    await SendToPlayerAsync(player, action, data);
-                }
-                else
-                {
-                    Console.WriteLine($"Skipping player {player.Name} - socket closed.");
-                }
-            }
-        }
-
+        
         public static async Task BroadcastToHiders(Lobby lobby, string action, object data)
         {
             foreach (var player in lobby.Players)
@@ -82,5 +67,37 @@ namespace WebApplication1.Utils
                 }
             }
         }
+        
+        
+        
+        private static async Task TrySendAsync(Player player, string action, object data)
+        {
+            try
+            {
+                await SendToPlayerAsync(player, action, data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WARN] Failed to send to {player.Name}: {ex.Message}");
+            }
+        }
+
+        public static async Task BroadcastAsync(IEnumerable<Player> players, string action, object data)
+        {
+            var tasks = players
+                .Where(p => p.Socket?.State == WebSocketState.Open)
+                .Select(p => TrySendAsync(p, action, data));
+
+            await Task.WhenAll(tasks);
+        }
+
+        public static Task BroadcastLobbyAsync(Lobby lobby, string action, object data)
+            => BroadcastAsync(lobby.Players, action, data);
+
+        public static Task BroadcastToHidersAsync(Lobby lobby, string action, object data)
+            => BroadcastAsync(lobby.GetHidersList(), action, data);
+
+        public static Task BroadcastToSeekersAsync(Lobby lobby, string action, object data)
+            => BroadcastAsync(lobby.GetSeekersList(), action, data);
     }
 }

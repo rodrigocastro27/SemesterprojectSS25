@@ -62,4 +62,9 @@ public class Lobby
     {
         
     }
+
+    public IEnumerable<Player> GetSeekersList()
+    {
+        return Players.Where(p => p.GetRole() == Role.seeker).ToList();
+    }
 }

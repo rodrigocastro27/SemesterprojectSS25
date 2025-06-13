@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
       print("⚠️ WebSocket disconnected - player marked as disconnected.");
     });
 
-    webSocketService.connect('wss://f546-193-170-132-8.ngrok-free.app/ws');
+    webSocketService.connect('wss://db18-90-167-167-62.ngrok-free.app/ws');
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

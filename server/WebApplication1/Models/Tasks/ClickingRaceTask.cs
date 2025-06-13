@@ -11,17 +11,14 @@ public class ClickingRaceTask : GameTask
 
     public override async Task ExecuteAsync(Lobby lobby)
     {
-        Console.WriteLine($"[ClickingRaceTask] Starting 15-second timer for lobby {lobby.Id}");
+        Console.WriteLine($"[ClickingRaceTask] Starting 10-second timer for lobby {lobby.Id}");
         await Task.Delay(TimeSpan.FromSeconds(10));
         Console.WriteLine($"[ClickingRaceTask] Timer ended. Sending message to lobby {lobby.Id}");
 
-        object payload = new
+        var payload = new
         {
             taskName = "ClickingRace",
-            update = new
-            {
-                type = "time_out",
-            },
+            update = new { type = "time_out" }
         };
 
         await GameMessageSender.BroadcastUpdateTask(lobby, payload);
@@ -30,6 +27,7 @@ public class ClickingRaceTask : GameTask
     public override async Task EndTask(Lobby lobby, HashSet<PlayerGameSession> respondedSessions)
     {
         Console.WriteLine("Ending task...");
+
         foreach (var session in respondedSessions)
         {
             var info = session.GetInfoFrom("ClickingRace");
@@ -40,20 +38,16 @@ public class ClickingRaceTask : GameTask
             else seekersCounter += count;
         }
 
+        var result = hidersCounter > seekersCounter ? "hiders"
+            : seekersCounter > hidersCounter ? "seekers"
+            : "tie";
+
         Console.WriteLine($"RESULT: hiders {hidersCounter} - seekers {seekersCounter}");
-        var winners = "";
-        if (hidersCounter > seekersCounter) winners = "hiders";
-        else if (hidersCounter < seekersCounter) winners = "seekers";
-        else winners = "tie";
+        await GameMessageSender.BroadcastTaskResult(lobby, result);
 
-        Console.WriteLine("Notifying players of the result.");
-        await GameMessageSender.BroadcastTaskResult(lobby, winners);
-
-        // Clear all used variables
         foreach (var session in respondedSessions)
-        {
             session._taskUpdates.Clear();
-        }
+
         respondedSessions.Clear();
     }
 }
