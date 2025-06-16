@@ -21,6 +21,12 @@ class GameState extends ChangeNotifier {
   List<Player> seekers = [];
   List<Player> players = [];
 
+  // Tasks fields
+  String? currentTaskName;
+  Map<String,dynamic>? currentTaskPayload;
+  bool startFinishingTask = false;
+  String? taskResult;
+
   // Countdown timer fields
   DateTime? _endTime;
   Duration remainingTime = Duration.zero;
@@ -28,8 +34,8 @@ class GameState extends ChangeNotifier {
 
   void initGame(BuildContext context) {
    
-   hiders.clear();
-   seekers.clear();
+    hiders.clear();
+    seekers.clear();
     players = Provider.of<LobbyState>(context, listen: false).getPlayerList();
 
     for (var p in players) {
@@ -39,6 +45,8 @@ class GameState extends ChangeNotifier {
         seekers.add(p);
       }
     }
+
+    endTask();
 
     print("🧑 Total players: ${players.length}");
     print("🎭 Hiders: ${hiders.map((p) => p.name).toList()}");
@@ -162,14 +170,48 @@ class GameState extends ChangeNotifier {
   {
     //additionally clean game logic...
     gameEnded = true;
+    endTask();
     notifyListeners();
   }
 
   void reset() {
-  gameEnded = false;
-  // reset any other fields if needed
-  notifyListeners();
-}
+    gameEnded = false;
+    // reset any other fields if needed
+    notifyListeners();
+  }
+
+  void startTask(String name) {
+    print("changing state");
+    currentTaskName = name;
+    notifyListeners();
+  }
+
+  void updatePayload(Map<String,dynamic> payload) {
+    currentTaskPayload = payload;
+    notifyListeners();
+  }
+
+  void finishTask(bool finish) {
+    startFinishingTask = finish;
+    notifyListeners();
+  }
+
+  void setTaskResult(String winners) {
+    taskResult = winners;
+    notifyListeners();
+
+    Future.delayed(const Duration(seconds: 3), () {
+      taskResult = null;
+      notifyListeners();
+    });
+  }
+  // More task functions
+  // ...
+
+  void endTask() {
+    currentTaskName = null;
+    notifyListeners();
+  }
 
 
   @override

@@ -16,9 +16,11 @@ class GameActions {
     ServerActionDispatcher dispatcher,
     BuildContext context,
   ) {
+
     dispatcher.register('game_started', (data) {
       Provider.of<LobbyState>(context, listen: false).startGame(context);
     });
+
     dispatcher.register("location_request", (data) {
       final gameState = Provider.of<GameState>(context, listen: false);
       gameState.updatePosition(context);
@@ -90,10 +92,46 @@ class GameActions {
       }
     });
 
+    dispatcher.register("task_started", (data) {
+
+      final gameState = Provider.of<GameState>(context, listen: false);
+
+      final taskName = data['name'];
+
+      gameState.startTask(taskName);
+    });
+
     dispatcher.register("game_ended", (data) {
       final gameState = Provider.of<GameState>(context, listen: false);
 
       gameState.stopGame();
+    });
+
+
+    dispatcher.register("task_update", (data) {
+
+      final gameState = Provider.of<GameState>(context, listen: false);
+
+      final taskName = data['taskName'];
+      final update = data['update'];
+      final updateType = update['type'];
+
+      switch (taskName) {
+        case 'ClickingRace': {
+          if (updateType == 'time_out') {
+            gameState.finishTask(true);
+          }
+        }
+        default: print("NO task specified in update");
+      }
+
+      Provider.of<GameState>(context, listen: false).updatePayload(update);
+    });
+
+    dispatcher.register("task_result", (data) {
+      final gameState = Provider.of<GameState>(context, listen: false);
+      final winners = data['winners'];
+      gameState.setTaskResult(winners);
     });
   }
 }

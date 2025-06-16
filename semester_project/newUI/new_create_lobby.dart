@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'lobby_page.dart';
+import '../new UI/lobby_page.dart';
 
 class CreateLobbyPage extends StatefulWidget {
   const CreateLobbyPage({super.key});

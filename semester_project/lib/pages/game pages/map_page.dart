@@ -39,7 +39,6 @@ class MapPage extends StatelessWidget {
             child: Consumer<GameState>(
               builder: (context, gameState, child) {
                 final remaining = gameState.remainingTime;
-                if (remaining == null) return const SizedBox();
 
                 String format(Duration d) =>
                     "${d.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(d.inSeconds.remainder(60)).toString().padLeft(2, '0')}";

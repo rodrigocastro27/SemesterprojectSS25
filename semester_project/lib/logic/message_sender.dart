@@ -67,6 +67,20 @@ class MessageSender {
     });
   } 
   
+  // TASKS ---------------------------------------------------------------
+  static void startTask(String name, String lobbyId) {
+    webSocketService.send("start_task", {
+      "username": name,
+      "lobbyId": lobbyId,
+    });
+  }
 
+  static void sendTaskUpdate(String lobbyId, String username, Map<String,dynamic> payload) {
+    webSocketService.send("update_task", {
+      "username" : username,
+      "lobbyId" : lobbyId,
+      "payload" : payload,
+    });
+  }
   
 }

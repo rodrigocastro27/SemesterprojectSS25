@@ -9,7 +9,7 @@ public static class GameHandlers
 {
     public static void Register(WebSocketActionDispatcher dispatcher)
     {
-        
+
         dispatcher.Register("start_game", async (data, socket) =>
         {
             var lobbyId = data.GetProperty("lobbyId").GetString();
@@ -17,10 +17,10 @@ public static class GameHandlers
             Console.WriteLine($"\n[start_game] Proceeding to start game for lobby {lobbyId}.");
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
-            
+
             Console.WriteLine("Notifying all players in the lobby that the game is starting.");
             await GameMessageSender.SendGameStarted(lobby!);
-            
+
             /*START the GAME in GameSession:
 
                 ->Instantiate a GameSession Class
@@ -29,15 +29,14 @@ public static class GameHandlers
 
                 -> call tart function to kick off the logic
             */
-            
+
             GameSession gameSession = new GameSession(lobby!);
-            
+
             await gameSession.Start();
 
         });
-        
-        
-        
+
+
         dispatcher.Register("ping_request", (data, socket) =>
         {
             var username = data.GetProperty("username").GetString();
@@ -45,20 +44,20 @@ public static class GameHandlers
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             var player = PlayerManager.Instance.GetPlayer(username!);
-            
+
             Console.WriteLine($"\n {player?.Name} requested a ping in lobby: {lobbyId}.");
-            
+
             GameSession? session = lobby?.GetGameSession();
-            
+
             //starts ping logic 
             if (player != null) session?.RequestPing(player);
             return Task.CompletedTask;
         });
-        
+
         //request received when players send their original location
         dispatcher.Register("update_position", (data, socket) =>
         {
-            
+
             var username = data.GetProperty("username").GetString();
             var lobbyId = data.GetProperty("lobbyId").GetString();
             var longitude = data.GetProperty("lon").GetDouble();
@@ -66,15 +65,54 @@ public static class GameHandlers
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             var player = PlayerManager.Instance.GetPlayer(username!);
-            
+
             if (player == null || lobby == null) return Task.CompletedTask;
-            
+
             GeoPosition geoPosition = new GeoPosition(latitude, longitude);
-            
+
             player?.UpdateLocation(geoPosition);
             return Task.CompletedTask;
         });
-        
-        
+
+
+        dispatcher.Register("start_task", async (data, socket) =>
+        {
+            Console.WriteLine("Starting request to start task...");
+            var username = data.GetProperty("username").GetString();
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            var gameSession = lobby!.GetGameSession()!;
+
+            await gameSession.StartTask(lobby);   // assuming game session and lobby are not null
+        });
+
+
+        dispatcher.Register("update_task", (data, socket) =>
+        {
+            Console.Write("\nReceived update from task.");
+            var username = data.GetProperty("username").GetString();
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            var payload = data.GetProperty("payload");
+
+            var taskName = payload.GetProperty("taskName").GetString();
+            var update = payload.GetProperty("update");
+            var type = update.GetProperty("type").GetString();
+            var info = update.GetProperty("info");
+
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            var player = PlayerManager.Instance.GetPlayerByName(username!);
+            var gameSession = lobby!.GetGameSession();
+
+            // Find PlayerSession by username or socket
+            var playerSession = gameSession!.GetPlayerGameSession(player!);
+
+            if (playerSession != null)
+            {
+                playerSession.MarkUpdateReceived(taskName!, info); // set a flag inside PlayerSession
+            }
+
+            return Task.CompletedTask;
+        });
     }
 }

@@ -11,10 +11,10 @@ public class GameSession
 
     private readonly Lobby _lobby;
     private readonly ConcurrentDictionary<Player, PlayerGameSession> _playerGameSessions = new();
-    private readonly List<Func<Task>> _taskList = [];
+    private readonly List<GameTask> _taskList = [];
     private readonly Random _random = new();
 
-    private TimeSpan _timer = TimeSpan.FromSeconds(25);
+    private TimeSpan _timer = TimeSpan.FromMinutes(10);
     private readonly TimeSpan _tickRate = TimeSpan.FromSeconds(1);
     private readonly TimeSpan _taskInterval = TimeSpan.FromSeconds(15);
     private DateTime _lastTaskSpawnTime;
@@ -22,6 +22,9 @@ public class GameSession
     public GameSession(Lobby lobby)
     {
         _lobby = lobby;
+        RegisterTask(new ClickingRaceTask());
+        // Register more tasks here
+        // ...
     }
 
     #endregion
@@ -128,26 +131,88 @@ public class GameSession
             if (DateTime.UtcNow - _lastTaskSpawnTime >= _taskInterval)
             {
                 _lastTaskSpawnTime = DateTime.UtcNow;
-                await SpawnRandomTask();
+                // SpawnRandomTask();
             }
 
             await Task.Delay(_tickRate);
         }
     }
 
-    private async Task SpawnRandomTask()
+    private GameTask? SpawnRandomTask()
     {
         if (_taskList.Count == 0)
-            return;
+            return null;
 
         int index = _random.Next(_taskList.Count);
         var selectedTask = _taskList[index];
-        await selectedTask();
+        return selectedTask;
     }
 
-    public void RegisterTask(Func<Task> task)
+    public void RegisterTask(GameTask task)
     {
         _taskList.Add(task);
+    }
+
+    public async Task StartTask(Lobby lobby)
+    {
+        Console.WriteLine("\n[task] Selecting task to play.");
+
+        GameTask? selectedTask = SpawnRandomTask();
+        if (selectedTask != null)
+        {
+            Console.WriteLine($"[task] Executing task {selectedTask.GetName()}");
+            await GameMessageSender.BroadcastTask(lobby, selectedTask);
+
+            Task waitingTask = WaitForAllPlayersUpdateAsync(lobby, selectedTask, TimeSpan.FromSeconds(25));
+            Task executionTask = selectedTask.ExecuteAsync(lobby);
+
+            await Task.WhenAny(waitingTask, executionTask); // for both tasks to run in parallel!!
+        }
+        else
+        {
+            Console.WriteLine("[task] Could not find any task to play.");
+        }
+    }
+
+    public GameTask? GetTask(string taskName)
+    {
+        foreach (var task in _taskList)
+        {
+            if (task.Name == taskName) return task;
+        }
+        return null;
+    }
+
+    public async Task WaitForAllPlayersUpdateAsync(Lobby lobby, GameTask task, TimeSpan timeout)
+    {
+        Console.WriteLine("Starting to wait for player responses from task...");
+
+        var startTime = DateTime.UtcNow;
+
+        var playerSessions = _playerGameSessions.Values.ToList();  // all PlayerSessions in this game
+
+        var respondedSessions = new HashSet<PlayerGameSession>();
+
+        while (DateTime.UtcNow - startTime < timeout)
+        {
+            foreach (var session in playerSessions)
+            {
+                if (session.HasSentUpdate(task.GetName()))
+                {
+                    respondedSessions.Add(session);
+                }
+            }
+
+            if (respondedSessions.Count == playerSessions.Count)
+                break;  // all players responded
+
+            await Task.Delay(200);  // small delay before checking again
+        }
+
+        Console.WriteLine("Finished waiting for players...");
+
+
+        await task.EndTask(lobby, respondedSessions);
     }
 
     #endregion
