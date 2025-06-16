@@ -34,7 +34,8 @@ public static class GameHandlers
             GameSession gameSession = new GameSession(lobby!);
 
             await gameSession.Start();
-
+        });
+        
         dispatcher.Register("set_map_center", (data, socket) =>
         {
             var lobbyId = data.GetProperty("lobbyId").GetString();

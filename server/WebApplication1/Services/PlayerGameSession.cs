@@ -35,5 +35,7 @@ public class PlayerGameSession(Player player, GameSession gameSession)
         _taskUpdates.TryGetValue(taskName, out var value);
         return value!;
     }
-    
+
+    public Player? GetPlayer() => player;
+
 }

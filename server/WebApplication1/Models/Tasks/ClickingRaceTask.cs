@@ -31,6 +31,10 @@ public class ClickingRaceTask : GameTask
     public override async Task EndTask(Lobby lobby, HashSet<PlayerGameSession> respondedSessions)
     {
         Console.WriteLine("Ending task...");
+        Player? hidersMVP = null;
+        int hidersMVPcount = 0;
+        Player? seekersMVP = null;
+        int seekersMVPcount = 0;
 
         foreach (var session in respondedSessions)
         {
@@ -40,6 +44,18 @@ public class ClickingRaceTask : GameTask
 
             if (isHider) hidersCounter += count;
             else seekersCounter += count;
+            
+            
+            if (count > hidersMVPcount && isHider)
+            {
+                hidersMVPcount = count;
+                hidersMVP = session.GetPlayer();
+            }
+            else if (count > seekersMVPcount && !isHider)
+            {
+                seekersMVPcount = count;
+                seekersMVP = session.GetPlayer();
+            }
         }
 
         var result = hidersCounter > seekersCounter ? "hiders"
@@ -47,11 +63,34 @@ public class ClickingRaceTask : GameTask
             : "tie";
 
         Console.WriteLine($"RESULT: hiders {hidersCounter} - seekers {seekersCounter}");
+      
+        Console.WriteLine("Notifying players of the result.");
+        
+        
         await GameMessageSender.BroadcastTaskResult(lobby, result);
-
+        
+        if (hidersMVP != null || seekersMVP != null)
+        {
+            switch (result)
+            {
+                case "hiders" when hidersMVP != null:
+                    Console.WriteLine($"Notifying hider {hidersMVP.Name} that he won an ability!");
+                    await GameMessageSender.NotifyAbilityGainAsync(hidersMVP, "hider");
+                    break;
+                case "seekers" when seekersMVP != null:
+                    Console.WriteLine($"Notifying seeker {seekersMVP.Name} that he won an ability!");
+                    await GameMessageSender.NotifyAbilityGainAsync(seekersMVP, "hider");
+                    break;
+                default:
+                    Console.WriteLine("Unconclusive result. Either tie or uncontrolled case.");
+                    break;
+            }
+        }
+        
         foreach (var session in respondedSessions)
             session._taskUpdates.Clear();
-
+        
+        
         respondedSessions.Clear();
     }
 }
