@@ -14,6 +14,8 @@ public class GameSession
     private readonly List<GameTask> _taskList = [];
     private readonly Random _random = new();
 
+    private Tuple<Double,Double>? _centerMap;
+
     private TimeSpan _timer = TimeSpan.FromMinutes(10);
     private readonly TimeSpan _tickRate = TimeSpan.FromSeconds(1);
     private readonly TimeSpan _taskInterval = TimeSpan.FromSeconds(15);
@@ -25,6 +27,11 @@ public class GameSession
         RegisterTask(new ClickingRaceTask());
         // Register more tasks here
         // ...
+    }
+
+    public void SetMapCenter(double centerLat, double centerLon)
+    {
+        _centerMap = Tuple.Create(centerLat, centerLon);
     }
 
     #endregion
@@ -65,6 +72,7 @@ public class GameSession
     }
 
     #endregion
+
     
     #region Timer Adjustment
 

@@ -7,6 +7,7 @@ import 'package:semester_project/logic/message_sender.dart';
 import 'package:semester_project/state/game_state.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:semester_project/state/lobby_state.dart';
+import 'package:semester_project/state/player_state.dart';
 
 import 'ping_button.dart';
 import 'user_marker.dart'; // Rename to HiderMarker if needed
@@ -74,7 +75,7 @@ class _SeekerMapViewState extends State<SeekerMapView> {
 
     // Show loading indicator while user location is initializing
     if (gameState.userLocation == null) {
-      gameState.initLocation(context);
+      Provider.of<GameState>(context, listen: false).initLocation(context, lobbyState.getLobbyId()!);
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -112,10 +113,17 @@ class _SeekerMapViewState extends State<SeekerMapView> {
         Positioned(
           bottom: 20,
           left: 20,
-          child: PingButton(
-            onPing: () => gameState.startPing(context),
-            pingState: gameState.pingState,
-            cooldownSeconds: gameState.cooldownSeconds,
+          child: Consumer2<PlayerState, GameState>(
+            builder: (context, playerState, gameState, _) {
+              final hasPings = playerState.pings > 0;
+
+              return PingButton(
+                onPing: () => gameState.startPing(context),
+                pingState: gameState.pingState,
+                cooldownSeconds: gameState.cooldownSeconds,
+                isEnabled: hasPings,
+              );
+            },
           ),
         ),
 

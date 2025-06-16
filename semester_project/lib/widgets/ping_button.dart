@@ -5,6 +5,8 @@ class PingButton extends StatelessWidget {
   final VoidCallback onPing;
   final PingState pingState;
   final int cooldownSeconds;
+  final bool isEnabled;
+
   static const int totalCooldown = 10;
 
   const PingButton({
@@ -12,11 +14,12 @@ class PingButton extends StatelessWidget {
     required this.onPing,
     required this.pingState,
     this.cooldownSeconds = 10,
+    this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool isDisabled = pingState != PingState.idle;
+    final bool isDisabled = pingState != PingState.idle || !isEnabled;
 
     return Stack(
       alignment: Alignment.center,
@@ -52,18 +55,17 @@ class PingButton extends StatelessWidget {
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child:
-                pingState == PingState.cooldown
-                    ? Text(
-                      'Wait ($cooldownSeconds)',
-                      key: const ValueKey('cooldown'),
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    )
-                    : const Text(
-                      'Ping',
-                      key: ValueKey('ping'),
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
+            child: pingState == PingState.cooldown
+                ? Text(
+                    'Wait ($cooldownSeconds)',
+                    key: const ValueKey('cooldown'),
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  )
+                : const Text(
+                    'Ping',
+                    key: ValueKey('ping'),
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
           ),
         ),
       ],

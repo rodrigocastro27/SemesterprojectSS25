@@ -97,3 +97,14 @@
             });
         }
     }
+    public static async Task NotifyAbilityGainAsync(Player player, string role)
+    {
+        await MessageSender.SendToPlayerAsync(player, "gained_ability", new
+        {
+            role = role,
+        });
+    }
+
+    #endregion
+
+}

@@ -52,6 +52,14 @@ class MessageSender {
     });
   } 
 
+  static void setMapCenter(String lobbyId, double lat, double lon) {
+    webSocketService.send("set_map_center", {
+      "lobbyId": lobbyId,
+      "latitude": lat,
+      "longitude": lon,
+    });
+  }
+
   static void startGame(String lobbyId)
   {
     webSocketService.send("start_game", {
@@ -86,6 +94,12 @@ class MessageSender {
       "username" : username,
       "lobbyId" : lobbyId,
       "payload" : payload,
+    });
+  }
+
+  static void makeHidersPhonesSound(String lobbyId) {
+    webSocketService.send("make_hiders_phone_sound", {
+      "lobbyId": lobbyId,
     });
   }
   
