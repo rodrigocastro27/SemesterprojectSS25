@@ -11,6 +11,10 @@ public class ClickingRaceTask : GameTask
 
     public override async Task ExecuteAsync(Lobby lobby)
     {
+        hidersCounter = 0;
+        seekersCounter = 0;
+        
+        
         Console.WriteLine($"[ClickingRaceTask] Starting 10-second timer for lobby {lobby.Id}");
         await Task.Delay(TimeSpan.FromSeconds(10));
         Console.WriteLine($"[ClickingRaceTask] Timer ended. Sending message to lobby {lobby.Id}");
