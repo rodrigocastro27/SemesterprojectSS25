@@ -1,6 +1,6 @@
 # Flutter Application API
 
-In this file, there is a description for each of the files in the flutter application.
+In this file, there is a description for each of the files in the flutter application. The specific explanations of methods and classes are explained in the summaries of the files.
 
 ## Components
 
