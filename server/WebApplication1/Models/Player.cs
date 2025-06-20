@@ -10,7 +10,7 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     public string Id { get; set; } = deviceId; //device id
     public WebSocket Socket { get; set; } = socket;
 
-    public bool isOnline { get; set; } = false;
+    private bool isOnline { get; set; } = false;
 
     public bool IsHost;
     public GeoPosition Position { get; private set; }
@@ -53,6 +53,8 @@ public class Player(string name, string nickname, string deviceId, WebSocket soc
     }
 
     public bool IsOnline() => isOnline;
+    
+    
 }
 
 public readonly struct GeoPosition(double lat, double lon)

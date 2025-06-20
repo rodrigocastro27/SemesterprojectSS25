@@ -255,16 +255,16 @@ class MapPage extends StatelessWidget {
   MapEntry<IconData, String> _getAbilityIconAndTooltip(dynamic ability) {
   if (ability is HiderAbility) {
     switch (ability) {
-      case HiderAbility.swapQR:
+      case HiderAbility.SwapQr:
         return const MapEntry(Icons.autorenew, "Swap QR");
-      case HiderAbility.hidePing:
+      case HiderAbility.HidePing:
         return const MapEntry(Icons.visibility_off, "Hide next ping");
     }
   } else if (ability is SeekerAbility) {
     switch (ability) {
-      case SeekerAbility.hiderSound:
+      case SeekerAbility.HiderSound:
         return const MapEntry(Icons.hearing, "Hear Hider");
-      case SeekerAbility.gainPing:
+      case SeekerAbility.GainPing:
         return const MapEntry(Icons.wifi_tethering, "Ping Hider");
     }
   }

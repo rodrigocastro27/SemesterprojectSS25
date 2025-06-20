@@ -44,11 +44,8 @@ public static class GameHandlers
 
             var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
             GameSession gameSession = lobby!.GetGameSession()!;
-            if (gameSession != null)
-            {
-                gameSession.SetMapCenter(lat, lon);
-                Console.WriteLine($"SET MAP CENTER TO ({lat},{lon})");
-            }
+            gameSession.SetMapCenter(lat, lon);
+            Console.WriteLine($"SET MAP CENTER TO ({lat},{lon})");
 
             return Task.CompletedTask;
         });
@@ -153,11 +150,43 @@ public static class GameHandlers
             return Task.CompletedTask;
         });
     
+        
+        //possibly will be refactored
         dispatcher.Register("make_hiders_phone_sound", async (data, socket) => 
         {
             Console.WriteLine("[make_hiders_phone_sound] Notifying hiders to make sound.");
             var lobbyId = data.GetProperty("lobbyId").GetString();
             await PlayerMessageSender.SendMakeNoise(lobbyId!);
+        });
+        
+        dispatcher.Register("use_ability", async (data, socket) => 
+        {
+            var username = data.GetProperty("username").GetString();
+            var lobbyId = data.GetProperty("lobbyId").GetString();
+            var abilityName = data.GetProperty("ability").GetString();
+            
+            var player = PlayerManager.Instance.GetPlayer(username!);
+            var lobby = LobbyManager.Instance.GetLobby(lobbyId!);
+            
+            var gameSession = lobby!.GetGameSession()!;
+            
+            var playerGameSession = gameSession.GetPlayerGameSession(player!);
+            if (abilityName != null)
+            {
+                Console.WriteLine(abilityName);
+                var ability = playerGameSession?.GetAbilityFromString(abilityName);
+                
+                
+                if (ability != null)
+                {
+                    Console.WriteLine($"{username} has used an {abilityName} ability!. ");
+                    await playerGameSession?.UseAbility(ability)!;
+                }
+                else
+                {
+                    Console.WriteLine("NULL ABILITY ERROR!");
+                }
+            }
         });
     }
 }

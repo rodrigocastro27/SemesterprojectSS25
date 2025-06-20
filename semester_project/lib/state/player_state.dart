@@ -58,51 +58,64 @@ class PlayerState extends ChangeNotifier {
     return _player;
   }
 
-  void addHiderAbility() {
-    final values = HiderAbility.values;
-    final randomIndex = Random().nextInt(values.length);
-    hiderAbilities.add(values[randomIndex]);
-    print("Player ${_player!.name} gained ability: ${values[randomIndex]}");
-  }
+void addHiderAbilityByName(String name) {
+   final ability = HiderAbility.values.firstWhere(
+    (e) => e.name == name);
+  
+  hiderAbilities.add(ability);
+  notifyListeners();
+}
 
+void addSeekerAbilityByName(String name) {
+    final ability = SeekerAbility.values.firstWhere(
+    (e) => e.name == name);
+
+  seekerAbilities.add(ability);
+  notifyListeners();
+}
+
+
+ 
   void removeHiderAbility(HiderAbility ability) {
     hiderAbilities.remove(ability);
     notifyListeners();
   }
-
-  void addSeekerAbility() {
-    final values = SeekerAbility.values;
-    final randomIndex = Random().nextInt(values.length);
-    seekerAbilities.add(values[randomIndex]);
-    print("Player ${_player!.name} gained ability: ${values[randomIndex]}");
-  }
-
+  
   void removeSeekerAbility(SeekerAbility ability) {
     seekerAbilities.remove(ability);
     notifyListeners();
   }
 
   void useAbility(Enum ability, BuildContext context) {
+   
+   /*
+   
     switch(ability) {
-      case HiderAbility.hidePing:
+      case HiderAbility.HidePing:
         hidePlayer();
-        removeHiderAbility(HiderAbility.hidePing);
-      case HiderAbility.swapQR:
+        removeHiderAbility(HiderAbility.HidePing);
+      case HiderAbility.SwapQr:
         swapQRcode(context);
-        removeHiderAbility(HiderAbility.swapQR);
+        removeHiderAbility(HiderAbility.SwapQr);
       // Add more hider abilities here
       // ...
 
-      case SeekerAbility.gainPing:
+      case SeekerAbility.GainPing:
         addPing();
-        removeSeekerAbility(SeekerAbility.gainPing);
-      case SeekerAbility.hiderSound:
+        removeSeekerAbility(SeekerAbility.GainPing);
+      case SeekerAbility.HiderSound:
         makeHidersPhonesSound(context);
-        removeSeekerAbility(SeekerAbility.hiderSound);
+        removeSeekerAbility(SeekerAbility.HiderSound);
       // Add more seeker abilities here
       // ...
     }
 
+*/      
+    final lobbyState = Provider.of<LobbyState>(context, listen: false);
+    var lobbyId = lobbyState.lobbyId;   
+     
+
+    MessageSender.sendAbilityUsed(lobbyId!, username!, ability.name);
 
   }
 
@@ -111,7 +124,8 @@ class PlayerState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void swapQRcode(BuildContext context) {
+  void swapQRcode(BuildContext context) 
+  {
     final gameState = Provider.of<GameState>(context, listen: false);
     final random = Random();
     final chosenPlayer =  gameState.hiders[random.nextInt(gameState.hiders.length)];
@@ -134,4 +148,7 @@ class PlayerState extends ChangeNotifier {
     var lobbyId = lobbyState.lobbyId;
     MessageSender.makeHidersPhonesSound(lobbyId!);
   }
+
+
+
 }

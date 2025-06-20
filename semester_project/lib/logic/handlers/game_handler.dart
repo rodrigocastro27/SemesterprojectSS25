@@ -138,20 +138,23 @@ class GameActions {
       gameState.setTaskResult(winners);
     });
 
-    dispatcher.register("gained_ability", (data) {
+    dispatcher.register("gained_ability", (data) 
+    {
       final playerState = Provider.of<PlayerState>(context, listen: false);
       final role = playerState.getPlayer()!.role;
+      final abilityName = data['ability'] as String;
       
       rootNavigatorKey.currentState?.push(
         MaterialPageRoute(
-          builder: (_) => MVPOverlay(abilityMessage: "You won a new ability!"),
+          builder: (_) => MVPOverlay(abilityMessage: "You won a new ability! -> $abilityName"),
         ),
       );
 
-      if (role == "hider") {
-        playerState.addHiderAbility();
+      if (role == "hider")
+      {
+        playerState.addHiderAbilityByName(abilityName);
       } else {
-        playerState.addSeekerAbility();
+        playerState.addSeekerAbilityByName(abilityName);
       }
     });
 

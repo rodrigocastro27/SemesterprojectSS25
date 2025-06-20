@@ -1,6 +1,7 @@
 ﻿    using WebApplication1.Utils;
     using WebApplication1.Models;
     using Microsoft.AspNetCore.Identity;
+    using WebApplication1.Models.Abilities;
 
     namespace WebApplication1.Services.Messaging;
 
@@ -18,6 +19,19 @@
             {
                 //idk what else to send
             });
+        }
+        
+        
+        //request from a specific list of player in this case bypasses hidden or dead players... 
+        public static async Task RequestPlayersLocation(List<Player> players)
+        {
+            foreach (var player in players)
+            {
+                await MessageSender.SendToPlayerAsync(player, "location_request", new
+                {
+                    // You can add more fields if needed later
+                });
+            }
         }
 
         public static Task SendPingToSeekers(Lobby lobby, List<Player> updatedLocations)
@@ -96,11 +110,12 @@
                 
             });
         }
-        public static async Task NotifyAbilityGainAsync(Player player, string role)
+        public static async Task NotifyAbilityGainAsync(Player player, AbilityType abilityType)
         {
             await MessageSender.SendToPlayerAsync(player, "gained_ability", new
             {
-                role = role,
+                role = player.Role,
+                ability = abilityType.ToString(),
             });
         }
     }

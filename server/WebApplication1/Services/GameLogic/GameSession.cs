@@ -97,34 +97,53 @@ public class GameSession
 
     public void RequestPing(Player requestingPlayer)
     {
-        _ = Task.Run(() => HandlePing(requestingPlayer));
+        _ = Task.Run(InternalHandlePing);
     }
+    
+    private TaskCompletionSource<bool>? _pingCompletedSource;
 
-    private async Task HandlePing(Player requestingPlayer)
+    public Task HandlePing()
+    {
+        _pingCompletedSource = new TaskCompletionSource<bool>();
+        _ = InternalHandlePing(); // fire-and-forget async logic
+        return _pingCompletedSource.Task;
+    }
+    
+    private async Task InternalHandlePing()
     {
         var hiders = _lobby.GetHidersList();
-        var freshHiders = new HashSet<Player>();
 
+        var visibleHiders = hiders
+            .Where(h =>
+                _playerGameSessions.TryGetValue(h, out var session) &&
+                session.CheckVisibility())
+            .ToList();
+
+        
+        // Request locations from visible hiders only
+        await GameMessageSender.RequestPlayersLocation(visibleHiders);
+
+        var freshHiders = new HashSet<Player>();
         var timeout = TimeSpan.FromSeconds(10);
         var staleThreshold = TimeSpan.FromSeconds(6);
         var startTime = DateTime.UtcNow;
 
-        await GameMessageSender.RequestHidersLocation(_lobby);
-
         while (DateTime.UtcNow - startTime < timeout)
         {
-            foreach (var hider in hiders.Where(h => h.IsLocationFresh(staleThreshold)))
+            foreach (var hider in visibleHiders.Where(h => h.IsLocationFresh(staleThreshold)))
             {
                 freshHiders.Add(hider);
             }
 
-            if (freshHiders.Count == hiders.Count)
+            if (freshHiders.Count == visibleHiders.Count)
                 break;
 
             await Task.Delay(200);
         }
 
         await GameMessageSender.SendPingToSeekers(_lobby, freshHiders.ToList());
+
+        _pingCompletedSource?.TrySetResult(true);
     }
 
     #endregion
