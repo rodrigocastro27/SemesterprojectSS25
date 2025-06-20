@@ -38,10 +38,10 @@ This document explains the messaging system used in the project for communicatio
 
 ## Key Components
 
-- `**WebSocketService**`: Core communication class, manages connection and transmission.
+- **`WebSocketService`**: Core communication class, manages connection and transmission.
     
-- `**MessageSender**`: Simplifies sending typed messages to the server.
+- **`MessageSender`**: Simplifies sending typed messages to the server.
     
-- `**ServerActionDispatcher**`: Routes received messages to appropriate handlers.
+- **`ServerActionDispatcher`**: Routes received messages to appropriate handlers.
     
-- **Handlers (**`**GameActions**`**, etc.)**: Execute logic based on specific server actions.
+- **Handlers (`GameActions`, etc.)**: Execute logic based on specific server actions.
