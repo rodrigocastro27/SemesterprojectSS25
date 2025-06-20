@@ -40,8 +40,8 @@ The structure of the repository is the following, only showing the relevant file
 ├── docs/                 # Extended documentation
 │   ├── architecture.md
 │   ├── api/
-│   │   ├── overview.md
-│   │   └── ...
+│   │   ├── flutter_application.md
+│   │   └── server_program.md
 │   ├── setup/
 │   │   ├── flutter-setup.md
 │   │   └── server-setup.md
@@ -105,8 +105,9 @@ The documentation is all written in the [docs](docs) folder of the repository.
 
 The architecture of the project is explained in the [architecture](docs/architecture.md) file.
 
-The [api](docs/api) folder contains a description of the key concepts and how they are implemented in the code ([overview](docs/api/overview.md)), together with a more detailed explanation of the different methods:
-- ...
+The [api](docs/api) folder contains a description of the key concepts and how they are implemented in the code for both:
+- [Flutter Application](docs/api/flutter_application.md)
+- [Server Program](docs/api/server_program.md)
 
 ## Get Started
 

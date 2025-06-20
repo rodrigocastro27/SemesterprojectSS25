@@ -17,7 +17,7 @@ And for the game itself:
 The project is divided into two main sections: the **Flutter app** and the **server**. It is a multiplayer app where each *client* (player) has an instance of the Flutter application and the *server* is unique. 
 There is a constant communication between the two, shown in the diagram below together with a simple illustration of the main classes and files of the project and how they are related to each other:
 
-![Architecture Diagram](..\assets\Diagrams-Architecture.svg)
+![Architecture Diagram](../assets/Diagrams-Architecture.svg)
 
 ## Flutter end
 In Flutter the starting file is `main.dart`. It is in charge of:
@@ -52,7 +52,7 @@ The basic server cycle is:
 
 The structure of the database can be seen in the following ER diagrams:
 
-![Database ER](..\assets\Diagrams-DatabaseER.svg)
+![Database ER](../assets/Diagrams-DatabaseER.svg)
 
 ❗<mark>TODO: use the *id* from the Players table as PK instead of *username*</mark>
 
@@ -61,11 +61,11 @@ The structure of the database can be seen in the following ER diagrams:
 # Server UML Diagram
 In the server, the classes have the following descriptions:
 
-![Classes Description](..\assets\ClassesDescription.svg)
+![Classes Description](../assets/ClassesDescription.svg)
 
 And the relationships between them are explained by the following UML diagram:
 
-![ServerUML](..\assets\UML.svg)
+![ServerUML](../assets/UML.svg)
 
 ❗<mark>TODO: there are quite a few inconsistencies and, possibly, better ways and programming patterns that could be applied to the classes. For instance, make the *MessageSender* the parent of *Game/Lobby/PlayerMessageSender* in a generalization relationship.</mark>
 
@@ -75,7 +75,7 @@ In Flutter, we distinguish between classes and *pages* and *widgets*.
 ## Classes
 The classes in the Flutter end are the following, in the described relationships of the UML diagram:
 
-![FlutterUML](..\assets\FlutterUML.svg)
+![FlutterUML](../assets/FlutterUML.svg)
 
 ## Navigation & UI
 For the navigation, we used two main methods:
@@ -86,6 +86,6 @@ For the navigation, we used two main methods:
 
 For the pages, this is a brief description of the pages and their navigation, and where the widgets are used:
 
-![Diagram Pages](..\assets\Diagrams-Pages.svg)
+![Diagram Pages](../assets/Diagrams-Pages.svg)
 
 The directory between `''` under the name of the pages is the route defined in the `router` to go to that page.
