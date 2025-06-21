@@ -4,12 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:semester_project/logic/action_dispatcher.dart';
 import 'package:semester_project/logic/message_sender.dart';
+import 'package:semester_project/models/ability_type.dart';
 import 'package:semester_project/models/player.dart';
 import 'package:provider/provider.dart';
 import 'package:semester_project/state/game_state.dart';
 import 'package:semester_project/state/lobby_state.dart';
 import '../action_dispatcher.dart';
 import 'package:semester_project/state/player_state.dart';
+import 'package:semester_project/services/navigation_service.dart';
+import 'package:semester_project/widgets/mvp_overlay.dart';
+
 
 class GameActions {
   static void register(
@@ -95,5 +99,68 @@ class GameActions {
 
       gameState.stopGame();
     });
+
+
+    //TASKS ---------------------------------------
+    dispatcher.register("task_update", (data) {
+
+      final gameState = Provider.of<GameState>(context, listen: false);
+
+      final taskName = data['taskName'];
+      final update = data['update'];
+      final updateType = update['type'];
+
+      switch (taskName) {
+        case 'ClickingRace': {
+          if (updateType == 'time_out') {
+            gameState.finishTask(true);
+          }
+        }
+        default: print("NO task specified in update");
+      }
+
+      Provider.of<GameState>(context, listen: false).updatePayload(update);
+    });
+
+    dispatcher.register("task_result", (data) {
+      final gameState = Provider.of<GameState>(context, listen: false);
+      final winners = data['winners'];
+      gameState.setTaskResult(winners);
+    });
+    //ABILITIES -----------------------------------
+    dispatcher.register("gained_ability", (data) 
+    {
+      final playerState = Provider.of<PlayerState>(context, listen: false);
+      final role = playerState.getPlayer()!.role;
+      final abilityName = data['ability'] as String;
+      
+      rootNavigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => MVPOverlay(abilityMessage: "You won a new ability! -> $abilityName"),
+        ),
+      );
+
+      if (role == "hider")
+      {
+        playerState.addHiderAbilityByName(abilityName);
+      } else {
+        playerState.addSeekerAbilityByName(abilityName);
+      }
+    });
+    dispatcher.register("used_ability", (data) 
+    {
+        final abilityName = data['ability'] as String;
+    });
+    //ELIMINATION ---------------------------------
+    dispatcher.register("eliminated_player", (data){
+        final gameState = Provider.of<GameState>(context, listen: false);
+    });
+
+    dispatcher.register("current_player_eliminated", (data){
+        final gameState = Provider.of<GameState>(context, listen: false);
+        gameState.stopGame();
+        print("you are eliminated!!!");
+    });
+    
   }
 }

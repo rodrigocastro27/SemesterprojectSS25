@@ -14,6 +14,7 @@ class GameState extends ChangeNotifier {
   PingState pingState = PingState.idle;
   int cooldownSeconds = 10;
   LatLng? userLocation;
+  int locationUpdateIntervalSeconds = 2;
 
   bool gameEnded = false;
 
@@ -25,12 +26,14 @@ class GameState extends ChangeNotifier {
   DateTime? _endTime;
   Duration remainingTime = Duration.zero;
   Timer? _countdownTimer;
+  Timer? _locationUpdateTimer;
 
   void initGame(BuildContext context) {
    
    hiders.clear();
    seekers.clear();
     players = Provider.of<LobbyState>(context, listen: false).getPlayerList();
+    startLocationUpdates(context); // start updating location every 10s
 
     for (var p in players) {
       if (p.role == "hider") {
@@ -44,6 +47,38 @@ class GameState extends ChangeNotifier {
     print("🎭 Hiders: ${hiders.map((p) => p.name).toList()}");
     print("🔍 Seekers: ${seekers.map((p) => p.name).toList()}");
   }
+
+
+
+
+
+  void startLocationUpdates(BuildContext context) {
+  // Cancel if already running
+  _locationUpdateTimer?.cancel();
+
+  // Start a new timer
+  _locationUpdateTimer = Timer.periodic(
+    Duration(seconds: locationUpdateIntervalSeconds),
+    (_) async {
+      try {
+        await updatePosition(context);
+
+        if (userLocation != null) {
+          print("New position: (${userLocation!.latitude},${userLocation!.longitude})");
+        } else {
+          print("⚠️ Location is still null after update.");
+        }
+      } catch (e) {
+        print("❌ Failed to update location: $e");
+      }
+    },
+  );
+}
+
+
+
+
+
 
   void setRole(bool hider) {
     isHider = hider;
@@ -60,36 +95,65 @@ class GameState extends ChangeNotifier {
     pingState = PingState.pinging;
     notifyListeners();
 
-    final username = Provider.of<PlayerState>(context, listen: false).getUsername();
+    final playerState = Provider.of<PlayerState>(context, listen: false);
+
+    final username = playerState.getUsername();
     final lobbyId = Provider.of<LobbyState>(context, listen: false).getLobbyId();
 
     if (lobbyId != null && username != null) {
       MessageSender.pingRequest(username, lobbyId);
     }
+
+    playerState.removePing();
   }
 
-  void initLocation(BuildContext context) async {
+  void initLocation(BuildContext context, String lobbyId) async {
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) return;
+
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+  }
+  if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) return;
+
+  final position = await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high,
+  );
+  setLocation(LatLng(position.latitude, position.longitude));
+
+  // Send location to server
+  MessageSender.setMapCenter(lobbyId, position.latitude, position.longitude);
+
+  // ✅ Now safe to start periodic updates
+  startLocationUpdates(context);
+}
+
+
+  Future<void> updatePosition(BuildContext context) async {
+  try {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+    if (!serviceEnabled) {
+      print("⚠️ Location services are disabled.");
+      return;
+    }
 
     LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      print("⚠️ Location permission denied.");
+      return;
     }
-    if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) return;
 
     final position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
     setLocation(LatLng(position.latitude, position.longitude));
+  } catch (e) {
+    print("❌ Error getting location: $e");
   }
+}
 
-  void updatePosition(BuildContext context) async {
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    setLocation(LatLng(position.latitude, position.longitude));
-  }
+
 
   LatLng? getCurrentPosition() {
     return userLocation;
@@ -175,6 +239,7 @@ class GameState extends ChangeNotifier {
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _locationUpdateTimer?.cancel();
     super.dispose();
   }
 }

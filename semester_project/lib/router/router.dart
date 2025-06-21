@@ -75,7 +75,9 @@ GoRouter createRouter(
         builder: (context, state) => HomePage(username: playerState.username!),
       ),
       GoRoute(path: '/lobby', builder: (context, state) => const LobbyPage()),
+
       GoRoute(path: '/game', builder: (context, state) => const MapPage()),
+
 
       GoRoute(
         path: '/end',

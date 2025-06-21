@@ -52,10 +52,10 @@ class _AuthPageState extends State<AuthPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _login,
-              child: Text('Log in'),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, 48),
               ),
+              child: Text('Log in'),
             ),
           ],
         ),

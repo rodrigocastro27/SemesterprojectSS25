@@ -8,8 +8,8 @@ import 'package:semester_project/widgets/player_list_tile.dart';
 class LobbyPage extends StatelessWidget {
   const LobbyPage({super.key});
 
-  void _startGame(BuildContext context, LobbyState state) {
-    final lobbyId = state.lobbyId;
+  void _startGame(BuildContext context, LobbyState lobbyState, PlayerState playerState) {
+    final lobbyId = lobbyState.lobbyId;
     if (lobbyId == null) return;
 
     // Notify the server
@@ -131,7 +131,7 @@ Widget build(BuildContext context) {
     ),
     floatingActionButton: lobbyState.isHost
         ? FloatingActionButton(
-            onPressed: () => _startGame(context, lobbyState),
+            onPressed: () => _startGame(context, lobbyState, playerState),
             tooltip: 'Start Game',
             child: const Icon(Icons.play_arrow),
           )

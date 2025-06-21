@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:semester_project/main.dart';
 
 class MessageSender {
@@ -53,6 +52,14 @@ class MessageSender {
     });
   } 
 
+  static void setMapCenter(String lobbyId, double lat, double lon) {
+    webSocketService.send("set_map_center", {
+      "lobbyId": lobbyId,
+      "latitude": lat,
+      "longitude": lon,
+    });
+  }
+
   static void startGame(String lobbyId)
   {
     webSocketService.send("start_game", {
@@ -66,7 +73,46 @@ class MessageSender {
       "lobbyId": lobbyId,
     });
   } 
+
+  static void eliminatePlayer(String name, String lobbyId) {
+    webSocketService.send("player_eliminated", {
+      "username": name,
+      "lobbyId": lobbyId,
+    });
+  } 
+  
+  // TASKS ---------------------------------------------------------------
+  static void startTask(String name, String lobbyId) {
+    webSocketService.send("start_task", {
+      "username": name,
+      "lobbyId": lobbyId,
+    });
+  }
+
+  static void sendTaskUpdate(String lobbyId, String username, Map<String,dynamic> payload) {
+    webSocketService.send("update_task", {
+      "username" : username,
+      "lobbyId" : lobbyId,
+      "payload" : payload,
+    });
+  }
+
+  static void makeHidersPhonesSound(String lobbyId) {
+    webSocketService.send("make_hiders_phone_sound", {
+      "lobbyId": lobbyId,
+    });
+  }
   
 
-  
+  // ABILITIES ----------------------------------------------------------
+ 
+  static void sendAbilityUsed(String lobbyId, String username, String abilityName)
+  {
+      webSocketService.send("use_ability", {
+        "username": username,
+        "lobbyId" : lobbyId,
+        "ability" : abilityName
+      });
+  }
+
 }
