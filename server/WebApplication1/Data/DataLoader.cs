@@ -5,15 +5,8 @@ using WebApplication1.Services;
 
 namespace WebApplication1.Data
 {
-    /// <summary>
-    /// Responsible for loading application state from the SQLite database into memory at startup.
-    /// </summary>
     public static class DataLoader
     {
-        /// <summary>
-        /// Loads all relevant data (lobbies, players, and lobby-player mappings) from the database.
-        /// Should be called once at application startup.
-        /// </summary>
         public static void LoadAll()
         {
             LoadLobbies();
@@ -21,9 +14,6 @@ namespace WebApplication1.Data
             LoadLobbyPlayers();
         }
 
-        /// <summary>
-        /// Loads all lobbies from the "Lobbies" table and registers them with the LobbyManager.
-        /// </summary>
         private static void LoadLobbies()
         {
             using var conn = SQLiteConnector.GetConnection();
@@ -40,10 +30,6 @@ namespace WebApplication1.Data
             }
         }
 
-        /// <summary>
-        /// Loads all players from the "Players" table and registers them with the PlayerManager.
-        /// Sets their online status based on the stored value.
-        /// </summary>
         private static void LoadPlayers()
         {
             using var conn = SQLiteConnector.GetConnection();
@@ -64,12 +50,6 @@ namespace WebApplication1.Data
             }
         }
 
-        /// <summary>
-        /// Loads lobby-player associations from the "LobbyPlayers" table.
-        /// Reconnects players to their lobbies if they're online.
-        /// If the player is offline, the association is deleted from the table.
-        /// In the end, deletes all lobbies that do not have any (online) players.
-        /// </summary>
         private static void LoadLobbyPlayers()
         {
             using var conn = SQLiteConnector.GetConnection();

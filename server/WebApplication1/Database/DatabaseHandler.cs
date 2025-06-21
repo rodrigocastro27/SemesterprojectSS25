@@ -3,22 +3,12 @@ using WebApplication1.Data;
 
 namespace WebApplication1.Database;
 
-/// <summary>
-/// Provides CRUD operations for managing the application's database tables.
-/// Uses SQLite for persistent storage of lobbies, players, and their relationships.
-/// </summary>
 public class DatabaseHandler
 {
-    /// <summary>
-    /// Singleton instance of the handler.
-    /// </summary>
     public static DatabaseHandler Instance { get; } = new DatabaseHandler();
 
     private DatabaseHandler() { }
 
-    /// <summary>
-    /// Gets a new open SQLite connection using the shared connector.
-    /// </summary>
     private static SQLiteConnection GetDBConnection()
     {
         return SQLiteConnector.GetConnection();
@@ -26,9 +16,6 @@ public class DatabaseHandler
 
     // ========== INSERT ==========
 
-    /// <summary>
-    /// Inserts a new lobby record into the Lobbies table.
-    /// </summary>
     public void InsertIntoLobbies(string lobbyId)
     {
         using var conn = GetDBConnection();
@@ -37,9 +24,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>
-    /// Inserts a new player record into the Players table with initial online status.
-    /// </summary>
     public void InsertIntoPlayers(string deviceId, string username)
     {
         using var conn = GetDBConnection();
@@ -49,9 +33,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>
-    /// Adds a player to a lobby with metadata such as nickname, host flag, and role.
-    /// </summary>
     public void InsertIntoLobbyPlayers(string lobbyId, string username, string nickname, bool isHost, string role)
     {
         using var conn = GetDBConnection();
@@ -66,9 +47,6 @@ public class DatabaseHandler
 
     // ========== SELECT ==========
 
-    /// <summary>
-    /// Gets the lobby ID that the given player is currently assigned to.
-    /// </summary>
     public string SelectLobbyFromLobbyPlayers(string username)
     {
         string? lobbyId = null!;
@@ -83,9 +61,6 @@ public class DatabaseHandler
         return lobbyId!;
     }
 
-    /// <summary>
-    /// Checks whether a player is the host of their current lobby.
-    /// </summary>
     public bool SelectIsHostFromLobbyPlayers(string username)
     {
         bool isHost = false;
@@ -103,9 +78,6 @@ public class DatabaseHandler
 
     // ========== UPDATE ==========
 
-    /// <summary>
-    /// Updates a player's nickname and role in the lobby.
-    /// </summary>
     public void UpdateLobbyPlayersNickname(string username, string nickname, string role)
     {
         using var conn = GetDBConnection();
@@ -116,9 +88,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>
-    /// Updates a player's online status. Also removes them from lobby mapping if offline.
-    /// </summary>
     public void UpdatePlayersIsOnline(string username, bool isOnline)
     {
         using var conn = GetDBConnection();
@@ -133,10 +102,6 @@ public class DatabaseHandler
         }
     }
 
-    /// <summary>
-    /// Moves a player to a different lobby and updates their role.
-    /// </summary>
-
     public void UpdateLobbyPlayersLobby(string username, string lobbyId, string role)
     {
         using var conn = GetDBConnection();
@@ -147,9 +112,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>
-    /// Promotes a player to be the host of their lobby.
-    /// </summary>
     public void UpdateLobbyPlayersHost(string username)
     {
         using var conn = GetDBConnection();
@@ -160,10 +122,6 @@ public class DatabaseHandler
 
 
     // ========== DELETE ==========
-
-    /// <summary>
-    /// Deletes a lobby and all its player associations.
-    /// </summary>
     public void DeleteFromLobbies(string lobbyId)
     {
         using var conn = GetDBConnection();
@@ -174,9 +132,6 @@ public class DatabaseHandler
         DeleteFromLobbyPlayersLobby(lobbyId);
     }
 
-    /// <summary>
-    /// Deletes a player record.
-    /// </summary>
     public void DeleteFromPlayers(string username)
     {
         using var conn = GetDBConnection();
@@ -185,9 +140,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>
-    /// Removes a specific player from a specific lobby.
-    /// </summary>
     public void DeleteFromLobbyPlayersLobbyPlayer(string lobbyId, string username)
     {
         using var conn = GetDBConnection();
@@ -197,9 +149,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>
-    /// Removes all players from the specified lobby.
-    /// </summary>
     public void DeleteFromLobbyPlayersLobby(string lobbyId)
     {
         using var conn = GetDBConnection();
@@ -208,9 +157,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>
-    /// Removes all lobby-player associations for a specific player.
-    /// </summary>
     public void DeleteFromLobbyPlayersPlayer(string username)
     {
         using var conn = GetDBConnection();
