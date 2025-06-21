@@ -6,8 +6,8 @@ import 'package:semester_project/state/lobby_state.dart';
 import 'package:semester_project/state/player_state.dart';
 import 'package:semester_project/widgets/seeker_map_view.dart';
 import 'package:semester_project/widgets/hider_map_view.dart';
-import 'package:semester_project/models/player.dart';
 import 'package:semester_project/models/ability_type.dart';
+import 'package:semester_project/widgets/task_overlay.dart';
 
 class MapPage extends StatelessWidget {
   const MapPage({super.key});
