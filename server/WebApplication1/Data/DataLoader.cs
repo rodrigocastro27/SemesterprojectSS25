@@ -12,6 +12,8 @@ public static class DataLoader
         LoadLobbies();
         LoadPlayers();
         LoadLobbyPlayers();
+        LoadUsers();
+        LoadPasswordTokens();
     }
 
     private static void LoadLobbies()
@@ -106,5 +108,37 @@ public static class DataLoader
         }
 
         LobbyManager.Instance.DeleteEmptyLobbies();        
+    }
+
+    private static void LoadUsers()
+    {
+        using var conn = SQLiteConnector.GetConnection();
+        var cmd = new SQLiteCommand("SELECT UserID, Email, PasswordHash, GoogleId FROM Users;", conn);
+        using var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+         string userId = reader.GetString(0);
+         string email = reader.GetString(1);
+         string passwordHash = reader.GetString(2);
+         string googleId = reader.GetString(3);
+         
+        }
+    }
+
+    private static void LoadPasswordTokens()
+    {
+        using var conn = SQLiteConnector.GetConnection();
+        var cmd = new SQLiteCommand("SELECT TokenID, UserID, Token, ExpiresAt, Used FROM PasswordResetTokens;", conn);
+        using var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            int tokenId = reader.GetInt32(0);
+            int userId = reader.GetInt32(1);
+            string token = reader.GetString(2);
+            DateTime expiresAt = reader.GetDateTime(3);
+            string used = reader.GetString(4);
+        }
     }
 }
