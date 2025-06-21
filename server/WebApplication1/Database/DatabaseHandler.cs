@@ -14,7 +14,8 @@ public class DatabaseHandler
         return SQLiteConnector.GetConnection();
     }
 
-    // INSERT
+    // ========== INSERT ==========
+
     public void InsertIntoLobbies(string lobbyId)
     {
         using var conn = GetDBConnection();
@@ -22,7 +23,6 @@ public class DatabaseHandler
         cmd.Parameters.AddWithValue("@lobbyId", lobbyId);
         cmd.ExecuteNonQuery();
     }
-
 
     public void InsertIntoPlayers(string deviceId, string username)
     {
@@ -32,7 +32,6 @@ public class DatabaseHandler
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
     }
-
 
     public void InsertIntoLobbyPlayers(string lobbyId, string username, string nickname, bool isHost, string role)
     {
@@ -46,7 +45,8 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-    // SELECT
+    // ========== SELECT ==========
+
     public string SelectLobbyFromLobbyPlayers(string username)
     {
         string? lobbyId = null!;
@@ -60,7 +60,6 @@ public class DatabaseHandler
             lobbyId = reader.IsDBNull(0) ? null : reader.GetString(0);
         return lobbyId!;
     }
-
 
     public bool SelectIsHostFromLobbyPlayers(string username)
     {
@@ -77,7 +76,8 @@ public class DatabaseHandler
     }
 
 
-    // UPDATE
+    // ========== UPDATE ==========
+
     public void UpdateLobbyPlayersNickname(string username, string nickname, string role)
     {
         using var conn = GetDBConnection();
@@ -87,7 +87,6 @@ public class DatabaseHandler
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
     }
-
 
     public void UpdatePlayersIsOnline(string username, bool isOnline)
     {
@@ -103,7 +102,6 @@ public class DatabaseHandler
         }
     }
 
-
     public void UpdateLobbyPlayersLobby(string username, string lobbyId, string role)
     {
         using var conn = GetDBConnection();
@@ -114,7 +112,6 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-
     public void UpdateLobbyPlayersHost(string username)
     {
         using var conn = GetDBConnection();
@@ -124,7 +121,7 @@ public class DatabaseHandler
     }
 
 
-    // DELETE
+    // ========== DELETE ==========
     public void DeleteFromLobbies(string lobbyId)
     {
         using var conn = GetDBConnection();
@@ -135,7 +132,6 @@ public class DatabaseHandler
         DeleteFromLobbyPlayersLobby(lobbyId);
     }
 
-
     public void DeleteFromPlayers(string username)
     {
         using var conn = GetDBConnection();
@@ -143,7 +139,6 @@ public class DatabaseHandler
         cmd.Parameters.AddWithValue("@username", username);
         cmd.ExecuteNonQuery();
     }
-
 
     public void DeleteFromLobbyPlayersLobbyPlayer(string lobbyId, string username)
     {

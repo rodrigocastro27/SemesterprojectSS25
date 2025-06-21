@@ -5,9 +5,9 @@ namespace WebApplication1.Data;
 public static class SQLiteConnector
 {
     private static string _dbPath = null!;
+
     private static string _connectionString = null!;
 
-    // Static constructor
     public static void Initialize(string contentRootPath)
     {
         _dbPath = Path.Combine(contentRootPath, "Database", "database.db");
