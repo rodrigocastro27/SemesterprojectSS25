@@ -20,9 +20,11 @@ class GameActions {
     ServerActionDispatcher dispatcher,
     BuildContext context,
   ) {
+
     dispatcher.register('game_started', (data) {
       Provider.of<LobbyState>(context, listen: false).startGame(context);
     });
+
     dispatcher.register("location_request", (data) {
       final gameState = Provider.of<GameState>(context, listen: false);
       gameState.updatePosition(context);
@@ -94,6 +96,15 @@ class GameActions {
       }
     });
 
+    dispatcher.register("task_started", (data) {
+
+      final gameState = Provider.of<GameState>(context, listen: false);
+
+      final taskName = data['name'];
+
+      gameState.startTask(taskName);
+    });
+
     dispatcher.register("game_ended", (data) {
       final gameState = Provider.of<GameState>(context, listen: false);
 
@@ -140,6 +151,7 @@ class GameActions {
         ),
       );
 
+      print("ROLE: $role");
       if (role == "hider")
       {
         playerState.addHiderAbilityByName(abilityName);
@@ -147,12 +159,17 @@ class GameActions {
         playerState.addSeekerAbilityByName(abilityName);
       }
     });
+
     dispatcher.register("used_ability", (data) 
     {
+      // This is not really used because from Flutter you already know you used it
+      // In case some of the tasks need some server validation before being used
         final abilityName = data['ability'] as String;
     });
+
     //ELIMINATION ---------------------------------
     dispatcher.register("eliminated_player", (data){
+      // To then handle notifying everyone that a player has been eliminated (not implemented)
         final gameState = Provider.of<GameState>(context, listen: false);
     });
 

@@ -59,6 +59,7 @@ class PlayerState extends ChangeNotifier {
   }
 
 void addHiderAbilityByName(String name) {
+  print("Adding hider ability");
    final ability = HiderAbility.values.firstWhere(
     (e) => e.name == name);
   
@@ -67,6 +68,7 @@ void addHiderAbilityByName(String name) {
 }
 
 void addSeekerAbilityByName(String name) {
+  print("Adding seeker ability");
     final ability = SeekerAbility.values.firstWhere(
     (e) => e.name == name);
 
@@ -87,15 +89,19 @@ void addSeekerAbilityByName(String name) {
   }
 
   void useAbility(Enum ability, BuildContext context) {
-   
-   /*
-   
+    final lobbyState = Provider.of<LobbyState>(context, listen: false);
+    var lobbyId = lobbyState.lobbyId;   
+     
+    MessageSender.sendAbilityUsed(lobbyId!, username!, ability.name);
+
+    //possibly improve with dictionary 
+    
     switch(ability) {
       case HiderAbility.HidePing:
-        hidePlayer();
+        // hidePlayer();  // NOT REALLY USED, maybe for future UI
         removeHiderAbility(HiderAbility.HidePing);
       case HiderAbility.SwapQr:
-        swapQRcode(context);
+       swapQRcode(context);
         removeHiderAbility(HiderAbility.SwapQr);
       // Add more hider abilities here
       // ...
@@ -110,39 +116,11 @@ void addSeekerAbilityByName(String name) {
       // ...
     }
 
-*/      
-    final lobbyState = Provider.of<LobbyState>(context, listen: false);
-    var lobbyId = lobbyState.lobbyId;   
-     
-    MessageSender.sendAbilityUsed(lobbyId!, username!, ability.name);
-
-    //possibly improve with dictionary 
-    
-    switch(ability) {
-      case HiderAbility.HidePing:
-       // hidePlayer();
-        removeHiderAbility(HiderAbility.HidePing);
-      case HiderAbility.SwapQr:
-       // swapQRcode(context);
-        removeHiderAbility(HiderAbility.SwapQr);
-      // Add more hider abilities here
-      // ...
-
-      case SeekerAbility.GainPing:
-        addPing();
-        removeSeekerAbility(SeekerAbility.GainPing);
-      case SeekerAbility.HiderSound:
-        //makeHidersPhonesSound(context);
-        removeSeekerAbility(SeekerAbility.HiderSound);
-      // Add more seeker abilities here
-      // ...
-    }
-
 
   }
 
   void hidePlayer() { //currently not used, controlled in server
-    hiderIsHidden = true;  
+    hiderIsHidden = true;
     notifyListeners();
   }
 
@@ -170,7 +148,5 @@ void addSeekerAbilityByName(String name) {
     var lobbyId = lobbyState.lobbyId;
     MessageSender.makeHidersPhonesSound(lobbyId!);
   }
-
-
 
 }

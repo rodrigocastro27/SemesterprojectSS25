@@ -15,8 +15,8 @@ public static class AbilityManager
     
    private static List<AbilityType> _seekersAbilities =
     [
-        AbilityType.SwapQr,
-        AbilityType.HidePing
+        AbilityType.GainPing,
+        AbilityType.HiderSound
     ];
 
 
@@ -44,25 +44,25 @@ public static class AbilityManager
     {
         Random rnd = new Random();
         int index = rnd.Next(0, _seekersAbilities.Count);
-  //      var ability = _seekersAbilities[index];
+        var ability = _seekersAbilities[index];
     
-            var ability = CreateAbilityInstance(AbilityType.GainPing);
+        //var ability = CreateAbilityInstance(AbilityType.GainPing);
 
 
-            if (ability != null) gameSession.GrantAbility(ability);
-            _ = GameMessageSender.NotifyAbilityGainAsync(player, AbilityType.GainPing);  //hard code change to random
+        gameSession.GrantAbility(CreateAbilityInstance(ability)!);
+        _ = GameMessageSender.NotifyAbilityGainAsync(player, ability);  //hard code change to random
     }    
     
     public static void GrantHiderAbility(Player player,  PlayerGameSession gameSession)
     {
         Random rnd = new Random();
         int index = rnd.Next(0, _hidersAbilities.Count);
-//        var ability = _hidersAbilities[index];
+        var ability = _hidersAbilities[index];
         
-        var ability = CreateAbilityInstance(AbilityType.HidePing);
+        //var ability = CreateAbilityInstance(AbilityType.HidePing);  // hard code
 
-        if (ability != null) gameSession.GrantAbility(ability);
-        _ = GameMessageSender.NotifyAbilityGainAsync(player, AbilityType.HidePing);  //hard code change to random
+        gameSession.GrantAbility(CreateAbilityInstance(ability)!);
+        _ = GameMessageSender.NotifyAbilityGainAsync(player, ability);
     }
     
     private static IAbility? CreateAbilityInstance(AbilityType type)

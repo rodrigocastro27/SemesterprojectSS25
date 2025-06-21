@@ -9,7 +9,7 @@ public class GainPingAbility: IAbility
         // TODO release managed resources here
     }
 
-    public AbilityType Type { get; }
+    public AbilityType Type { get; } = AbilityType.GainPing;
     public Task ApplyEffectAsync(GameSession session, PlayerGameSession playerSession)
     {
         throw new NotImplementedException();

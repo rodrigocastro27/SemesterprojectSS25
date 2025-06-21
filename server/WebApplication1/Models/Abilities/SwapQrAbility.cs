@@ -4,7 +4,7 @@ namespace WebApplication1.Models.Abilities;
 
 public class SwapQrAbility : IAbility
 {
-    public AbilityType Type { get; }
+    public AbilityType Type { get; } = AbilityType.SwapQr;
     public Task ApplyEffectAsync(GameSession session, PlayerGameSession playerSession)
     {
         throw new NotImplementedException();
