@@ -105,6 +105,7 @@ class MessageSender {
   
 
   // ABILITIES ----------------------------------------------------------
+ 
   static void sendAbilityUsed(String lobbyId, String username, String abilityName)
   {
       webSocketService.send("use_ability", {

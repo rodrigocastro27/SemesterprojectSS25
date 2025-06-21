@@ -112,6 +112,7 @@ class GameActions {
     });
 
 
+    //TASKS ---------------------------------------
     dispatcher.register("task_update", (data) {
 
       final gameState = Provider.of<GameState>(context, listen: false);
@@ -137,7 +138,7 @@ class GameActions {
       final winners = data['winners'];
       gameState.setTaskResult(winners);
     });
-
+    //ABILITIES -----------------------------------
     dispatcher.register("gained_ability", (data) 
     {
       final playerState = Provider.of<PlayerState>(context, listen: false);
@@ -157,8 +158,11 @@ class GameActions {
         playerState.addSeekerAbilityByName(abilityName);
       }
     });
-
-
+    dispatcher.register("used_ability", (data) 
+    {
+        final abilityName = data['ability'] as String;
+    });
+    //ELIMINATION ---------------------------------
     dispatcher.register("eliminated_player", (data){
         final gameState = Provider.of<GameState>(context, listen: false);
     });

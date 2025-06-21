@@ -114,13 +114,35 @@ void addSeekerAbilityByName(String name) {
     final lobbyState = Provider.of<LobbyState>(context, listen: false);
     var lobbyId = lobbyState.lobbyId;   
      
-
     MessageSender.sendAbilityUsed(lobbyId!, username!, ability.name);
+
+    //possibly improve with dictionary 
+    
+    switch(ability) {
+      case HiderAbility.HidePing:
+       // hidePlayer();
+        removeHiderAbility(HiderAbility.HidePing);
+      case HiderAbility.SwapQr:
+       // swapQRcode(context);
+        removeHiderAbility(HiderAbility.SwapQr);
+      // Add more hider abilities here
+      // ...
+
+      case SeekerAbility.GainPing:
+        addPing();
+        removeSeekerAbility(SeekerAbility.GainPing);
+      case SeekerAbility.HiderSound:
+        //makeHidersPhonesSound(context);
+        removeSeekerAbility(SeekerAbility.HiderSound);
+      // Add more seeker abilities here
+      // ...
+    }
+
 
   }
 
-  void hidePlayer() {
-    hiderIsHidden = true;
+  void hidePlayer() { //currently not used, controlled in server
+    hiderIsHidden = true;  
     notifyListeners();
   }
 

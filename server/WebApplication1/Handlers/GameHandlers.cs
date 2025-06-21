@@ -180,7 +180,7 @@ public static class GameHandlers
                 if (ability != null)
                 {
                     Console.WriteLine($"{username} has used an {abilityName} ability!. ");
-                    await playerGameSession?.UseAbility(ability)!;
+                    _= playerGameSession?.UseAbility(ability)!;
                 }
                 else
                 {

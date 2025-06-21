@@ -105,7 +105,7 @@ public class GameSession
     public Task HandlePing()
     {
         _pingCompletedSource = new TaskCompletionSource<bool>();
-        _ = InternalHandlePing(); // fire-and-forget async logic
+       // _ = InternalHandlePing(); // fire-and-forget async logic
         return _pingCompletedSource.Task;
     }
     
