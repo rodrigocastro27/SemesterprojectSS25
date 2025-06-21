@@ -118,7 +118,7 @@ The guides to setup the computer to run both the Flutter application and the ser
 
 # Future Work
 
-The game in this repository is far away from considered finished. There is still a lot to improve and implement. See more details on what can be the next line of work in [FUTUREWORK](../FUTUREWORK).
+The game in this repository is far away from considered finished. There is still a lot to improve and implement. See more details on what can be the next line of work in [FUTUREWORK](FUTUREWORK.md).
 
 ## 📬Contact
 
