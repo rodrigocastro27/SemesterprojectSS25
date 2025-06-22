@@ -61,11 +61,11 @@ The structure of the database can be seen in the following ER diagrams:
 # Server UML Diagram
 In the server, the classes have the following descriptions:
 
-![Classes Description](../assets/ClassesDescription.svg)
+![Classes Description](../assets/Diagrams-ERServer.svg)
 
 And the relationships between them are explained by the following UML diagram:
 
-![ServerUML](../assets/UML.svg)
+![ServerUML](../assets/UMLGraph.svg)
 
 ❗<mark>TODO: there are quite a few inconsistencies and, possibly, better ways and programming patterns that could be applied to the classes. For instance, make the *MessageSender* the parent of *Game/Lobby/PlayerMessageSender* in a generalization relationship.</mark>
 
