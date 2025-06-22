@@ -1,16 +1,19 @@
+using System;
+using System.Net.WebSockets;
+using System.Text.Json; 
+using System.Threading.Tasks;
 using WebApplication1.Utils; 
 using WebApplication1.Services; 
 using WebApplication1.Services.Messaging; 
 
 namespace WebApplication1.Handlers
 {
-   
+
     public static class AuthHandlers
     {
-   
         public static void Register(WebSocketActionDispatcher dispatcher)
         {
-            
+         
             dispatcher.Register("register_request", async (data, socket) =>
             {
                 if (data.TryGetProperty("email", out var emailElement) &&
@@ -29,7 +32,7 @@ namespace WebApplication1.Handlers
 
                     Console.WriteLine($"\n[register_request] Attempting to register user: {email}");
 
-             
+                   
                     var newUser = await AuthenticationManager.Instance.RegisterUser(email, password, googleId);
 
                     if (newUser != null)
@@ -51,7 +54,7 @@ namespace WebApplication1.Handlers
                 }
             });
 
-            
+      
             dispatcher.Register("login_request", async (data, socket) =>
             {
                 if (data.TryGetProperty("email", out var emailElement) &&
@@ -69,20 +72,19 @@ namespace WebApplication1.Handlers
 
                     Console.WriteLine($"\n[login_request] Attempting to login user: {email}");
 
-                 
+                    
                     var authenticatedUser = await AuthenticationManager.Instance.AuthenticateUser(email, password);
 
                     if (authenticatedUser != null)
                     {
                         Console.WriteLine($"Login successful for {email}. UserID: {authenticatedUser.UserID}");
                         
-                       
+                        
                         string jwtToken = JwtTokenService.GenerateToken(authenticatedUser);
 
-                        
+                       
                         await AuthMessageSender.SendLoginSuccess(socket, authenticatedUser, jwtToken);
 
-                       
                         
                     }
                     else
@@ -98,7 +100,7 @@ namespace WebApplication1.Handlers
                 }
             });
 
-       
+          
             dispatcher.Register("password_reset_request", async (data, socket) =>
             {
                 if (data.TryGetProperty("email", out var emailElement))
@@ -117,7 +119,7 @@ namespace WebApplication1.Handlers
                   
                     var resetTokenUser = await AuthenticationManager.Instance.CreatePasswordResetToken(email);
 
-                    
+                   
                     if (resetTokenUser != null && !string.IsNullOrEmpty(resetTokenUser.Token))
                     {
                         Console.WriteLine($"Generated password reset token for {email}: {resetTokenUser.Token}. This token should be EMAILED to the user.");
@@ -137,7 +139,7 @@ namespace WebApplication1.Handlers
                 }
             });
 
-           
+          
             dispatcher.Register("password_update", async (data, socket) =>
             {
                 if (data.TryGetProperty("token", out var tokenElement) &&
@@ -155,7 +157,7 @@ namespace WebApplication1.Handlers
 
                     Console.WriteLine($"\n[password_update] Attempting to update password with token: {token}");
 
-                    // Delegate logic to AuthenticationManager
+                  
                     bool success = await AuthenticationManager.Instance.ResetPassword(token, newPassword);
 
                     if (success)

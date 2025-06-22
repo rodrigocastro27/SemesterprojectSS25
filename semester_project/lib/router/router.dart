@@ -39,7 +39,7 @@ GoRouter createRouter(PlayerState playerState, LobbyState lobbyState, GameState 
     routes: [
       GoRoute(
         path: '/auth',
-        builder: (context, state) => const AuthPage(),
+        builder: (context, state) => const AuthenticationPage(),
       ),
       GoRoute(
         path: '/home',

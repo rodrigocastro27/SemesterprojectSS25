@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:semester_project/models/player.dart';
+import 'package:semester_project/models/user.dart';
 
 class PlayerState extends ChangeNotifier {
   String? username;
@@ -8,6 +9,8 @@ class PlayerState extends ChangeNotifier {
   bool isOnline = false;
   Player? player;
 
+  User? _authenticatedUser;
+  User? get authenticatedUser => _authenticatedUser;
   void register(String name) {
     username = name;
     notifyListeners();
@@ -33,4 +36,27 @@ class PlayerState extends ChangeNotifier {
   void setOnline(bool isOnline) {
     this.isOnline = isOnline;
   }
+
+   void setAuthenticatedUser(User user) {
+    _authenticatedUser = user;
+    
+    username = user.email;
+    notifyListeners();
+  }
+
+  
+  void clearAuthenticatedUser() {
+    _authenticatedUser = null;
+    username = null; 
+    notifyListeners();
+  }
+
+  
+  void setPlayer(Player newPlayer) { 
+    player = newPlayer;
+    username = newPlayer.name;
+    nickname = newPlayer.nickname; 
+    notifyListeners();
+  }
+
 }
