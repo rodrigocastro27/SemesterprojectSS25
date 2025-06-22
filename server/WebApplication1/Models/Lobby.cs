@@ -52,11 +52,6 @@ public class Lobby
     {
         return Players.Where(p => p.GetRole() == Role.hider).ToList();
     }
-
-    public List<Player> GetSeekerList()
-    {
-        return Players.Where(p => p.GetRole() == Role.seeker).ToList();
-    }
     
     public void ClearGameSession()
     {
