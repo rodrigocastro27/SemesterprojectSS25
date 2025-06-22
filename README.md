@@ -1,4 +1,4 @@
-# Welcome to the respository for Cat&Seek!
+# Welcome to the respository for Hidenberg!
 
 In this repository we have the source code and documentation for a real-time mobile game built using **Flutter (Dart)** for the frontend and **C# (.NET)** for the backend server.
 
@@ -119,7 +119,7 @@ The guides to setup the computer to run both the Flutter application and the ser
 
 # Future Work
 
-The game in this repository is far away from considered finished. There is still a lot to improve and implement. See more details on what can be the next line of work in [FUTUREWORK](FUTUREWORK).
+The game in this repository is far away from considered finished. There is still a lot to improve and implement. See more details on what can be the next line of work in [FUTUREWORK](FUTUREWORK.md).
 
 ## 📬Contact
 
