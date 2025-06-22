@@ -8,19 +8,19 @@ namespace WebApplication1.Models;
 
 public class User (int userId, string email, string passwordHash, string? googleId = null)
 {
-    public int UserId { get; set; } = userId;
+    public int UserID { get; set; } = userId;
     public string Email { get; set; } = email;
     public string PasswordHash { get; set; } = passwordHash;
     public string? GoogleId { get; set; } = googleId;
     
     public int TokenID { get; set; } 
-    public string Token { get; set; } 
-    public DateTime ExpiresAt { get; set; } 
-    public bool Used { get; set; }
+    public string? Token { get; set; } 
+    public DateTime ExpiresAt { get; set; } = DateTime.MinValue;
+    public bool Used { get; set; } = false;
     
     public bool IsValid()
     {
-        return !Used && ExpiresAt > DateTime.Now;
+        return !string.IsNullOrEmpty(Email) && !Used && ExpiresAt > DateTime.UtcNow;  
     }
     
         

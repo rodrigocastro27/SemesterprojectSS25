@@ -1,5 +1,6 @@
 using System.Data.SQLite;
 using WebApplication1.Data;
+using WebApplication1.Models;
 
 namespace WebApplication1.Database;
 
@@ -45,6 +46,29 @@ public class DatabaseHandler
         cmd.Parameters.AddWithValue("@role", role);
         cmd.ExecuteNonQuery();
     }
+    
+    public int InsertUser(string email, string passwordHash, string? googleId)
+    {
+        using var conn = GetDBConnection(); 
+        var cmd = new SQLiteCommand(
+            "INSERT INTO Users (Email, PasswordHash, GoogleId) VALUES (@email, @passwordHash, @googleId); SELECT last_insert_rowid();", conn);
+        cmd.Parameters.AddWithValue("@email", email);
+        cmd.Parameters.AddWithValue("@passwordHash", passwordHash);
+        cmd.Parameters.AddWithValue("@googleId", (object?)googleId ?? DBNull.Value);
+        return (int)(long)cmd.ExecuteScalar(); 
+    }
+    
+    public int InsertPasswordResetToken(int userId, string token, DateTime expiresAt, bool used)
+    {
+        using var conn = GetDBConnection(); 
+        var cmd = new SQLiteCommand(
+            "INSERT INTO PasswordResetTokens (UserID, Token, ExpiresAt, Used) VALUES (@userId, @token, @expiresAt, @used); SELECT last_insert_rowid();", conn);
+        cmd.Parameters.AddWithValue("@userId", userId);
+        cmd.Parameters.AddWithValue("@token", token);
+        cmd.Parameters.AddWithValue("@expiresAt", expiresAt.ToString("yyyy-MM-dd HH:mm:ss"));
+        cmd.Parameters.AddWithValue("@used", used);
+        return (int)(long)cmd.ExecuteScalar();
+    }
 
     // SELECT
     public string SelectLobbyFromLobbyPlayers(string username)
@@ -76,7 +100,70 @@ public class DatabaseHandler
         return isHost!;
     }
 
+    public User? SelectUserById(int userId)
+    {
+        using var conn = GetDBConnection();
+        var cmd = new SQLiteCommand(
+            "SELECT UserID, Email, PasswordHash, GoogleId FROM Users WHERE UserID = @userId;", conn);
+        cmd.Parameters.AddWithValue("@userId", userId);
 
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            int retrievedUserId = reader.GetInt32(0);
+            string retrievedEmail = reader.GetString(1);
+            string storedPasswordHash = reader.GetString(2);
+            string? googleId = reader.IsDBNull(3) ? null : reader.GetString(3);
+            return new User(retrievedUserId, retrievedEmail, storedPasswordHash, googleId);
+        }
+        return null;
+    }
+    
+    public User? SelectUserByEmail(string email)
+    {
+        using var conn = GetDBConnection(); 
+        var cmd = new SQLiteCommand(
+            "SELECT UserID, Email, PasswordHash, GoogleId FROM Users WHERE Email = @email;", conn);
+        cmd.Parameters.AddWithValue("@email", email);
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            int retrievedUserId = reader.GetInt32(0);
+            string retrievedEmail = reader.GetString(1);
+            string storedPasswordHash = reader.GetString(2);
+            string? googleId = reader.IsDBNull(3) ? null : reader.GetString(3);
+            return new User(retrievedUserId, retrievedEmail, storedPasswordHash, googleId);
+        }
+        return null;
+    }
+    
+    public User? SelectPasswordResetToken(string token)
+    {
+        using var conn = GetDBConnection(); 
+        var cmd = new SQLiteCommand(
+            "SELECT TokenID, UserID, ExpiresAt, Used FROM PasswordResetTokens WHERE Token = @token;", conn);
+        cmd.Parameters.AddWithValue("@token", token);
+
+        using var reader = cmd.ExecuteReader();
+        if (reader.Read())
+        {
+            int tokenId = reader.GetInt32(0);
+            int userId = reader.GetInt32(1);
+            DateTime expiresAt = DateTime.Parse(reader.GetString(2));
+            bool used = reader.GetBoolean(3);
+
+           
+            return new User(userId, "", "") 
+            {
+                TokenID = tokenId, 
+                Token = token,
+                ExpiresAt = expiresAt,
+                Used = used
+            };
+        }
+        return null;
+    }
     // UPDATE
     public void UpdateLobbyPlayersNickname(string username, string nickname, string role)
     {
@@ -123,7 +210,25 @@ public class DatabaseHandler
         cmd.ExecuteNonQuery();
     }
 
-
+    public void UpdateUserPassword(int userId, string newPasswordHash)
+    {
+        using var conn = GetDBConnection();
+        var cmd = new SQLiteCommand(
+            "UPDATE Users SET PasswordHash = @newPasswordHash WHERE UserID = @userId;", conn);
+        cmd.Parameters.AddWithValue("@newPasswordHash", newPasswordHash);
+        cmd.Parameters.AddWithValue("@userId", userId);
+        cmd.ExecuteNonQuery();
+    }
+    
+    public void UpdatePasswordResetTokenUsed(int tokenId)
+    {
+        using var conn = GetDBConnection(); 
+        var cmd = new SQLiteCommand(
+            "UPDATE PasswordResetTokens SET Used = 1 WHERE TokenID = @tokenId;", conn);
+        cmd.Parameters.AddWithValue("@tokenId", tokenId);
+        cmd.ExecuteNonQuery();
+    }
+        
     // DELETE
     public void DeleteFromLobbies(string lobbyId)
     {
