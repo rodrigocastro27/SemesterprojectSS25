@@ -1,1 +1,212 @@
 # Server Program API
+
+## **Program.cs**
+
+This file serves as the entry point for the C# server application. It configures the web server, initializes the database, sets up WebSocket endpoints, and registers various request handlers for WebSocket communication.
+
+### Server Initialization
+
+| Function                                      | Description                                                                      | Parameters                                        | Return Value |
+| --------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------- | ------------ |
+| `SQLiteConnector.Initialize(contentRootPath)` | Initializes the SQLite database connection and ensures the DB file exists.       | `contentRootPath` – Root directory of the project | `void`       |
+| `DataLoader.LoadAll()`                        | Loads initial data from the database into memory, including players and lobbies. | None                                              | `void`       |
+
+### Dispatcher Registration
+
+| Function                              | Description                                         | Parameters                                                   | Return Value |
+| ------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------ | ------------ |
+| `LobbyHandlers.Register(dispatcher)`  | Registers WebSocket handlers related to lobbies.    | `dispatcher` – The shared WebSocketActionDispatcher instance | `void`       |
+| `PlayerHandlers.Register(dispatcher)` | Registers WebSocket handlers related to players.    | `dispatcher` – The shared WebSocketActionDispatcher instance | `void`       |
+| `GameHandlers.Register(dispatcher)`   | Registers WebSocket handlers related to game logic. | `dispatcher` – The shared WebSocketActionDispatcher instance | `void`       |
+
+### WebSocket Endpoint
+
+| Endpoint | Description                                                                | Parameters                       | Return Value |
+| -------- | -------------------------------------------------------------------------- | -------------------------------- | ------------ |
+| `/ws`    | Accepts incoming WebSocket requests and routes messages to the dispatcher. | WebSocket connection from client | `void`       |
+
+#### WebSocket Communication Loop
+
+| Function                                | Description                              | Parameters                                                              | Return Value   |
+| --------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------- | -------------- |
+| `dispatcher.HandleMessage(msg, socket)` | Processes an incoming WebSocket message. | `msg` – The text message from client<br>`socket` – The WebSocket object | `Task` (async) |
+
+#### Exception Handling and Cleanup
+
+| Function                                                             | Description                                         | Parameters                                                | Return Value |
+| -------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------- | ------------ |
+| `PlayerManager.Instance.FindPlayerWithSocket(socket)`                | Retrieves a player by their WebSocket instance.     | `socket` – The client WebSocket                           | `Player?`    |
+| `DatabaseHandler.Instance.UpdatePlayersIsOnline(username, isOnline)` | Updates the player's online status in the database. | `username` – Player's name<br>`isOnline` – Boolean status | `void`       |
+| `LobbyManager.Instance.DeleteEmptyLobbies()`                         | Removes any lobbies with no active players.         | None                                                      | `void`       |
+
+### Server Execution
+
+| Function                              | Description                                                             | Parameters           | Return Value |
+| ------------------------------------- | ----------------------------------------------------------------------- | -------------------- | ------------ |
+| `app.RunAsync("http://0.0.0.0:5000")` | Starts the server and begins listening for HTTP and WebSocket requests. | The endpoint address | `Task`       |
+
+## Database
+
+### **SQLiteConnector.cs**
+
+This static class provides access to a SQLite database by managing the database path, connection string, and database initialization.
+
+**Purpose:** establishes and manages connections to a SQLite database and ensures the database file exists.
+
+#### Public Static Methods
+
+| Function                             | Description                                                                                                               | Parameters                                                                                 | Return Value       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------ |
+| `Initialize(string contentRootPath)` | Initializes the database by constructing the path, connection string, and creating the database file if it doesn't exist. | `contentRootPath` – The root directory of the project (used to determine DB file location) | `void`             |
+| `GetConnection()`                    | Returns an open connection to the SQLite database using the internal connection string.                                   | None                                                                                       | `SQLiteConnection` |
+
+#### Private Static Methods
+
+| Function                 | Description                                                                           | Parameters | Return Value |
+| ------------------------ | ------------------------------------------------------------------------------------- | ---------- | ------------ |
+| `EnsureDatabaseExists()` | Checks if the database file exists; if not, it creates the directory and SQLite file. | None       | `void`       |
+
+#### Internal Fields
+
+| Field               | Type     | Description                                         |
+| ------------------- | -------- | --------------------------------------------------- |
+| `_dbPath`           | `string` | Full file system path to the SQLite database file   |
+| `_connectionString` | `string` | Connection string used to open database connections |
+
+---
+
+### **DatabaseHandler.cs**
+
+This class manages database operations related to players, lobbies, and their relationships. It provides insert, select, update, and delete methods for corresponding SQLite tables.
+
+**Purpose:** acts as a singleton to execute SQL operations using the `SQLiteConnector`. Handles the data layer logic for `Players`, `Lobbies`, and `LobbyPlayers` tables.
+
+#### Singleton Access
+
+```csharp
+DatabaseHandler.Instance
+```
+
+#### Public Methods
+
+##### INSERT
+
+| Function                                                                                             | Description                                  | Parameters                                          | Return Value |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------------- | ------------ |
+| `InsertIntoLobbies(string lobbyId)`                                                                  | Inserts a new lobby by name.                 | `lobbyId` – Lobby identifier                        | `void`       |
+| `InsertIntoPlayers(string deviceId, string username)`                                                | Adds a player with an online status.         | `deviceId`, `username`                              | `void`       |
+| `InsertIntoLobbyPlayers(string lobbyId, string username, string nickname, bool isHost, string role)` | Registers a player to a lobby with metadata. | `lobbyId`, `username`, `nickname`, `isHost`, `role` | `void`       |
+
+##### SELECT
+
+| Function                                        | Description                                    | Parameters | Return Value |
+| ----------------------------------------------- | ---------------------------------------------- | ---------- | ------------ |
+| `SelectLobbyFromLobbyPlayers(string username)`  | Gets the lobby ID for a player.                | `username` | `string`     |
+| `SelectIsHostFromLobbyPlayers(string username)` | Checks if the player is a host in their lobby. | `username` | `bool`       |
+
+##### UPDATE
+
+| Function                                                                    | Description                                                 | Parameters                     | Return Value |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------ | ------------ |
+| `UpdateLobbyPlayersNickname(string username, string nickname, string role)` | Updates a player's nickname and role.                       | `username`, `nickname`, `role` | `void`       |
+| `UpdatePlayersIsOnline(string username, bool isOnline)`                     | Sets player's online status; deletes from lobby if offline. | `username`, `isOnline`         | `void`       |
+| `UpdateLobbyPlayersLobby(string username, string lobbyId, string role)`     | Changes the player’s lobby and role.                        | `username`, `lobbyId`, `role`  | `void`       |
+| `UpdateLobbyPlayersHost(string username)`                                   | Promotes a player to lobby host.                            | `username`                     | `void`       |
+
+##### DELETE
+
+| Function                                                             | Description                             | Parameters            | Return Value |
+| -------------------------------------------------------------------- | --------------------------------------- | --------------------- | ------------ |
+| `DeleteFromLobbies(string lobbyId)`                                  | Removes a lobby and all its players.    | `lobbyId`             | `void`       |
+| `DeleteFromPlayers(string username)`                                 | Deletes a player from the system.       | `username`            | `void`       |
+| `DeleteFromLobbyPlayersLobbyPlayer(string lobbyId, string username)` | Removes a specific player from a lobby. | `lobbyId`, `username` | `void`       |
+| `DeleteFromLobbyPlayersLobby(string lobbyId)`                        | Removes all players from a lobby.       | `lobbyId`             | `void`       |
+| `DeleteFromLobbyPlayersPlayer(string username)`                      | Removes a player from any lobby.        | `username`            | `void`       |
+
+---
+
+### **DataLoader.cs**
+
+The `DataLoader` class is responsible for bootstrapping the application by loading persisted data from the SQLite database into memory. This includes lobbies, players, and lobby-player mappings.
+
+**Purpose:** loads the application state into memory by reading from the SQLite database and initializing runtime managers (`LobbyManager`, `PlayerManager`).
+
+#### Public Methods
+
+| Function    | Description                                                                       | Parameters | Return Value |
+| ----------- | --------------------------------------------------------------------------------- | ---------- | ------------ |
+| `LoadAll()` | Loads all required runtime data: lobbies, players, and player-lobby associations. | None       | `void`       |
+
+#### Private Methods
+
+| Function             | Description                                                                                                                                           | Parameters | Return Value |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------ |
+| `LoadLobbies()`      | Reads all lobbies from the `Lobbies` table and registers them with `LobbyManager`.                                                                    | None       | `void`       |
+| `LoadPlayers()`      | Reads all players from the `Players` table and registers them with `PlayerManager`.                                                                   | None       | `void`       |
+| `LoadLobbyPlayers()` | Reads all entries from `LobbyPlayers`, maps players to lobbies, and updates their roles and nicknames. Also cleans up stale data for offline players. | None       | `void`       |
+
+---
+
+
+## Program
+
+### **WebSocketActionDispatcher.cs**
+
+This utility class enables dynamic dispatching of WebSocket messages based on an `"action"` field in incoming JSON messages. It acts as a message router for WebSocket-based communication.
+
+**Purpose:** routes incoming WebSocket messages to corresponding handler functions based on the `"action"` field in the message.
+
+
+#### Public Methods
+
+| Function                                                              | Description                                                                           | Parameters                                                                                                             | Return Value   |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `Register(string action, Func<JsonElement, WebSocket, Task> handler)` | Registers a handler function for a specific action keyword.                           | `action` – String name of the action<br>`handler` – Function that handles the action, takes JSON payload and WebSocket | `void`         |
+| `HandleMessage(string jsonMessage, WebSocket socket)`                 | Parses an incoming message and dispatches it to the appropriate handler if available. | `jsonMessage` – The raw JSON string from the client<br>`socket` – The active WebSocket connection                      | `Task` (async) |
+
+#### Behavior Details
+
+* Expected message structure:
+
+```json
+{
+  "action": "someAction",
+  "data": { /* arbitrary payload */ }
+}
+```
+
+* If either `"action"` or `"data"` is missing, the message is logged as malformed.
+* If the `"action"` value is not found in the registered handlers, it's logged as unknown.
+
+---
+
+### **MessageSender.cs**
+
+This static utility class provides methods to send JSON-formatted WebSocket messages to individual players or broadcast to lobbies, filtered by role if needed.
+
+**Purpose:** facilitates structured message communication over WebSockets between the server and connected players/lobbies in the game.
+
+#### Public Static Methods
+
+| Function                                                       | Description                                                                | Parameters                                                                                                      | Return Value |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------ |
+| `SendAsync(WebSocket socket, string action, object data)`      | Sends a JSON message with an action and payload to a specific WebSocket.   | `socket` – Target WebSocket<br>`action` – Action string<br>`data` – Payload object                              | `Task`       |
+| `SendToPlayerAsync(Player player, string action, object data)` | Sends a message to a single player, if their socket is open.               | `player` – Target player<br>`action` – Action string<br>`data` – Payload object                                 | `Task`       |
+| `BroadcastLobbyAsync(Lobby lobby, string action, object data)` | Sends a message to all players in the lobby with active sockets.           | `lobby` – Lobby whose players should receive the message<br>`action` – Action string<br>`data` – Payload object | `Task`       |
+| `BroadcastToHiders(Lobby lobby, string action, object data)`   | Sends a message only to players with the `hider` role in the given lobby.  | `lobby` – Lobby to filter players<br>`action` – Action string<br>`data` – Payload object                        | `Task`       |
+| `BroadcastToSeekers(Lobby lobby, string action, object data)`  | Sends a message only to players with the `seeker` role in the given lobby. | `lobby` – Lobby to filter players<br>`action` – Action string<br>`data` – Payload object                        | `Task`       |
+
+#### Message Format
+
+All messages sent follow this JSON structure:
+
+```json
+{
+  "action": "yourActionName",
+  "data": { /* any serializable content */ }
+}
+```
+
+---
+
+### 
