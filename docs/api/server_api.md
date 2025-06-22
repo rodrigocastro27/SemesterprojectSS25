@@ -628,4 +628,143 @@ Registers a suite of WebSocket actions related to the in-game logic and event fl
 
 ---
 
-### 
+### **PlayerManager.cs**
+
+This singleton service manages all connected players in memory, facilitating their creation, lookup, WebSocket updates, and synchronization with the lobby system and database.
+
+**Purpose:** centralizes the logic for managing player lifecycles, their WebSocket connections, and lobby associations to maintain a consistent multiplayer game state.
+
+#### Public Methods
+
+| Function                                                                                  | Description                                                                                  | Parameters                                                                                                                                 | Return Value          |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| `CreatePlayer(string deviceId, string username, WebSocket socket)`                        | Creates a new player, stores it in memory, and inserts it into the database.                 | `deviceId` – Device identifier<br>`username` – Player's name<br>`socket` – Player's WebSocket connection                                   | `Player`              |
+| `AddPlayerToLobby(Player player, Lobby lobby, string nickname, bool isHost, string role)` | Adds a player to a lobby or switches them between lobbies. Updates nickname, host, and role. | `player` – Player to add<br>`lobby` – Target lobby<br>`nickname` – Display name<br>`isHost` – Is player host?<br>`role` – "hider"/"seeker" | `string`              |
+| `RemovePlayerFromLobby(Player player, Lobby lobby)`                                       | Removes a player from a lobby, reassigns host if needed, and deletes empty lobbies.          | `player` – Player to remove<br>`lobby` – Lobby to remove from                                                                              | `void`                |
+| `RemovePlayer(string username)`                                                           | Removes a player from memory and deletes from database.                                      | `username` – Player’s username                                                                                                             | `void`                |
+| `UpdatePlayerSocket(string id, WebSocket newSocket)`                                      | Replaces a player’s WebSocket connection with a new one.                                     | `id` – Player ID<br>`newSocket` – New WebSocket                                                                                            | `void`                |
+| `LoginPlayer(string username)`                                                            | Marks a player as online in the database.                                                    | `username` – Player’s username                                                                                                             | `void`                |
+| `GetPlayer(string id)`                                                                    | Retrieves a player by ID.                                                                    | `id` – Player ID                                                                                                                           | `Player?`             |
+| `GetPlayerByName(string username)`                                                        | Retrieves a player by name.                                                                  | `username` – Player’s username                                                                                                             | `Player?`             |
+| `IsPlayerInLobby(Player player)`                                                          | Returns the lobby ID the player is currently in, if any.                                     | `player` – The player object                                                                                                               | `string`              |
+| `FindPlayerWithSocket(WebSocket socket)`                                                  | Finds the player associated with a specific WebSocket.                                       | `socket` – WebSocket connection                                                                                                            | `Player?`             |
+| `PrintPlayers()`                                                                          | Prints the names of all players in memory to the console.                                    | *(none)*                                                                                                                                   | `void`                |
+| `GetAllPlayers()`                                                                         | Returns a list of all players currently tracked in memory.                                   | *(none)*                                                                                                                                   | `IEnumerable<Player>` |
+
+
+---
+
+### **LobbyManager.cs**
+
+This singleton service manages all active game lobbies, handling their creation, retrieval, deletion, and player membership management.
+
+**Purpose:** maintains the collection of lobbies in memory and synchronizes lobby state with the database to support multi-player game sessions.
+
+#### Public Methods
+
+| Function                                 | Description                                                               | Parameters                                    | Return Value                  |
+| ---------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------- |
+| `CreateLobby(string lobbyId)`            | Creates a new lobby if it doesn’t exist and inserts it into the database. | `lobbyId` – Unique lobby identifier           | `Lobby` (or `null` if exists) |
+| `AddLobby(string name, Lobby lobby)`     | Adds or updates a lobby in the manager's internal dictionary.             | `name` – Lobby ID<br>`lobby` – Lobby instance | `void`                        |
+| `GetLobby(string lobbyId)`               | Retrieves a lobby by its ID.                                              | `lobbyId` – Lobby ID                          | `Lobby?`                      |
+| `IsLobbyEmpty(string lobbyId)`           | Checks if the lobby has no players.                                       | `lobbyId` – Lobby ID                          | `bool`                        |
+| `IsHost(string username)`                | Checks if the given username is a host in any lobby.                      | `username` – Player's username                | `bool`                        |
+| `DeleteLobby(Lobby lobby)`               | Deletes a lobby from the database and manager if it exists.               | `lobby` – Lobby instance                      | `Lobby` (or `null`)           |
+| `DeleteEmptyLobbies()`                   | Removes all lobbies that currently have no players.                       | *(none)*                                      | `void`                        |
+| `DeletePlayerFromLobby(string username)` | Removes a player from any lobby they belong to in memory.                 | `username` – Player's username                | `void`                        |
+
+
+---
+
+### **AbilityManager.cs**
+
+This static utility class manages assigning and granting abilities to players based on their roles (`hider` or `seeker`) and creates ability instances as needed.
+
+**Purpose:** provides role-specific ability assignment logic and interfaces with messaging services to notify players of newly granted abilities.
+
+#### Public Static Methods
+
+| Function                                                           | Description                                                                    | Parameters                                                            | Return Value |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ------------ |
+| `GrantRandomAbility(Player player)`                                | Grants a random ability to the player based on their role and notifies them.   | `player` – The player receiving the ability                           | `void`       |
+| `GrantSeekerAbility(Player player, PlayerGameSession gameSession)` | Grants a random seeker-specific ability and updates the player's game session. | `player` – Target seeker player<br>`gameSession` – Their game session | `void`       |
+| `GrantHiderAbility(Player player, PlayerGameSession gameSession)`  | Grants a random hider-specific ability and updates the player's game session.  | `player` – Target hider player<br>`gameSession` – Their game session  | `void`       |
+
+
+---
+
+### **PlayerMessageSender.cs**
+
+This class provides methods to send specific WebSocket messages to players based on in-game events.
+
+**Purpose:** facilitates sending targeted messages to players, such as triggering sounds on hiders’ devices.
+
+#### Public Static Methods
+
+| Function                        | Description                                                                     | Parameters                              | Return Value |
+| ------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------- | ------------ |
+| `SendMakeNoise(string lobbyId)` | Sends a "make\_sound" message to all hider-role players in the specified lobby. | `lobbyId` – The lobby identifier string | `Task`       |
+
+---
+
+### **LobbyMessageSender**
+
+This static class provides methods to send WebSocket messages related to lobby events and player updates within a lobby.
+
+**Purpose:** handles communication for lobby lifecycle events, player joins/leaves, host changes, player lists, and error notifications.
+
+#### Public Static Methods
+
+| Function                                                          | Description                                                                                   | Parameters                                                                                                          | Return Value |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `JoinedAsync(Lobby lobby, Player player, bool asHost)`            | Sends a "lobby\_joined" message to a player when they join a lobby.                           | `lobby` – Target lobby<br>`player` – Player who joined<br>`asHost` – Whether the player is the host                 | `Task`       |
+| `BroadcastPlayerJoinedAsync(Lobby lobby, Player player)`          | Broadcasts a "new\_player\_joined" message to all players in a lobby when a new player joins. | `lobby` – Target lobby<br>`player` – New player joined                                                              | `Task`       |
+| `SetNewHost(Player player)`                                       | Sends a "new\_host" message to notify a player that they are now the lobby host.              | `player` – Player who is the new host                                                                               | `Task`       |
+| `BroadcastPlayerList(Lobby lobby)`                                | Broadcasts the current list of players in the lobby to all members.                           | `lobby` – Target lobby                                                                                              | `Task`       |
+| `LeaveAsync(Lobby lobby, Player player)`                          | Sends a "leave\_lobby" message to a player who is leaving the lobby.                          | `lobby` – Lobby being left<br>`player` – Player leaving                                                             | `Task`       |
+| `DeletedLobby(Lobby lobby)`                                       | Broadcasts a "lobby\_deleted" message to all players in the lobby when the lobby is deleted.  | `lobby` – Lobby being deleted                                                                                       | `Task`       |
+| `ErrorMessageAsync(string lobbyId, Player player, int errorCode)` | Sends an error message to a player based on the provided error code.                          | `lobbyId` – Affected lobby ID<br>`player` – Target player<br>`errorCode` – Numeric error code identifying the error | `Task`       |
+
+#### Error Codes in `ErrorMessageAsync`
+
+| Code  | Meaning                 |
+| ----- | ----------------------- |
+| 1     | Error creating lobby    |
+| 2     | Player already in lobby |
+| 3     | Lobby does not exist    |
+| Other | Generic error           |
+
+---
+
+### **GameMessageSender.cs**
+
+This static class provides methods to send WebSocket messages related to game events, including game start/end, location requests, task updates, and player elimination notifications.
+
+**Purpose:** facilitates communication of game state changes and player-specific updates during gameplay.
+
+#### Public Static Methods
+
+| Function                                                        | Description                                                          | Parameters                                                                    | Return Value |
+| --------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------ |
+| `SendGameStarted(Lobby lobby)`                                  | Broadcasts a "game\_started" message to all players in the lobby.    | `lobby` – Target lobby                                                        | `Task`       |
+| `RequestHidersLocation(Lobby lobby)`                            | Broadcasts a "location\_request" message to all hiders in the lobby. | `lobby` – Target lobby                                                        | `Task`       |
+| `RequestPlayersLocation(List<Player> players)`                  | Sends a "location\_request" message to a specific list of players.   | `players` – List of players to request location from                          | `Task`       |
+| `SendPingToSeekers(Lobby lobby, List<Player> updatedLocations)` | Broadcasts location updates to seekers in the lobby.                 | `lobby` – Target lobby<br>`updatedLocations` – Players with updated locations | `Task`       |
+| `SendGameEnded(Lobby lobby)`                                    | Broadcasts a "game\_ended" message to all players in the lobby.      | `lobby` – Target lobby                                                        | `Task`       |
+| `SendTimeUpdate(Lobby lobby, TimeSpan time)`                    | Broadcasts a "time\_update" message with the current game time.      | `lobby` – Target lobby<br>`time` – Remaining or elapsed game time             | `Task`       |
+
+#### Task-Related Messages
+
+| Function                                           | Description                                                          | Parameters                                             | Return Value |
+| -------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------ | ------------ |
+| `BroadcastTask(Lobby lobby, GameTask task)`        | Broadcasts "task\_started" message for a game task to lobby players. | `lobby` – Target lobby<br>`task` – Task starting       | `Task`       |
+| `BroadcastUpdateTask(Lobby lobby, object payload)` | Broadcasts a "task\_update" message with task progress or state.     | `lobby` – Target lobby<br>`payload` – Task update data | `Task`       |
+| `BroadcastTaskResult(Lobby lobby, string winners)` | Broadcasts a "task\_result" message announcing winners.              | `lobby` – Target lobby<br>`winners` – Winner(s)        | `Task`       |
+
+#### Player Elimination and Ability Messages
+
+| Function                                                         | Description                                                            | Parameters                                                  | Return Value |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------- | ------------ |
+| `BroadcastEliminatedPlayer(Lobby lobby, Player player)`          | Broadcasts an "eliminated\_player" message to all lobby players.       | `lobby` – Target lobby<br>`player` – Eliminated player      | `Task`       |
+| `SendEliminatedPlayer(Player player)`                            | Sends a "current\_player\_eliminated" message to a specific player.    | `player` – Player being eliminated                          | `Task`       |
+| `NotifyAbilityGainAsync(Player player, AbilityType abilityType)` | Sends a "gained\_ability" message to notify a player of a new ability. | `player` – Target player<br>`abilityType` – Granted ability | `Task`       |
