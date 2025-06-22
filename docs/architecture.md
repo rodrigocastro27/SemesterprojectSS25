@@ -54,9 +54,9 @@ The structure of the database can be seen in the following ER diagrams:
 
 ![Database ER](../assets/Diagrams-DatabaseER.svg)
 
-❗<mark>TODO: use the *id* from the Players table as PK instead of *username*</mark>
+❗<mark>TODO: not everything is implemented as described in the diagram, in the current implementation the Players table has the `id`, the `email`, and the `username` as PK. But the authentication is not implemented, which should be done (ideally)</mark>
 
-❗<mark>TODO: add the new properties of a lobby as needed in the Lobbies table</mark>
+❗<mark>TODO: add the new properties of a lobby as needed in the Lobbies table.</mark>
 
 # Server UML Diagram
 In the server, the classes have the following descriptions:

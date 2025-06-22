@@ -13,8 +13,8 @@ public class ClickingRaceTask : GameTask
     {
         _hidersCounter = 0;
         _seekersCounter = 0;
-        
-        
+
+
         Console.WriteLine($"[ClickingRaceTask] Starting 10-second timer for lobby {lobby.Id}");
         await Task.Delay(TimeSpan.FromSeconds(10));
         Console.WriteLine($"[ClickingRaceTask] Timer ended. Sending message to lobby {lobby.Id}");
@@ -38,7 +38,7 @@ public class ClickingRaceTask : GameTask
 
         PlayerGameSession mvpGameSessionH = null;
         PlayerGameSession mvpGameSessionS = null;
-        
+
         foreach (var session in respondedSessions)
         {
             var info = session.GetInfoFrom("ClickingRace");
@@ -47,22 +47,22 @@ public class ClickingRaceTask : GameTask
 
             if (isHider) _hidersCounter += count;
             else _seekersCounter += count;
-            
-            
+
+
             if (count > hidersMVPcount && isHider)
             {
                 hidersMVPcount = count;
                 hidersMVP = session.GetPlayer();
-                
+
                 mvpGameSessionH = session;
             }
             else if (count > seekersMVPcount && !isHider)
             {
                 seekersMVPcount = count;
                 seekersMVP = session.GetPlayer();
-                
+
                 mvpGameSessionS = session;
-                
+
             }
         }
 
@@ -71,12 +71,12 @@ public class ClickingRaceTask : GameTask
             : "tie";
 
         Console.WriteLine($"RESULT: hiders {_hidersCounter} - seekers {_seekersCounter}");
-      
+
         Console.WriteLine("Notifying players of the result.");
-        
-        
+
+
         await GameMessageSender.BroadcastTaskResult(lobby, result);
-        
+
         if (hidersMVP != null || seekersMVP != null)
         {
             switch (result)
@@ -94,11 +94,19 @@ public class ClickingRaceTask : GameTask
                     break;
             }
         }
-        
+
         foreach (var session in respondedSessions)
             session.TaskUpdates.Clear();
-        
-        
+
+
         respondedSessions.Clear();
+
+        ResetCounters();
+    }
+
+    public void ResetCounters()
+    {
+        _hidersCounter = 0;
+        _seekersCounter = 0;
     }
 }
