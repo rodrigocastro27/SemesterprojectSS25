@@ -6,15 +6,24 @@ class Player {
   final String nickname;
 
   LatLng? position;
+  String? qrCode;
 
-  Player({required this.name, required this.role, required this.nickname});
+  Player({
+    required this.name,
+    required this.role,
+    required this.nickname,
+  }) {
+    qrCode = name; // Set qrCode to name initially
+  }
 
   factory Player.fromJson(Map<String, dynamic> json) {
-    return Player(
+    final player = Player(
       name: json['name'],
       role: json['role'],
       nickname: json['nickname'],
     );
+    player.qrCode = json['qrCode'] ?? player.name; // Use stored value or fallback to name
+    return player;
   }
 
   Map<String, dynamic> toJson() {
@@ -22,6 +31,7 @@ class Player {
       'name': name,
       'role': role,
       'nickname': nickname,
+      'qrCode': qrCode,
     };
   }
 }

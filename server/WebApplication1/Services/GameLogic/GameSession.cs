@@ -67,7 +67,14 @@ public class GameSession
 
     private async Task EndGame()
     {
-        await GameMessageSender.SendGameEnded(_lobby);
+        if(_lobby.GetHidersList().Count > 0)
+        {
+            await GameMessageSender.SendGameEnded(_lobby, "hiders");
+        }
+        else
+        {
+            await GameMessageSender.SendGameEnded(_lobby, "seekers");
+        }
         _lobby.ClearGameSession();
     }
 
@@ -157,7 +164,7 @@ public class GameSession
             if (DateTime.UtcNow - _lastTaskSpawnTime >= _taskInterval)
             {
                 _lastTaskSpawnTime = DateTime.UtcNow;
-                // SpawnRandomTask();
+                SpawnRandomTask();
             }
 
             await Task.Delay(_tickRate);
@@ -255,13 +262,43 @@ public class GameSession
 
 
     #region Elimination
+    
+    private readonly List<Func<Player, Task<bool>>> _eliminationInterceptors = new();   //interceptor logic could be a improvement to add to ping mechanic
 
-    public void EliminatePlayer(Player player)
+    public void RegisterEliminationInterceptor(Func<Player, Task<bool>> interceptor)
     {
+        _eliminationInterceptors.Add(interceptor);
+    }
+    
+    public void UnregisterEliminationInterceptor(Func<Player, Task<bool>> interceptor)
+    {
+        _eliminationInterceptors.Remove(interceptor);
+    }
+    
+    public async Task EliminatePlayer(Player player)
+    {
+        foreach (var interceptor in _eliminationInterceptors.ToList())
+        {
+            // If the interceptor returns true, it handled the elimination and wants to cancel it
+            if (await interceptor(player))
+            {
+                return;
+            }
+        }
+        
         if(_playerGameSessions.TryGetValue(player, out var session))
         {
             session.Eliminate();
             _ = GameMessageSender.BroadcastEliminatedPlayer(_lobby, player);
+        }
+
+        if(_lobby.GetSeekerList().Count <= 0 && _lobby.GetHidersList().Count > 0)
+        {
+            _= GameMessageSender.SendGameEnded(_lobby, "hiders");
+        }
+        else if(_lobby.GetHidersList().Count <= 0 && _lobby.GetSeekerList().Count > 0)
+        {
+            _= GameMessageSender.SendGameEnded(_lobby, "seekers");
         }
     }
 

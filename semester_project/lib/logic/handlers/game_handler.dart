@@ -107,8 +107,9 @@ class GameActions {
 
     dispatcher.register("game_ended", (data) {
       final gameState = Provider.of<GameState>(context, listen: false);
-
-      gameState.stopGame();
+       final winner = data['winner'];
+       gameState.setWinners(winner);
+       gameState.stopGame();
     });
 
 
@@ -165,7 +166,25 @@ class GameActions {
       // This is not really used because from Flutter you already know you used it
       // In case some of the tasks need some server validation before being used
         final abilityName = data['ability'] as String;
+
     });
+
+
+    dispatcher.register("qr_switch", (data){  //when user performs a qr code switch action
+
+      final newName = data['newCode'];
+      Provider.of<PlayerState>(context, listen: false).setQrCode(newName); 
+
+    });
+
+    dispatcher.register("qr_scanned", (data){  //when user's qr code (after being switched) gets scanned. possibly should centralize all clients to recieve this message
+
+      String? name = Provider.of<PlayerState>(context, listen: false).getUsername();
+      Provider.of<PlayerState>(context, listen: false).setQrCode(name!); 
+    });
+
+
+
 
     //ELIMINATION ---------------------------------
     dispatcher.register("eliminated_player", (data){

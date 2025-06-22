@@ -17,7 +17,6 @@ class PlayerState extends ChangeNotifier {
   List<HiderAbility> hiderAbilities = [];
   List<SeekerAbility> seekerAbilities = [];
   bool hiderIsHidden = false;
-  String? fakeName;
   int pings = 1;
 
   void register(String name) {
@@ -68,7 +67,7 @@ void addHiderAbilityByName(String name) {
 }
 
 void addSeekerAbilityByName(String name) {
-  print("Adding seeker ability");
+    print("Adding seeker ability");
     final ability = SeekerAbility.values.firstWhere(
     (e) => e.name == name);
 
@@ -101,7 +100,7 @@ void addSeekerAbilityByName(String name) {
         // hidePlayer();  // NOT REALLY USED, maybe for future UI
         removeHiderAbility(HiderAbility.HidePing);
       case HiderAbility.SwapQr:
-       swapQRcode(context);
+        MessageSender.sendAbilityUsed(lobbyId, username!, ability.name);
         removeHiderAbility(HiderAbility.SwapQr);
       // Add more hider abilities here
       // ...
@@ -124,12 +123,12 @@ void addSeekerAbilityByName(String name) {
     notifyListeners();
   }
 
-  void swapQRcode(BuildContext context) 
+  void swapQRcode(BuildContext context) //not used anymore -> refactored to be controlled on server side.
   {
     final gameState = Provider.of<GameState>(context, listen: false);
     final random = Random();
     final chosenPlayer =  gameState.hiders[random.nextInt(gameState.hiders.length)];
-    fakeName = chosenPlayer.name;
+   // fakeName = chosenPlayer.name;
     notifyListeners();
   }
 
@@ -147,6 +146,11 @@ void addSeekerAbilityByName(String name) {
     final lobbyState = Provider.of<LobbyState>(context, listen: false);
     var lobbyId = lobbyState.lobbyId;
     MessageSender.makeHidersPhonesSound(lobbyId!);
+  }
+
+
+  void setQrCode(String qr){
+    _player!.qrCode = qr;
   }
 
 }

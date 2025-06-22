@@ -1,6 +1,5 @@
 ﻿    using WebApplication1.Utils;
     using WebApplication1.Models;
-    using Microsoft.AspNetCore.Identity;
     using WebApplication1.Models.Abilities;
 
     namespace WebApplication1.Services.Messaging;
@@ -50,11 +49,11 @@
             });
         }
 
-        public static async Task SendGameEnded(Lobby lobby)
+        public static async Task SendGameEnded(Lobby lobby, string  winners)  
         {
             await MessageSender.BroadcastLobbyAsync(lobby, "game_ended", new
             {
-                //who won, other relevant info
+                winner = winners
             });
         }
 
@@ -110,6 +109,10 @@
                 
             });
         }
+        
+        
+        #region Ability Messages
+        
         public static async Task NotifyAbilityGainAsync(Player player, AbilityType abilityType)
         {
             await MessageSender.SendToPlayerAsync(player, "gained_ability", new
@@ -118,6 +121,21 @@
                 ability = abilityType.ToString(),
             });
         }
+
+        public static async Task NotifyNewQrCode(Player player, string code)
+        {
+            await MessageSender.SendToPlayerAsync(player, "qr_switch", new
+            {
+                newCode = code
+            });
+        }
+            
+        public static async Task NotifyQrCodeScanned(Player player)
+        {
+            await MessageSender.SendToPlayerAsync(player, "qr_scanned", new
+            {
+            });
+        }
         
-        
+        #endregion
     }

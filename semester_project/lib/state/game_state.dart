@@ -34,6 +34,8 @@ class GameState extends ChangeNotifier {
   Timer? _countdownTimer;
   Timer? _locationUpdateTimer;
 
+  late String winner;
+
   void initGame(BuildContext context) {
    
     hiders.clear();
@@ -284,4 +286,16 @@ class GameState extends ChangeNotifier {
     _locationUpdateTimer?.cancel();
     super.dispose();
   }
+
+
+  void setWinners(String w){
+      winner = w;
+      notifyListeners();
+  }
+
+  String getWinners(){
+    return winner;
+  }
+
 }
+

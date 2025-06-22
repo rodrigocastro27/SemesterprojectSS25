@@ -69,7 +69,7 @@ class HiderMapView extends StatelessWidget {
                         height: 200,
                         child: Center(
                           child: QrImageView(
-                            data: playerState.getPlayer()?.name ?? 'unknown_id',
+                            data: playerState.getPlayer()?.qrCode ?? 'unknown_id',
                             version: QrVersions.auto,
                             size: 180,
                           ),
