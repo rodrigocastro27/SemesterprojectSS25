@@ -15,7 +15,8 @@ The user interface for this application is undergoing a redesign. All new UI com
 project-root/
 ├── assets/
 │ └── images/         # Place all new images here
-├── newUI/            # Contains the new UI components/pages
+├── lib/
+│ └── newUI/          # Contains the new UI components/pages
 └── ...               # Other existing project files
 ```
 Please follow these guidelines carefully to ensure a smooth transition to the new user interface.  
