@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:qr_flutter/qr_flutter.dart';
-=======
-import 'lobby pages/create_lobby.dart';
-import 'lobby pages/join_lobby.dart';
->>>>>>> 4678a5491463079bdf0f27ce7e059fe5a01b902f
 
 class HomePage extends StatefulWidget{
-  final String username;
-
-  const HomePage({super.key, required this.username});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => LandingPage();
@@ -21,7 +14,7 @@ class LandingPage extends State<HomePage>  {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Multiplayer Lobby - ${widget.username}'),
+        title: const Text('Multiplayer Lobby'),
         centerTitle: true,
       ),
       body: Center(
@@ -31,9 +24,7 @@ class LandingPage extends State<HomePage>  {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton.icon(
-                onPressed: () => {
-                  Navigator.push(context, MaterialPageRoute(builder: (_)=> JoinLobbyPage(username: widget.username)))
-                },
+                onPressed: () => {},
                 icon: const Icon(Icons.login),
                 label: const Text('Join Lobby'),
                 style: ElevatedButton.styleFrom(
@@ -43,10 +34,7 @@ class LandingPage extends State<HomePage>  {
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
-                onPressed: () => {
-                  
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => CreateLobbyPage(username: widget.username)))
-                },
+                onPressed: () => {},
                 icon: const Icon(Icons.add_box),
                 label: const Text('Create Lobby'),
                 style: ElevatedButton.styleFrom(
