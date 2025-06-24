@@ -20,7 +20,7 @@ Additionally, throughout the documentation, there are tips and improvements spec
 ## Implement Authentication
 - [ ] Right now, the players are distinguished by their unique username. A good authentication system that lets them log in with an email and a unique id should be implemented.
 ## UI
-- [ ] Finish all "new" UI ([more info](/docs/api/switchUI).
+- [ ] Finish all "new" UI ([more info](docs/api/switchUI.md)).
 - [ ] Implemented in the final version of the game.
 
 ---
