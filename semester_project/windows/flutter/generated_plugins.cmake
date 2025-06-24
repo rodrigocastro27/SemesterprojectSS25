@@ -3,6 +3,12 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
+=======
+  audioplayers_windows
+  cloud_firestore
+  firebase_core
+>>>>>>> 4678a5491463079bdf0f27ce7e059fe5a01b902f
   geolocator_windows
 )
 
