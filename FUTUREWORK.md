@@ -18,7 +18,7 @@ Additionally, throughout the documentation, there are tips and improvements spec
 ## Database Improvement
 - [ ] Create a function for creating/resetting the database. It does not exist because the database `database.db` was created manually with an interface instead of with queries.
 ## Implement Authentication
-- [ ] Right now, the players are distinguished by their unique username. A good authentication system that lets them log in with an email and a unique id should be implemented.
+- [ ] Right now, the players are distinguished by their unique username. A good authentication system that lets them log in with an email and a unique id should be implemented. There is a branch in the repository called _feature/Authentication_ which has already some part implemented. Due to lack of time we could not finish the feature but part of the logic is there.
 ## UI
 - [ ] Finish all "new" UI ([more info](docs/switchUI.md)).
 - [ ] Implemented in the final version of the game.
@@ -42,6 +42,7 @@ These are some general improvements/features still to be implemented:
 We had originally planned some tasks to develop for nice teamwork dynamics that have not been implemented:
 - [ ] Have specific tasks that can be played only by hiders or seekers and they can either win (and gain an ability) or loose. The idea of these tasks would be to appear on the map and the first player (hider or seeker) to reach it gains the possibility of playing for its team.
 - [ ] Have the possibility of easily creating and customizing tasks read from a QR code put in the playing zone.
+- [ ] The current task is started after a button is clicked, ideally, it should be started by the server or with another criterion.
 - [ ] **Task:** create a task where a spot in the map appears and the first player to go there wins.
 - [ ] **Task:** a *wordle* style task.
 - [ ] **Task:** a task where two players of the same team need to be at a specific distance and complete a task in teamwork.
