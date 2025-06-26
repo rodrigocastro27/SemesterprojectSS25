@@ -32,9 +32,8 @@ class MapPage extends StatelessWidget {
         children: [
           // Fullscreen map view
           Positioned.fill(child: mapView),
-          
-          
-          //Countdown timer
+
+          // Countdown timer
           Positioned(
             top: 16,
             left: 16,
@@ -61,6 +60,7 @@ class MapPage extends StatelessWidget {
             ),
           ),
 
+          // Start Task button
           Positioned(
             top: 24,
             right: 24,
@@ -72,7 +72,7 @@ class MapPage extends StatelessWidget {
 
                   return ElevatedButton.icon(
                     onPressed: isTaskOngoing
-                        ? null // Disabled when task is ongoing
+                        ? null
                         : () {
                             MessageSender.startTask(
                               playerState.getUsername()!,
@@ -82,7 +82,8 @@ class MapPage extends StatelessWidget {
                     icon: const Icon(Icons.task),
                     label: const Text("Start Task"),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                   );
                 },
@@ -90,14 +91,15 @@ class MapPage extends StatelessWidget {
             ),
           ),
 
+          // Task Overlay
           Consumer<GameState>(
             builder: (context, gameState, _) {
               if (gameState.currentTaskName != null) return const TaskOverlay();
-              return Container();   // to not build the correct widget
+              return Container();
             },
           ),
 
-          // Ability bar based on role
+          // Ability bar
           Positioned(
             bottom: 80,
             left: 16,
@@ -127,11 +129,13 @@ class MapPage extends StatelessWidget {
                         child: Tooltip(
                           message: iconInfo.value,
                           child: IconButton(
-                            icon: Icon(iconInfo.key, size: 30, color: Colors.black),
+                            icon: Icon(iconInfo.key,
+                                size: 30, color: Colors.black),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Used ability: ${iconInfo.value}'),
+                                  content:
+                                      Text('Used ability: ${iconInfo.value}'),
                                   duration: const Duration(seconds: 2),
                                 ),
                               );
@@ -148,7 +152,7 @@ class MapPage extends StatelessWidget {
             ),
           ),
 
-          // Positioned button (bottom right corner, like a FAB)
+          // Leave game button
           Positioned(
             bottom: 24,
             right: 24,
@@ -156,32 +160,29 @@ class MapPage extends StatelessWidget {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder:
-                      (ctx) => AlertDialog(
-                        title: const Text("Confirm"),
-                        content: const Text(
-                          "Are you sure you want to leave the game? You will also leave the current lobby.",
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx),
-                            child: const Text("NO"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              final username = playerState.getUsername();
-                              final lobbyId = lobbyState.lobbyId;
-                              if (username != null && lobbyId != null) {
-                                lobbyState.stopPlaying();
-                                MessageSender.leaveLobby(lobbyId, username);
-                              } else {
-                                // Should never happen
-                              }
-                            },
-                            child: const Text("YES"),
-                          ),
-                        ],
+                  builder: (ctx) => AlertDialog(
+                    title: const Text("Confirm"),
+                    content: const Text(
+                      "Are you sure you want to leave the game? You will also leave the current lobby.",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("NO"),
                       ),
+                      TextButton(
+                        onPressed: () {
+                          final username = playerState.getUsername();
+                          final lobbyId = lobbyState.lobbyId;
+                          if (username != null && lobbyId != null) {
+                            lobbyState.stopPlaying();
+                            MessageSender.leaveLobby(lobbyId, username);
+                          }
+                        },
+                        child: const Text("YES"),
+                      ),
+                    ],
+                  ),
                 );
               },
               icon: const Icon(Icons.logout),
@@ -194,29 +195,67 @@ class MapPage extends StatelessWidget {
               ),
             ),
           ),
+
+          // Capture Overlay
+          Consumer<GameState>(
+            builder: (context, gameState, _) {
+              if (!gameState.captured) return const SizedBox();
+
+              return Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.8),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.close, size: 100, color: Colors.redAccent),
+                        SizedBox(height: 20),
+                        Text(
+                          "You have been captured!",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "Better luck next time...",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
   MapEntry<IconData, String> _getAbilityIconAndTooltip(dynamic ability) {
-  if (ability is HiderAbility) {
-    switch (ability) {
-      case HiderAbility.SwapQr:
-        return const MapEntry(Icons.autorenew, "Swap QR");
-      case HiderAbility.HidePing:
-        return const MapEntry(Icons.visibility_off, "Hide next ping");
+    if (ability is HiderAbility) {
+      switch (ability) {
+        case HiderAbility.SwapQr:
+          return const MapEntry(Icons.autorenew, "Swap QR");
+        case HiderAbility.HidePing:
+          return const MapEntry(Icons.visibility_off, "Hide next ping");
+      }
+    } else if (ability is SeekerAbility) {
+      switch (ability) {
+        case SeekerAbility.HiderSound:
+          return const MapEntry(Icons.hearing, "Hear Hider");
+        case SeekerAbility.GainPing:
+          return const MapEntry(Icons.wifi_tethering, "Ping Hider");
+      }
     }
-  } else if (ability is SeekerAbility) {
-    switch (ability) {
-      case SeekerAbility.HiderSound:
-        return const MapEntry(Icons.hearing, "Hear Hider");
-      case SeekerAbility.GainPing:
-        return const MapEntry(Icons.wifi_tethering, "Ping Hider");
-    }
-  }
 
-  // Fallback
-  return const MapEntry(Icons.help_outline, "Unknown Ability");
-}
+    return const MapEntry(Icons.help_outline, "Unknown Ability");
+  }
 }

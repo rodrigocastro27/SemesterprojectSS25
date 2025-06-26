@@ -34,6 +34,8 @@ class GameState extends ChangeNotifier {
   Timer? _countdownTimer;
   Timer? _locationUpdateTimer;
 
+  bool captured = false;
+
   late String winner;
 
   void initGame(BuildContext context) {
@@ -42,6 +44,8 @@ class GameState extends ChangeNotifier {
     seekers.clear();
     players = Provider.of<LobbyState>(context, listen: false).getPlayerList();
     startLocationUpdates(context); // start updating location every 10s
+
+    captured= false;
 
     for (var p in players) {
       if (p.role == "hider") {
@@ -237,6 +241,12 @@ class GameState extends ChangeNotifier {
     //additionally clean game logic...
     gameEnded = true;
     endTask();
+    notifyListeners();
+  }
+
+  void playerCatpured(){
+    
+    captured = true;
     notifyListeners();
   }
 

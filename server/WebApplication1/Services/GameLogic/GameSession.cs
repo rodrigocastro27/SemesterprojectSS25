@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using WebApplication1.Models;
 using WebApplication1.Services.Messaging;
@@ -279,28 +280,40 @@ public class GameSession
     {
         foreach (var interceptor in _eliminationInterceptors.ToList())
         {
-            // If the interceptor returns true, it handled the elimination and wants to cancel it
             if (await interceptor(player))
             {
                 return;
             }
         }
-        
-        if(_playerGameSessions.TryGetValue(player, out var session))
+
+        if (_playerGameSessions.TryGetValue(player, out var session))
         {
             session.Eliminate();
             _ = GameMessageSender.BroadcastEliminatedPlayer(_lobby, player);
         }
 
-        if(_lobby.GetSeekerList().Count <= 0 && _lobby.GetHidersList().Count > 0)
+        // Count remaining (non-eliminated) hiders
+        var remainingHiders = _lobby
+            .GetHidersList()
+            .Count(p => _playerGameSessions.TryGetValue(p, out var session) && !session.IsEliminated);
+
+        // Count remaining (non-eliminated) seekers
+        var remainingSeekers = _lobby
+            .GetSeekerList()
+            .Count(p => _playerGameSessions.TryGetValue(p, out var session) && !session.IsEliminated);
+
+        if (remainingSeekers <= 0 && remainingHiders > 0)
         {
-            _= GameMessageSender.SendGameEnded(_lobby, "hiders");
+            Console.WriteLine("Hiders won the game!");
+            _ = GameMessageSender.SendGameEnded(_lobby, "hiders");
         }
-        else if(_lobby.GetHidersList().Count <= 0 && _lobby.GetSeekerList().Count > 0)
+        else if (remainingHiders <= 0 && remainingSeekers > 0)
         {
-            _= GameMessageSender.SendGameEnded(_lobby, "seekers");
+            Console.WriteLine("Seekers won the game!");
+            _ = GameMessageSender.SendGameEnded(_lobby, "seekers");
         }
     }
+
 
     #endregion
 }

@@ -194,7 +194,7 @@ class GameActions {
 
     dispatcher.register("current_player_eliminated", (data){
         final gameState = Provider.of<GameState>(context, listen: false);
-        gameState.stopGame();
+        gameState.playerCatpured();
         print("you are eliminated!!!");
     });
     
